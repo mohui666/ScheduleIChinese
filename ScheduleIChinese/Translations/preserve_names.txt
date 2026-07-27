@@ -6408,4 +6408,3 @@ White Stink=White Stink
 White Thunderfuck=White Thunderfuck
 White Urkle=White Urkle
 Meth=Meth
-Methamphetamine=Methamphetamine

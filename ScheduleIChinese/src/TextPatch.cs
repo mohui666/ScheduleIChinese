@@ -14,6 +14,7 @@ namespace ScheduleIChinese
         private static readonly Queue<PendingText> PendingChanges =
             new Queue<PendingText>();
         private static readonly HashSet<int> PendingInstanceIds = new HashSet<int>();
+        private static readonly HashSet<int> _nullFontRebuilt = new HashSet<int>();
         private static Il2CppSystem.Action<UnityEngine.Object> _textChangedHandler;
 
         private sealed class PendingText
@@ -80,34 +81,19 @@ namespace ScheduleIChinese
             }
         }
 
-        /// <summary>
-        /// True when the component lives under a shop listing hierarchy. The game
-        /// compares those labels against the item name and hides them on mismatch,
-        /// so translating them makes the product name vanish entirely.
-        /// </summary>
-        private static bool IsShopListingText(TMP_Text comp)
+        private static void MarkDirty(TMP_Text comp)
         {
-            try
-            {
-                var t = comp.transform;
-                for (int i = 0; i < 12 && t != null; i++)
-                {
-                    if (t.name.IndexOf("Listing", StringComparison.Ordinal) >= 0)
-                        return true;
-                    t = t.parent;
-                }
-            }
-            catch { }
-            return false;
+            try { comp.havePropertiesChanged = true; } catch { }
         }
 
         private static void Transform(TMP_Text comp, ref string value)
         {
             if (string.IsNullOrEmpty(value)) return;
-            if (IsShopListingText(comp)) return;
+            if (NameOverlay.IsShopNameLabel(comp)) NameOverlay.Sync(comp);
             if (TranslationStore.ContainsCjk(value))
             {
-                FontService.ApplyCjkFont(comp);
+                if (FontService.ApplyCjkFont(comp))
+                    MarkDirty(comp);
                 if (ModConfig.EnableRuntimeTranslationFallback.Value)
                 {
                     var partial = TranslationStore.TranslateDisplayText(value);
@@ -120,7 +106,8 @@ namespace ScheduleIChinese
             var translated = TranslationStore.TranslateDisplayText(value);
             if (translated != null)
             {
-                FontService.ApplyCjkFont(comp);
+                if (FontService.ApplyCjkFont(comp))
+                    MarkDirty(comp);
                 value = translated;
             }
             else if (ModConfig.EnableAutoTranslate.Value &&
@@ -135,14 +122,20 @@ namespace ScheduleIChinese
         public static void ApplyExisting(TMP_Text comp)
         {
             if (comp == null) return;
-            if (IsShopListingText(comp)) return;
+            if (NameOverlay.IsShopNameLabel(comp)) NameOverlay.Sync(comp);
             try
             {
                 var current = comp.text;
                 if (string.IsNullOrEmpty(current)) return;
                 if (TranslationStore.ContainsCjk(current))
                 {
-                    FontService.ApplyCjkFont(comp);
+                    // If the font setup just changed, the mesh was built while no
+                    // CJK fallback was available (blank glyphs) and is stale.
+                    if (FontService.ApplyCjkFont(comp))
+                        MarkDirty(comp);
+                    else if (comp.font == null && FontService.Ready &&
+                             _nullFontRebuilt.Add(comp.GetInstanceID()))
+                        MarkDirty(comp);
                     if (!ModConfig.EnableRuntimeTranslationFallback.Value) return;
                     var partial = TranslationStore.TranslateDisplayText(current);
                     if (partial == null || partial == current) return;

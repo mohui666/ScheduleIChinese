@@ -53,6 +53,60 @@ namespace ScheduleIChinese
             _instance = this;
         }
 
+        private float _nextDump = 20f;
+
+        /// <summary>Periodic: append a full text-component snapshot with timestamp.</summary>
+        private static void DumpUiText()
+        {
+            try
+            {
+                var sb = new System.Text.StringBuilder();
+                sb.Append("=== ").Append(System.DateTime.Now.ToString("HH:mm:ss")).Append('\n');
+                foreach (var t in UnityEngine.Object.FindObjectsOfType<TMP_Text>(true))
+                    DumpComponent(t, sb);
+                foreach (var t in UnityEngine.Object.FindObjectsOfType<UnityEngine.UI.Text>(true))
+                    DumpComponent(t, sb);
+                var path = System.IO.Path.Combine(Plugin.DataDir, "uidump.txt");
+                System.IO.File.AppendAllText(path, sb.ToString());
+            }
+            catch { }
+        }
+
+        private static void DumpComponent(UnityEngine.Component comp, System.Text.StringBuilder sb)
+        {
+            string path;
+            try { path = GetPath(comp.transform); }
+            catch { return; }
+            try
+            {
+                var tmp = comp as TMP_Text;
+                string text = tmp != null ? tmp.text : (comp as UnityEngine.UI.Text).text;
+                string font = "<null>";
+                bool active = comp.gameObject.activeInHierarchy;
+                if (tmp != null && tmp.font != null) font = tmp.font.name;
+                var ugui = comp as UnityEngine.UI.Text;
+                if (ugui != null && ugui.font != null) font = ugui.font.name;
+                sb.Append(active ? "ON  | " : "off | ")
+                    .Append(path).Append(" | font=").Append(font)
+                    .Append(" | text='").Append(text == null ? "<null>" : text.Replace("\n", "\\n"))
+                    .Append("'\n");
+            }
+            catch { }
+        }
+
+        private static string GetPath(UnityEngine.Transform t)
+        {
+            var sb = new System.Text.StringBuilder(t.name);
+            var p = t.parent;
+            int guard = 0;
+            while (p != null && guard++ < 24)
+            {
+                sb.Insert(0, p.name + "/");
+                p = p.parent;
+            }
+            return sb.ToString();
+        }
+
         public static void RequestActiveTextRescan()
         {
             var instance = _instance;
@@ -70,6 +124,11 @@ namespace ScheduleIChinese
         private void Update()
         {
             FontService.Tick();
+            if (Time.unscaledTime >= _nextDump)
+            {
+                _nextDump = Time.unscaledTime + 5f;
+                DumpUiText();
+            }
             if (ModConfig.EnableRuntimeTranslationFallback.Value)
                 TextPatch.ApplyPendingChanges();
             if (ModConfig.EnableAutoTranslate.Value)

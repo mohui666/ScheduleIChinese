@@ -10390,3 +10390,6 @@ DOWNTOWN=市中心
 SUBURBIA=郊区
 UPTOWN=上城区
 DOCKS=码头区
+Methamphetamine=冰毒
+Meth (Liquid)=冰毒 (液态)
+Meth (Liquid) (Ingredient)=液态冰毒（原料）

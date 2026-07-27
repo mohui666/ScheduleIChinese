@@ -340,6 +340,29 @@ namespace ScheduleIChinese
                     $"Offline translation self-test failed ({total - failed}/{total} passed).");
         }
 
+        /// <summary>All CJK / full-width characters used by any translation value.</summary>
+        public static string CollectCjkChars()
+        {
+            var set = new HashSet<char>();
+            foreach (var kv in _dict)
+                foreach (var c in kv.Value)
+                    if (IsCjkOrFullwidth(c)) set.Add(c);
+            foreach (var kv in _effects)
+                foreach (var c in kv.Value)
+                    if (IsCjkOrFullwidth(c)) set.Add(c);
+            var sb = new StringBuilder(set.Count);
+            foreach (var c in set) sb.Append(c);
+            return sb.ToString();
+        }
+
+        private static bool IsCjkOrFullwidth(char c)
+        {
+            if (c >= '一' && c <= '鿿') return true;
+            if (c >= '　' && c <= '〿') return true;
+            if (c >= '＀' && c <= '￠') return true;
+            return false;
+        }
+
         public static bool ContainsCjk(string s)
         {
             foreach (var c in s)
