@@ -47,7 +47,7 @@ internal sealed class InstallerForm : Form
 
     public InstallerForm()
     {
-        Text = "Schedule I 简体中文安全汉化一键安装器 v1.3.9";
+        Text = "Schedule I 简体中文安全汉化一键安装器 v1.3.35";
         ClientSize = new Size(720, 390);
         MinimumSize = MaximumSize = Size;
         MaximizeBox = false;
@@ -65,7 +65,7 @@ internal sealed class InstallerForm : Form
         };
         var version = new Label
         {
-            Text = "v1.3.9 · 完全离线 · 人名、品种和自定义名称保留",
+            Text = "v1.3.35 · 完全离线 · 人名、品种和自定义名称保留",
             ForeColor = Color.FromArgb(75, 85, 99),
             AutoSize = true,
             Location = new Point(32, 72)
@@ -246,14 +246,19 @@ internal static class InstallerService
             var destination = SafePath(root, relative);
 
             // The package includes BepInEx for a clean one-click install. Preserve
-            // an existing loader installation and only replace our own plugin/config.
+            // an existing loader installation and only replace our own plugin files.
+            // The user's config is never overwritten; BepInEx adds new keys itself.
+            bool isConfig =
+                relative.Equals(
+                    Path.Combine("BepInEx", "config", "com.schedulei.chinesemod.cfg"),
+                    StringComparison.OrdinalIgnoreCase);
+            if (isConfig && File.Exists(destination))
+                continue;
             bool isChineseFile =
+                isConfig ||
                 relative.StartsWith(
                     Path.Combine("BepInEx", "plugins", "ScheduleIChinese") +
                     Path.DirectorySeparatorChar,
-                    StringComparison.OrdinalIgnoreCase) ||
-                relative.Equals(
-                    Path.Combine("BepInEx", "config", "com.schedulei.chinesemod.cfg"),
                     StringComparison.OrdinalIgnoreCase);
             if (!isChineseFile && File.Exists(destination))
                 continue;

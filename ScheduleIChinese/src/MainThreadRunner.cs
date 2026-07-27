@@ -29,23 +29,31 @@ namespace ScheduleIChinese
         // passes through any managed setter.
         private static readonly System.Collections.Generic.List<TMP_Text> _tmpRegistry =
             new System.Collections.Generic.List<TMP_Text>();
+        private static readonly System.Collections.Generic.HashSet<int> _tmpIds =
+            new System.Collections.Generic.HashSet<int>();
         private static readonly System.Collections.Generic.List<UnityEngine.UI.Text> _uguiRegistry =
             new System.Collections.Generic.List<UnityEngine.UI.Text>();
+        private static readonly System.Collections.Generic.HashSet<int> _uguiIds =
+            new System.Collections.Generic.HashSet<int>();
         private int _tmpScanIndex;
         private int _uguiScanIndex;
 
         public static void RegisterText(TMP_Text comp)
         {
             if (comp == null) return;
-            if (_tmpRegistry.Count > 2048) _tmpRegistry.Clear();
-            if (!_tmpRegistry.Contains(comp)) _tmpRegistry.Add(comp);
+            int id;
+            try { id = comp.GetInstanceID(); }
+            catch { return; }
+            if (_tmpIds.Add(id)) _tmpRegistry.Add(comp);
         }
 
         public static void RegisterText(UnityEngine.UI.Text comp)
         {
             if (comp == null) return;
-            if (_uguiRegistry.Count > 512) _uguiRegistry.Clear();
-            if (!_uguiRegistry.Contains(comp)) _uguiRegistry.Add(comp);
+            int id;
+            try { id = comp.GetInstanceID(); }
+            catch { return; }
+            if (_uguiIds.Add(id)) _uguiRegistry.Add(comp);
         }
 
         private void Awake()
@@ -133,14 +141,23 @@ namespace ScheduleIChinese
             {
                 if (_tmpScanIndex >= _tmpRegistry.Count) _tmpScanIndex = 0;
                 var comp = _tmpRegistry[_tmpScanIndex++];
-                bool dead;
-                try { dead = comp == null || !comp.gameObject.activeInHierarchy; }
-                catch { dead = true; }
-                if (dead)
+                bool destroyed;
+                int compId = 0;
+                try
+                {
+                    destroyed = comp == null || comp.gameObject == null;
+                    if (!destroyed) compId = comp.GetInstanceID();
+                }
+                catch { destroyed = true; }
+                if (destroyed)
                 {
                     _tmpRegistry.RemoveAt(--_tmpScanIndex);
+                    if (compId != 0) _tmpIds.Remove(compId);
                     continue;
                 }
+                // Inactive components are skipped but stay registered, so
+                // panels that close and reopen keep being covered.
+                if (!comp.gameObject.activeInHierarchy) continue;
                 TextPatch.ApplyExisting(comp);
             }
 
@@ -148,14 +165,21 @@ namespace ScheduleIChinese
             {
                 if (_uguiScanIndex >= _uguiRegistry.Count) _uguiScanIndex = 0;
                 var comp = _uguiRegistry[_uguiScanIndex++];
-                bool dead;
-                try { dead = comp == null || !comp.gameObject.activeInHierarchy; }
-                catch { dead = true; }
-                if (dead)
+                bool destroyed;
+                int compId = 0;
+                try
+                {
+                    destroyed = comp == null || comp.gameObject == null;
+                    if (!destroyed) compId = comp.GetInstanceID();
+                }
+                catch { destroyed = true; }
+                if (destroyed)
                 {
                     _uguiRegistry.RemoveAt(--_uguiScanIndex);
+                    if (compId != 0) _uguiIds.Remove(compId);
                     continue;
                 }
+                if (!comp.gameObject.activeInHierarchy) continue;
                 TextPatch.ApplyExisting(comp);
             }
         }

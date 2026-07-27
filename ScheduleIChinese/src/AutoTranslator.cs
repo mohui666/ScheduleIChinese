@@ -170,17 +170,23 @@ namespace ScheduleIChinese
         private static void Commit(string src, string translated)
         {
             lock (_pending) _pending.Remove(src);
-            if (string.IsNullOrWhiteSpace(translated)) { Fail(src, null); return; }
+            // Reject empty results and results identical to the source: caching
+            // those would permanently block a proper translation later.
+            if (string.IsNullOrWhiteSpace(translated) ||
+                string.Equals(src, translated, StringComparison.Ordinal) ||
+                !TranslationStore.ContainsCjk(translated)) { Fail(src, null); return; }
             _results.Enqueue(new KeyValuePair<string, string>(src, translated));
             try
             {
-                lock (_autoFile)
+                lock (AutoFileLock)
                     File.AppendAllText(_autoFile,
                         TranslationStore.Escape(src) + "=" + TranslationStore.Escape(translated) + "\n",
                         Encoding.UTF8);
             }
             catch { }
         }
+
+        private static readonly object AutoFileLock = new object();
 
         private static void Fail(string src, Exception e)
         {

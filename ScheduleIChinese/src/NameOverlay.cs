@@ -87,16 +87,23 @@ namespace ScheduleIChinese
 
                 CopyVisualStyle(label, overlay);
 
-                // 先设置字体，再写文本和重建网格。
-                FontService.EnsureCjkFont(overlay);
+                // 只在文本或字体真的变化时重建，避免每帧强制 Canvas 重排。
+                bool dirty = false;
+                if (FontService.EnsureCjkFont(overlay))
+                    dirty = true;
 
                 if (overlay.text != text)
+                {
                     overlay.text = text;
+                    dirty = true;
+                }
 
-                overlay.havePropertiesChanged = true;
-                overlay.SetVerticesDirty();
-                overlay.SetLayoutDirty();
-                overlay.ForceMeshUpdate(true, true);
+                if (dirty)
+                {
+                    overlay.havePropertiesChanged = true;
+                    overlay.SetVerticesDirty();
+                    overlay.SetLayoutDirty();
+                }
             }
             catch (Exception e)
             {

@@ -20,7 +20,8 @@ namespace ScheduleIChinese
             DumpUntranslated = cfg.Bind("General", "DumpUntranslated", false,
                 "Write strings that have no translation yet to Untranslated.txt (for building translation files)");
             AutoTranslateDelayMs = cfg.Bind("General", "AutoTranslateDelayMs", 300,
-                "Delay between auto-translation requests (ms)");
+                new ConfigDescription("Delay between auto-translation requests (ms)",
+                    new AcceptableValueRange<int>(100, 10000)));
             FontFile = cfg.Bind("Font", "FontFile", "assets/NotoSansSC.otf",
                 "Chinese font file, relative to the plugin data dir (BepInEx/plugins/ScheduleIChinese). Falls back to C:/Windows/Fonts/msyh.ttc");
         }

@@ -89,6 +89,20 @@ namespace ScheduleIChinese
 
         public static void Init()
         {
+            // Reload-safe: drop every piece of previous state first.
+            _dict.Clear();
+            _patternSources.Clear();
+            _patterns.Clear();
+            _patternCache.Clear();
+            _effects.Clear();
+            _nameSources.Clear();
+            _preserveNames.Clear();
+            _denyKeys.Clear();
+            _noHit.Clear();
+            _dumped.Clear();
+            lock (_dumpPending) _dumpPending.Clear();
+            lock (_live) _live.Clear();
+
             _transDir = Path.Combine(Plugin.DataDir, "Translations");
             _dumpFile = Path.Combine(Plugin.DataDir, "Untranslated.txt");
             Directory.CreateDirectory(_transDir);
@@ -220,7 +234,7 @@ namespace ScheduleIChinese
                     var regex = new Regex(
                         @"\A(?:" + kv.Key + @")\z",
                         RegexOptions.Compiled | RegexOptions.CultureInvariant,
-                        TimeSpan.FromMilliseconds(50));
+                        TimeSpan.FromMilliseconds(10));
                     _patterns.Add(new PatternEntry
                     {
                         Source = kv.Key,
@@ -578,11 +592,15 @@ namespace ScheduleIChinese
             return c >= '一' && c <= '鿿';
         }
 
+        private static readonly HashSet<string> _disabledPatterns =
+            new HashSet<string>(StringComparer.Ordinal);
+
         private static bool TryTranslatePattern(string source, out string translated)
         {
             translated = null;
             foreach (var entry in _patterns)
             {
+                if (_disabledPatterns.Contains(entry.Source)) continue;
                 try
                 {
                     var match = entry.Regex.Match(source);
@@ -592,7 +610,9 @@ namespace ScheduleIChinese
                 }
                 catch (RegexMatchTimeoutException)
                 {
-                    Plugin.Log.LogWarning($"Dynamic translation rule timed out: {entry.Source}");
+                    if (_disabledPatterns.Add(entry.Source))
+                        Plugin.Log.LogWarning(
+                            $"Disabled timed-out translation rule: {entry.Source}");
                 }
                 catch (Exception ex)
                 {

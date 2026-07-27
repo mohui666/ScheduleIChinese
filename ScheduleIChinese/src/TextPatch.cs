@@ -317,16 +317,28 @@ namespace ScheduleIChinese
         /// panels that are inactive at scan time. OnEnable is the exact moment a
         /// baked label becomes visible (phone apps, shop panels, popups).
         /// TMP_Text itself does not declare OnEnable in the interop assemblies —
-        /// only the concrete subclasses do — so each is patched explicitly.
-        /// Every component seen here is also registered for the rolling rescan
-        /// that catches text written natively (animation-driven banners).
+        /// only the concrete subclasses do — so each is patched explicitly via
+        /// TargetMethods. Every component seen here is also registered for the
+        /// rolling rescan that catches text written natively (animation-driven
+        /// banners).
         /// </summary>
-        [HarmonyPatch(typeof(TextMeshProUGUI), "OnEnable")]
-        [HarmonyPatch(typeof(TextMeshPro), "OnEnable")]
-        [HarmonyPatch(typeof(UnityEngine.UI.Text), "OnEnable")]
+        [HarmonyPatch]
         public static class BakedTextOnEnable
         {
-            public static void Postfix(UnityEngine.UI.MaskableGraphic __instance)
+            public static IEnumerable<MethodBase> TargetMethods()
+            {
+                var targets = new[]
+                {
+                    AccessTools.Method(typeof(TextMeshProUGUI), "OnEnable"),
+                    AccessTools.Method(typeof(TextMeshPro), "OnEnable"),
+                    AccessTools.Method(typeof(UnityEngine.UI.Text), "OnEnable")
+                };
+                foreach (var method in targets)
+                    if (method != null)
+                        yield return method;
+            }
+
+            public static void Postfix(object __instance)
             {
                 try
                 {
@@ -341,7 +353,10 @@ namespace ScheduleIChinese
                         ApplyExisting(ugui);
                     }
                 }
-                catch { }
+                catch (Exception e)
+                {
+                    Plugin.Log?.LogDebug("OnEnable translation failed: " + e.Message);
+                }
             }
         }
     }

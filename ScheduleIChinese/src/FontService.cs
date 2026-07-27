@@ -69,21 +69,30 @@ namespace ScheduleIChinese
         {
             try
             {
-                TMP_FontAsset any = null;
                 TMP_FontAsset sdf = null;
+                TMP_FontAsset openSans = null;
                 foreach (var fa in Resources.FindObjectsOfTypeAll<TMP_FontAsset>())
                 {
                     if (fa == null || fa.name == null) continue;
-                    if (any == null) any = fa;
-                    // The asset literally named "OpenSans-SemiBold" (no "SDF"
-                    // suffix) is what the game's CJK-rendering components use;
-                    // the "SDF"-suffixed variant does not render via fallback.
+                    // Priority: exact OpenSans-SemiBold, its SDF variant, TMP
+                    // settings default, then any OpenSans family member. Never
+                    // return an unrelated (icon/digit) font.
                     if (fa.name.Equals("OpenSans-SemiBold", StringComparison.OrdinalIgnoreCase))
                         return fa;
                     if (fa.name.Equals("OpenSans-SemiBold SDF", StringComparison.OrdinalIgnoreCase))
                         sdf = fa;
+                    else if (openSans == null &&
+                             fa.name.IndexOf("OpenSans", StringComparison.OrdinalIgnoreCase) >= 0)
+                        openSans = fa;
                 }
-                return sdf != null ? sdf : any;
+                if (sdf != null) return sdf;
+                try
+                {
+                    var def = TMP_Settings.defaultFontAsset;
+                    if (def != null) return def;
+                }
+                catch { }
+                return openSans;
             }
             catch { }
             return null;
@@ -172,6 +181,10 @@ namespace ScheduleIChinese
                 bool changed = false;
                 if (font == null)
                 {
+                    // The game font may not be loaded at plugin init; retry
+                    // discovery lazily instead of failing forever.
+                    if (_gameFont == null)
+                        _gameFont = FindGameFont();
                     if (_gameFont == null) return false;
                     comp.font = _gameFont;
                     font = _gameFont;
