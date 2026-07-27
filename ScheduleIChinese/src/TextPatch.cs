@@ -88,45 +88,62 @@ namespace ScheduleIChinese
 
         private static void Transform(TMP_Text comp, ref string value)
         {
-            if (string.IsNullOrEmpty(value)) return;
-            if (NameOverlay.IsShopNameLabel(comp)) NameOverlay.Sync(comp);
+            if (comp == null || string.IsNullOrEmpty(value))
+                return;
+
+            // 必须先完成翻译，再同步商店覆盖层。
             if (TranslationStore.ContainsCjk(value))
             {
-                if (FontService.ApplyCjkFont(comp))
-                    MarkDirty(comp);
                 if (ModConfig.EnableRuntimeTranslationFallback.Value)
                 {
                     var partial = TranslationStore.TranslateDisplayText(value);
                     if (partial != null) value = partial;
                 }
-                return;
             }
-            if (!ModConfig.EnableRuntimeTranslationFallback.Value) return;
+            else if (ModConfig.EnableRuntimeTranslationFallback.Value)
+            {
+                var translated = TranslationStore.TranslateDisplayText(value);
+                if (translated != null)
+                {
+                    value = translated;
+                }
+                else if (ModConfig.EnableAutoTranslate.Value &&
+                         TranslationStore.IsTranslatable(value))
+                {
+                    // remember who is showing this text so a late auto-translation can be applied
+                    TranslationStore.RegisterLive(comp, value);
+                }
+            }
 
-            var translated = TranslationStore.TranslateDisplayText(value);
-            if (translated != null)
+            if (TranslationStore.ContainsCjk(value))
             {
                 if (FontService.ApplyCjkFont(comp))
                     MarkDirty(comp);
-                value = translated;
             }
-            else if (ModConfig.EnableAutoTranslate.Value &&
-                     TranslationStore.IsTranslatable(value) &&
-                     !TranslationStore.ContainsCjk(value))
-            {
-                // remember who is showing this text so a late auto-translation can be applied
-                TranslationStore.RegisterLive(comp, value);
-            }
+
+            // 必须放在所有翻译处理之后，传入最终文本。
+            if (NameOverlay.IsShopNameLabel(comp))
+                NameOverlay.Sync(comp, value);
         }
 
         public static void ApplyExisting(TMP_Text comp)
         {
-            if (comp == null) return;
-            if (NameOverlay.IsShopNameLabel(comp)) NameOverlay.Sync(comp);
+            if (comp == null)
+                return;
+
             try
             {
                 var current = comp.text;
-                if (string.IsNullOrEmpty(current)) return;
+
+                if (string.IsNullOrEmpty(current))
+                {
+                    if (NameOverlay.IsShopNameLabel(comp))
+                        NameOverlay.Sync(comp, current);
+                    return;
+                }
+
+                string finalText = current;
+
                 if (TranslationStore.ContainsCjk(current))
                 {
                     // If the font setup just changed, the mesh was built while no
@@ -136,20 +153,43 @@ namespace ScheduleIChinese
                     else if (comp.font == null && FontService.Ready &&
                              _nullFontRebuilt.Add(comp.GetInstanceID()))
                         MarkDirty(comp);
-                    if (!ModConfig.EnableRuntimeTranslationFallback.Value) return;
-                    var partial = TranslationStore.TranslateDisplayText(current);
-                    if (partial == null || partial == current) return;
-                    comp.text = partial;
+
+                    if (ModConfig.EnableRuntimeTranslationFallback.Value)
+                    {
+                        var partial = TranslationStore.TranslateDisplayText(current);
+                        if (partial != null)
+                            finalText = partial;
+                    }
+                }
+                else if (ModConfig.EnableRuntimeTranslationFallback.Value)
+                {
+                    var translated = TranslationStore.TranslateDisplayText(current);
+                    if (translated != null)
+                    {
+                        finalText = translated;
+                    }
+                    else if (ModConfig.EnableAutoTranslate.Value &&
+                             TranslationStore.IsTranslatable(current))
+                    {
+                        TranslationStore.RegisterLive(comp, current);
+                    }
+                }
+
+                if (finalText != current)
+                {
+                    // setter 里会再次经过 Transform，由它同步覆盖层。
+                    comp.text = finalText;
                     return;
                 }
-                if (!ModConfig.EnableRuntimeTranslationFallback.Value) return;
 
-                var translated = TranslationStore.TranslateDisplayText(current);
-                if (translated == null || translated == current) return;
-                FontService.ApplyCjkFont(comp);
-                comp.text = translated;
+                // 已经是中文，或者商品格被复用成英文时，直接同步状态。
+                if (NameOverlay.IsShopNameLabel(comp))
+                    NameOverlay.Sync(comp, finalText);
             }
-            catch { }
+            catch (Exception e)
+            {
+                Plugin.Log?.LogDebug("ApplyExisting TMP failed: " + e.Message);
+            }
         }
 
         public static void ApplyExisting(UnityEngine.UI.Text comp)

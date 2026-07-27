@@ -13,7 +13,7 @@ namespace ScheduleIChinese
     public class Plugin : BasePlugin
     {
         public const string Guid = "com.schedulei.chinesemod";
-        public const string Version = "1.3.34";
+        public const string Version = "1.3.35";
 
         public static Plugin Instance { get; private set; }
         public static new ManualLogSource Log => Instance?.BaseLog;
@@ -45,6 +45,15 @@ namespace ScheduleIChinese
 
             var harmony = new Harmony(Guid);
             harmony.PatchAll(typeof(TextPatch).Assembly);
+
+            try
+            {
+                TextPatch.InitializeChangeListener();
+            }
+            catch (Exception e)
+            {
+                Log.LogWarning("TMP text-change listener initialization failed: " + e);
+            }
 
             ClassInjector.RegisterTypeInIl2Cpp<MainThreadRunner>();
             var go = new GameObject("ScheduleIChinese.Runner");
