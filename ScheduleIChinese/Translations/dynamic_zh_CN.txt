@@ -337,3 +337,4 @@ r:I'm after (\d+)x (.+)\. I can pay <color\=#46CB4F>(.+)</color> for it Deal\?\?
 r:Wanted Level (\d+)=通缉等级 $1
 r:Wanted Level: (\d+)=通缉等级：$1
 r:WANTED LEVEL (\d+)=通缉等级 $1
+r:(.+) \((\d+)\)=$1（$2）

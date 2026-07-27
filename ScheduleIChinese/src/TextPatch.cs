@@ -191,6 +191,47 @@ namespace ScheduleIChinese
             }
         }
 
+        /// <summary>
+        /// Patch SetText(StringBuilder) overloads. List-heavy UI (effect lists,
+        /// inventory rows) is commonly built through StringBuilder, which never
+        /// passes through the string overloads above; without this hook those
+        /// strings stay English and never even reach the translation dump.
+        /// </summary>
+        [HarmonyPatch]
+        public static class SetTextBuilderOverloads
+        {
+            public static IEnumerable<MethodBase> TargetMethods()
+            {
+                foreach (var method in AccessTools.GetDeclaredMethods(typeof(TMP_Text)))
+                {
+                    if (method.Name != nameof(TMP_Text.SetText)) continue;
+                    var parameters = method.GetParameters();
+                    if (parameters.Length == 1 &&
+                        parameters[0].ParameterType == typeof(Il2CppSystem.Text.StringBuilder))
+                        yield return method;
+                }
+            }
+
+            public static void Prefix(TMP_Text __instance, object[] __args)
+            {
+                if (__args == null || __args.Length == 0) return;
+                var sb = __args[0] as Il2CppSystem.Text.StringBuilder;
+                if (sb == null) return;
+                try
+                {
+                    var sourceText = sb.ToString();
+                    var before = sourceText;
+                    Transform(__instance, ref sourceText);
+                    if (sourceText != before)
+                    {
+                        sb.Clear();
+                        sb.Append(sourceText);
+                    }
+                }
+                catch { }
+            }
+        }
+
         /// <summary>Legacy uGUI Text support.</summary>
         [HarmonyPatch(typeof(UnityEngine.UI.Text), "text", MethodType.Setter)]
         public static class LegacyText
@@ -199,7 +240,11 @@ namespace ScheduleIChinese
             {
                 if (string.IsNullOrEmpty(value)) return true;
                 if (!ModConfig.EnableRuntimeTranslationFallback.Value) return true;
-                var translated = TranslationStore.Translate(value);
+                // Must go through TranslateDisplayText: panels such as the contacts
+                // detail view append lines incrementally ("• Calming" -> "...舒缓\n•
+                // Munchies"), and plain Translate() rejects any string that already
+                // contains CJK, so every line after the first would stay English.
+                var translated = TranslationStore.TranslateDisplayText(value);
                 if (translated != null)
                 {
                     if (TranslationStore.ContainsCjk(translated) && FontService.LegacyCjkFont != null)

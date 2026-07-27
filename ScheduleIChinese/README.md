@@ -1,4 +1,4 @@
-# ScheduleIChinese 1.3.13
+# ScheduleIChinese 1.3.15
 
 适配 Schedule I v0.4.5f2 / Steam Build 22829923 的简体中文离线汉化。
 
@@ -13,6 +13,22 @@
 - 效果/形容词词表支持项目符号、颜色标签和 TMP 富文本组合。
 - 在线自动翻译默认关闭，离线显示层翻译默认开启。
 - 不对每帧或每两秒执行全局扫描，降低载入和 UI 卡顿。
+
+## 1.3.15 变更
+
+- 根因修复：联系人详情等面板使用的是旧版 uGUI `Text`，其逐行追加赋值
+  （"• Calming" → "• 舒缓
+• Munchies"）会让旧的 `Translate()` 因字符串
+  已含中文而整体放弃，导致第一行之后全部漏翻。`LegacyText` 补丁改走
+  `TranslateDisplayText`（逐行、容忍已有中文）。
+
+## 1.3.14 变更
+
+- 地区名统一翻译为中文（北城区/西城区/市中心/郊区/上城区/码头区），
+  从黑名单移除 `EMapRegion` 成员。
+- `Meth`/`Methamphetamine` 按用户要求保留英文名（加入保护名单）。
+- 补主语类词条（你被捕了/你被解雇了）、通缉等级（Wanted Level）词条。
+- 新增 `SetText(StringBuilder)` 拦截（本作暂无此重载，作为兼容兜底）。
 
 ## 1.3.13 变更
 

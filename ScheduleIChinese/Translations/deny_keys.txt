@@ -85,12 +85,10 @@ DeepPurple
 Delete
 Diamonds
 Docked
-Docks
 Dollar
 DoubleQuote
 Down
 DownArrow
-Downtown
 E
 Eight
 End
@@ -428,8 +426,6 @@ Negotiating
 Never
 Nine
 NoWin
-None
-Northtown
 Numlock
 O
 Off
@@ -514,7 +510,6 @@ Storage
 Store
 Street_Rat
 Submit
-Suburbia
 Success
 Suit
 Sunday
@@ -542,7 +537,6 @@ Underlord
 Underscore
 Up
 UpArrow
-Uptown
 V
 Vehicle
 VehicleHandbrake
@@ -557,7 +551,6 @@ WaitingForPlayers
 Watermelon
 Wednesday
 Weekly
-Westville
 White
 Win
 Windowed
