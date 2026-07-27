@@ -23,6 +23,31 @@ namespace ScheduleIChinese
         private bool _fontWasReady;
         private static MainThreadRunner _instance;
 
+        // Rolling registry of every text component that has been enabled. A few
+        // are re-checked each frame; this catches text the game writes natively
+        // (animation-driven banners such as WANTED / UNDER ARREST), which never
+        // passes through any managed setter.
+        private static readonly System.Collections.Generic.List<TMP_Text> _tmpRegistry =
+            new System.Collections.Generic.List<TMP_Text>();
+        private static readonly System.Collections.Generic.List<UnityEngine.UI.Text> _uguiRegistry =
+            new System.Collections.Generic.List<UnityEngine.UI.Text>();
+        private int _tmpScanIndex;
+        private int _uguiScanIndex;
+
+        public static void RegisterText(TMP_Text comp)
+        {
+            if (comp == null) return;
+            if (_tmpRegistry.Count > 2048) _tmpRegistry.Clear();
+            if (!_tmpRegistry.Contains(comp)) _tmpRegistry.Add(comp);
+        }
+
+        public static void RegisterText(UnityEngine.UI.Text comp)
+        {
+            if (comp == null) return;
+            if (_uguiRegistry.Count > 512) _uguiRegistry.Clear();
+            if (!_uguiRegistry.Contains(comp)) _uguiRegistry.Add(comp);
+        }
+
         private void Awake()
         {
             _instance = this;
@@ -92,6 +117,45 @@ namespace ScheduleIChinese
             {
                 _nextCleanup = Time.time + 60f;
                 TranslationStore.CleanupLive();
+            }
+
+            RollingScan();
+        }
+
+        /// <summary>Re-check a small slice of registered components every frame.</summary>
+        private void RollingScan()
+        {
+            if (!FontService.Ready) return;
+            if (!ModConfig.EnableRuntimeTranslationFallback.Value) return;
+
+            for (int n = 0; n < 24 && _tmpRegistry.Count > 0; n++)
+            {
+                if (_tmpScanIndex >= _tmpRegistry.Count) _tmpScanIndex = 0;
+                var comp = _tmpRegistry[_tmpScanIndex++];
+                bool dead;
+                try { dead = comp == null || !comp.gameObject.activeInHierarchy; }
+                catch { dead = true; }
+                if (dead)
+                {
+                    _tmpRegistry.RemoveAt(--_tmpScanIndex);
+                    continue;
+                }
+                TextPatch.ApplyExisting(comp);
+            }
+
+            for (int n = 0; n < 8 && _uguiRegistry.Count > 0; n++)
+            {
+                if (_uguiScanIndex >= _uguiRegistry.Count) _uguiScanIndex = 0;
+                var comp = _uguiRegistry[_uguiScanIndex++];
+                bool dead;
+                try { dead = comp == null || !comp.gameObject.activeInHierarchy; }
+                catch { dead = true; }
+                if (dead)
+                {
+                    _uguiRegistry.RemoveAt(--_uguiScanIndex);
+                    continue;
+                }
+                TextPatch.ApplyExisting(comp);
             }
         }
 

@@ -80,9 +80,31 @@ namespace ScheduleIChinese
             }
         }
 
+        /// <summary>
+        /// True when the component lives under a shop listing hierarchy. The game
+        /// compares those labels against the item name and hides them on mismatch,
+        /// so translating them makes the product name vanish entirely.
+        /// </summary>
+        private static bool IsShopListingText(TMP_Text comp)
+        {
+            try
+            {
+                var t = comp.transform;
+                for (int i = 0; i < 12 && t != null; i++)
+                {
+                    if (t.name.IndexOf("Listing", StringComparison.Ordinal) >= 0)
+                        return true;
+                    t = t.parent;
+                }
+            }
+            catch { }
+            return false;
+        }
+
         private static void Transform(TMP_Text comp, ref string value)
         {
             if (string.IsNullOrEmpty(value)) return;
+            if (IsShopListingText(comp)) return;
             if (TranslationStore.ContainsCjk(value))
             {
                 FontService.ApplyCjkFont(comp);
@@ -113,6 +135,7 @@ namespace ScheduleIChinese
         public static void ApplyExisting(TMP_Text comp)
         {
             if (comp == null) return;
+            if (IsShopListingText(comp)) return;
             try
             {
                 var current = comp.text;
@@ -262,6 +285,8 @@ namespace ScheduleIChinese
         /// baked label becomes visible (phone apps, shop panels, popups).
         /// TMP_Text itself does not declare OnEnable in the interop assemblies —
         /// only the concrete subclasses do — so each is patched explicitly.
+        /// Every component seen here is also registered for the rolling rescan
+        /// that catches text written natively (animation-driven banners).
         /// </summary>
         [HarmonyPatch(typeof(TextMeshProUGUI), "OnEnable")]
         [HarmonyPatch(typeof(TextMeshPro), "OnEnable")]
@@ -272,8 +297,16 @@ namespace ScheduleIChinese
             {
                 try
                 {
-                    if (__instance is TMP_Text tmp) ApplyExisting(tmp);
-                    else if (__instance is UnityEngine.UI.Text ugui) ApplyExisting(ugui);
+                    if (__instance is TMP_Text tmp)
+                    {
+                        MainThreadRunner.RegisterText(tmp);
+                        ApplyExisting(tmp);
+                    }
+                    else if (__instance is UnityEngine.UI.Text ugui)
+                    {
+                        MainThreadRunner.RegisterText(ugui);
+                        ApplyExisting(ugui);
+                    }
                 }
                 catch { }
             }
