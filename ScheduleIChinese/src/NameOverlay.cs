@@ -1,11 +1,15 @@
 using System;
+using Il2CppInterop.Runtime;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using TMPro;
 using UnityEngine;
 
 namespace ScheduleIChinese
 {
     /// <summary>
-    /// 为无法正常渲染 CJK 的商店商品名创建独立覆盖文本。
+    /// 商店商品名覆盖层：原标签字体为空且无法渲染 CJK，
+    /// 用同级 TextMeshProUGUI 覆盖显示中文。
+    /// 1.3.44 已证实可显示；本版只修重复创建问题。
     /// </summary>
     public static class NameOverlay
     {
@@ -19,30 +23,17 @@ namespace ScheduleIChinese
                     return false;
 
                 var t = comp.transform;
-
                 for (int i = 0; i < 10 && t != null; i++)
                 {
-                    if (t.name.IndexOf(
-                            "ShopEntry",
-                            StringComparison.OrdinalIgnoreCase) >= 0)
-                    {
+                    if (t.name.IndexOf("ShopEntry", StringComparison.OrdinalIgnoreCase) >= 0)
                         return true;
-                    }
-
                     t = t.parent;
                 }
             }
-            catch
-            {
-                // Ignore destroyed IL2CPP objects.
-            }
-
+            catch { }
             return false;
         }
 
-        /// <summary>
-        /// text 必须是完成翻译后的最终文本，不能重新读取 label.text。
-        /// </summary>
         public static void Sync(TMP_Text label, string text)
         {
             if (label == null)
@@ -50,16 +41,26 @@ namespace ScheduleIChinese
 
             try
             {
-                var overlayTransform = label.transform.Find(OverlayName);
-                var overlay = overlayTransform != null
-                    ? overlayTransform.GetComponent<TextMeshProUGUI>()
-                    : null;
+                // Find the overlay as sibling (current) or child (legacy);
+                // the 1.3.44 bug searched only children of the label, so a new
+                // overlay was created on every sync.
+                TextMeshProUGUI overlay = null;
+                var parent = label.transform.parent;
+                if (parent != null)
+                {
+                    var tf = parent.Find(OverlayName);
+                    if (tf != null) overlay = tf.GetComponent<TextMeshProUGUI>();
+                }
+                if (overlay == null)
+                {
+                    var tf = label.transform.Find(OverlayName);
+                    if (tf != null) overlay = tf.GetComponent<TextMeshProUGUI>();
+                }
 
                 bool needsCjk =
                     !string.IsNullOrEmpty(text) &&
                     TranslationStore.ContainsCjk(text);
 
-                // 商品格被复用成英文内容时，必须清理旧中文。
                 if (!needsCjk)
                 {
                     if (overlay != null)
@@ -67,18 +68,14 @@ namespace ScheduleIChinese
                         overlay.text = string.Empty;
                         overlay.gameObject.SetActive(false);
                     }
-
                     return;
                 }
 
-                // 字体尚未初始化时不要创建一个永久空字体组件。
-                // 后续滚动扫描会再次调用 Sync。
                 if (!FontService.Ready)
                     return;
 
                 if (overlay == null)
                     overlay = Create(label);
-
                 if (overlay == null)
                     return;
 
@@ -87,7 +84,6 @@ namespace ScheduleIChinese
 
                 CopyVisualStyle(label, overlay);
 
-                // 只在文本或字体真的变化时重建，避免每帧强制 Canvas 重排。
                 bool dirty = false;
                 if (FontService.EnsureCjkFont(overlay))
                     dirty = true;
@@ -107,8 +103,7 @@ namespace ScheduleIChinese
             }
             catch (Exception e)
             {
-                Plugin.Log?.LogWarning(
-                    "shop name overlay sync failed: " + e);
+                Plugin.Log?.LogWarning("shop name overlay sync failed: " + e);
             }
         }
 
@@ -116,35 +111,55 @@ namespace ScheduleIChinese
         {
             try
             {
-                /*
-                 * 在 IL2CPP 下 GameObject 的 Type[] 构造函数需要
-                 * Il2CppReferenceArray<Type>，逐个 AddComponent 也可以，
-                 * 关键是 CanvasRenderer 必须存在，否则 TMP 不渲染。
-                 */
-                var go = new GameObject(OverlayName);
+                var componentTypes = new Il2CppReferenceArray<Il2CppSystem.Type>(1);
+                componentTypes[0] = Il2CppType.Of<RectTransform>();
+                var go = new GameObject(OverlayName, componentTypes);
+
                 go.layer = label.gameObject.layer;
                 go.hideFlags = HideFlags.DontSave;
 
-                var rect = go.AddComponent<RectTransform>();
-                go.AddComponent<CanvasRenderer>();
-                var overlay = go.AddComponent<TextMeshProUGUI>();
+                var rect = go.GetComponent<RectTransform>();
+                if (rect == null)
+                    throw new InvalidOperationException("Overlay GameObject has no RectTransform.");
 
-                // Overlay 是原标签的子对象，所以直接铺满原标签。
-                rect.SetParent(label.transform, false);
-                rect.anchorMin = Vector2.zero;
-                rect.anchorMax = Vector2.one;
-                rect.offsetMin = Vector2.zero;
-                rect.offsetMax = Vector2.zero;
-                rect.localPosition = Vector3.zero;
-                rect.localRotation = Quaternion.identity;
-                rect.localScale = Vector3.one;
-                rect.SetAsLastSibling();
+                // Sibling of the label, anchored exactly where the label sits.
+                // The label's own rect is degenerate (-6x20), so size comes
+                // from the preferred text size instead.
+                var labelRt = label.rectTransform;
+                rect.SetParent(label.transform.parent, false);
+                rect.pivot = labelRt.pivot;
+                rect.anchorMin = labelRt.anchorMin;
+                rect.anchorMax = labelRt.anchorMax;
+                rect.anchoredPosition = labelRt.anchoredPosition;
+                rect.localRotation = labelRt.localRotation;
+                rect.localScale = labelRt.localScale;
+                float w = label.preferredWidth;
+                float h = label.preferredHeight;
+                if (w < 30f) w = 160f;
+                if (h < 8f) h = 22f;
+                rect.sizeDelta = new Vector2(w, h);
+                rect.SetSiblingIndex(label.transform.GetSiblingIndex() + 1);
+
+                var renderer = go.AddComponent<CanvasRenderer>();
+                if (renderer == null)
+                    throw new InvalidOperationException("Failed to create CanvasRenderer.");
+
+                var overlay = go.AddComponent<TextMeshProUGUI>();
+                if (overlay == null)
+                    throw new InvalidOperationException("Failed to create TextMeshProUGUI.");
 
                 overlay.raycastTarget = false;
+                overlay.maskable = false;
+                overlay.overflowMode = TextOverflowModes.Overflow;
 
-                var gameFont = FontService.GameFont;
-                if (gameFont != null)
-                    overlay.font = gameFont;
+                var cjkFont = FontService.CjkFont;
+                if (cjkFont != null)
+                    overlay.font = cjkFont;
+                else
+                {
+                    var gameFont = FontService.GameFont;
+                    if (gameFont != null) overlay.font = gameFont;
+                }
 
                 CopyVisualStyle(label, overlay);
 
@@ -163,9 +178,7 @@ namespace ScheduleIChinese
             }
         }
 
-        private static void CopyVisualStyle(
-            TMP_Text source,
-            TextMeshProUGUI destination)
+        private static void CopyVisualStyle(TMP_Text source, TMP_Text destination)
         {
             destination.fontSize = source.fontSize;
             destination.fontStyle = source.fontStyle;
@@ -175,7 +188,7 @@ namespace ScheduleIChinese
 
             destination.color = source.color;
             destination.alignment = source.alignment;
-            destination.overflowMode = source.overflowMode;
+            destination.overflowMode = TextOverflowModes.Overflow;
             destination.richText = source.richText;
             destination.margin = source.margin;
 

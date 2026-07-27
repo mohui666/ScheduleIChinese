@@ -40,6 +40,12 @@ namespace ScheduleIChinese
         {
             if (_gameFont == null)
                 _gameFont = FindGameFont();
+            if (_gameFont != null && !_gameFontCompleted)
+            {
+                _gameFontCompleted = TryCompleteGameFont(_gameFont);
+                if (_gameFontCompleted)
+                    Plugin.Log.LogInfo("game font atlas completed with CJK glyphs");
+            }
             if (_cjkFont == null)
             {
                 _cjkFont = CreateNotoFont();
@@ -58,6 +64,9 @@ namespace ScheduleIChinese
         /// <summary>Real game font asset used to bridge null-font labels.</summary>
         public static TMP_FontAsset GameFont => _gameFont;
 
+        /// <summary>Complete-coverage CJK font asset (Noto, runtime-created).</summary>
+        public static TMP_FontAsset CjkFont => _cjkFont;
+
         /// <summary>
         /// Find a real game font asset (OpenSans-SemiBold). Runtime-created font
         /// assets silently refuse direct component assignment in this IL2CPP
@@ -65,6 +74,71 @@ namespace ScheduleIChinese
         /// font on null-font labels and let its fallback table carry the CJK
         /// glyphs from our runtime font.
         /// </summary>
+        private static bool _gameFontCompleted;
+
+        /// <summary>
+        /// Inject every CJK character our translations use into the game-native
+        /// font asset's atlas. Game-native fonts are the only ones TMP accepts
+        /// for direct component assignment in this runtime; once the atlas
+        /// carries CJK, bridged labels render Chinese from the font itself with
+        /// no fallback submeshes. APIs are touched via reflection since the
+        /// exact interop surface varies.
+        /// </summary>
+        private static bool TryCompleteGameFont(TMP_FontAsset font)
+        {
+            try
+            {
+                var type = font.GetType();
+                var pop = type.GetProperty("atlasPopulationMode");
+                if (pop != null && pop.CanWrite)
+                    pop.SetValue(font, (int)AtlasPopulationMode.Dynamic, null);
+                foreach (var propName in new[] { "IsMultiAtlasEnabled", "multiAtlas" })
+                {
+                    try
+                    {
+                        var p = type.GetProperty(propName);
+                        if (p != null && p.CanWrite) p.SetValue(font, true, null);
+                    }
+                    catch { }
+                }
+
+                var chars = TranslationStore.CollectCjkChars();
+                if (string.IsNullOrEmpty(chars)) return false;
+
+                System.Reflection.MethodInfo add = null;
+                object addArgs = null;
+                foreach (var m in type.GetMethods())
+                {
+                    if (m.Name != "TryAddCharacters") continue;
+                    var ps = m.GetParameters();
+                    if (ps.Length != 1) continue;
+                    Plugin.Log.LogInfo("TryAddCharacters overload: " + ps[0].ParameterType.FullName);
+                    if (ps[0].ParameterType == typeof(string))
+                    {
+                        add = m;
+                        addArgs = chars;
+                        break;
+                    }
+                }
+                if (add == null)
+                {
+                    Plugin.Log.LogWarning("game font: no TryAddCharacters(string) overload");
+                    return false;
+                }
+                var sw = System.Diagnostics.Stopwatch.StartNew();
+                bool ok = add.Invoke(font, new object[] { addArgs }) is bool b && b;
+                sw.Stop();
+                Plugin.Log.LogInfo(
+                    $"game font completion: {chars.Length} chars, ok={ok}, {sw.ElapsedMilliseconds} ms");
+                return ok;
+            }
+            catch (Exception e)
+            {
+                Plugin.Log.LogWarning("game font completion failed: " + e.Message);
+                return false;
+            }
+        }
+
         private static TMP_FontAsset FindGameFont()
         {
             try
