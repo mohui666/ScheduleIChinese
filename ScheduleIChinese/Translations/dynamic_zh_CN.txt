@@ -152,7 +152,7 @@ r:^Thanks. Hey my friend (.+) might be interested in your stuff. You should go t
 r:^That'll be <color\=#54E717>\\$(\\d{1,3}(?:,\\d{3})*)</color> for the (.+)\\. Sound good\\?$='$2' 的话要 <color\=#54E717>$$$1</color>。听起来不错吧？
 r:^Use (.+)$=使用 $1
 r:^v((\\d+)\\.(\\d+)\\.(\\d+)f(\\d+)) Alternate$=v$1 替代|简体中文版
-r:^v((\\d+)\\.(\\d+)\\.(\\d+)f(\\d+))$=v$1 \n简体中文版
+r:^v((\\d+)\\.(\\d+)\\.(\\d+)f(\\d+))$=v$1 简体中文版
 r:^Waiting for (.+)\\.\\.\\.$=等待 $1 中...
 r:^Waiting for players\\.{3} \\((\\d+/\\d+)\\)$=等待玩家 ($1)
 r:^We’ll buy your items for (\\d+)% of their retail value!$=我们将用物品零售价的 $1% 收购你的物品！
