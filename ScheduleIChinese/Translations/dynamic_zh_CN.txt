@@ -1,0 +1,334 @@
+# Schedule I 简体中文动态文本规则
+# 规则必须匹配整段文本；$1/${name} 为捕获组，$$ 为美元符号。
+# 仅供本离线插件使用，不启用在线翻译。
+r:'(.+)' REGION MUST BE UNLOCKED=必须先解锁“$1”区域
+r:(.+)\n(\\$\\d[\\d,]*)=$1\n$2
+r:(.+)\n\\(Dealer\\)=$1\n（毒贩）
+r:(.+) \\(Owned\\)=$1\n（已拥有）
+r:(.+) chance of succes=$1 成功几率
+r:(.+) Seed=$1 种子
+r:(.+)'s Briefcase=$1 的公事包
+r:(.+)'s favourite drug is (.+)=$1最喜欢的毒品是$2
+r:(.+)'s favourite effects:=$1 最喜欢的效果：
+r:(.+)'s Inventory=$1的库存
+r:(.+)'s Stash=$1的藏匿处
+r:(.+)<color\=#A0A0A0FF> \\((.+)\\)</color>=$1<color\=#A0A0A0FF>（$2）</color>
+r:(.+)\\n\\(Dealer\\)=$1（经销商）
+r:(?:Great, I'll meet you|Ok, I'll meet you|Alright cool, I'll meet you|Sweet as homie, I'll meet you|Hell yeah my friend, I'll meet you|Sick as, I'll meet you|Cheers bro, I'll meet you) <b>(.+?)</b> between (\\d{1,2}:\\d{2} [AP]M) and (\\d{1,2}:\\d{2} [AP]M)\\.=好的，$2 至 $3 在<b>$1</b>见。
+r:(?i)^Bagman ([IVX]+)$=中间人 $1
+r:(?i)^Baron ([IVX]+)$=巨头 $1
+r:(?i)^Block Boss ([IVX]+)$=地盘老大 $1
+r:(?i)^Enforcer ([IVX]+)$=执行者 $1
+r:(?i)^Hoodlum ([IVX]+)$=地痞 $1
+r:(?i)^Hustler ([IVX]+)$=骗徒 $1
+r:(?i)^Kingpin ([IVX]+)$=首脑 $1
+r:(?i)^Peddler ([IVX]+)$=小贩 $1
+r:(?i)^Shot Caller ([IVX]+)$=指挥者 $1
+r:(?i)^Street Rat ([IVX]+)$=过街老鼠 $1
+r:(?i)^Underlord ([IVX]+)$=地下权威 $1
+r:(?i)^Unlocks at <color\=#2DB92D>(.+) ([IVX]+)</color>$=在 <color\=#2DB92D>$1 $2</color> 解锁
+r:([A-Za-z\\s]+) will draw his daily wage of <color\=#54E717>(\\$\\d+)<\\/color> from this briefcase\\.=$1 将从这个公文包提取 <color\=#54E717>$2</color> 作为他的每日工资。
+r:(\\d+) \\/ (\\d+) XP=$1 / $2 经验值
+r:(\\d+) Customers\n(\\d+) Suppliers\n(\\d+) Dealer=$1 位顾客\n$2 位供应商\n$3 位交易员
+r:(\\d+) days ago=$1 天前
+r:(\\d+) days, (\\d+) hours, (\\d+) minutes=$1天，$2小时，$3分钟
+r:(\\d+) FPS=$1 FPS
+r:(\\d+) ft=$1 英尺
+r:(\\d+) hours=$1 小时
+r:(\\d+) hrs=$1 小时
+r:(\\d+) Hrs=$1 小时
+r:(\\d+) low-severity drugs confiscated=没收了$1种低风险毒品
+r:(\\d+) potential customers\\n(\\d+) dealer=$1个潜在顾客\n$2个交易员
+r:(\\d+) potential customers\\n(\\d+) dealer\\n(\\d+) supplier=$1个潜在顾客\n$2个交易员\n$3个供应商
+r:(\\d+) seconds since last save=距上次保存 $1 秒
+r:(\\d+)% chance of customer accepting=顾客接受的几率为 $1％
+r:(\\d+)\\/(\\d+) XP=$1/$2 经验值
+r:(\\d+)ft=$1 英尺
+r:(\\d+)h=$1 小时
+r:(\\d+)h\\s(\\d+)m=$1小时$2分钟
+r:(\\d+)hr (\\d+)m?=$1 小时 $2 分钟
+r:(\\d+)x (.+)\n(\\d+)x (.+)=$1 份$2\n$3 份$4
+r:(\\d+)° C=$1°C
+r:(\\d+)°C=$1°C
+r:(\\d+x) (.+)\\, (.+)=$1 份 $2 | $3
+r:(\\d{1,2}:\\d{2} [AP]M) ([A-Za-z]+)=$1 $2
+r:(Great, I'll meet you|Ok, I'll meet you|Alright cool, I'll meet you|Sweet as homie, I'll meet you|Hell yeah my friend, I'll meet you|Sick as, I'll meet you|Cheers bro, I'll meet you) <b>(.+?)</b> between (\\d{1,2}:\\d{2} [AP]M) and (\\d{1,2}:\\d{2} [AP]M).=$1 $3 到 $4 之间在 $2 见你。
+r:- Property\n- Property\n- Property\n- Property\n+ (/d) More=-财产 -财产 -财产 -财产 + $1 更多
+r:<color\=#FFC73D>(\\d+)x</color> (.+)=<color\=#FFC73D>$1 份</color> $2
+r:<color\=(#[0-9A-Fa-f]{6,8})>(.+)</color>=<color\=$1>$2</color>
+r:<color\=(#[0-9A-Fa-f]{8})>•  (.+)</color>=<color\=$1>•  $2</color>
+r:\\+\\$(\\d{1,3}(?:,\\d{3})*)\\sBonus=+$$$1 奖金
+r:^"Hello, (.+)"=你好，$1
+r:^(.+) \\(Unpackaged\\)$=$1 (未包装)
+r:^(.+) will draw her daily wage of <color\=#54E717>(\\$\\d{1,3}(?:,\\d{3})*)</color> from this briefcase.$=$1 将每天从这个公文包领取 <color\=#54E717>$2</color>。
+r:^(.+) will draw her daily wage of <color\=#54E717>\\$(\\d{1,3}(?:,\\d{3})*)</color> from this locker$=$1 将从这个储物柜中领取她 <color\=#54E717>$2</color> 的日薪
+r:^(.+) will draw his daily wage of <color\=#54E717>\\$(\\d{1,3}(?:,\\d{3})*)</color> from this locker$=$1 将从这个储物柜中领取他 <color\=#54E717>$2</color> 的日薪
+r:^(.+)'s favourite drug: (.+)$=$1最喜欢的毒品：$2
+r:^(?<npc>[A-Za-z].+) has requested a delivery of (?<qty>[0-9]+)x (?<item>(?:[A-Z][A-Za-z]*\\s*)+) (?<loc>.+) for (?<price_i>\\$\\d+)\\.$=${npc} 请求将 ${qty} 份 ${item} 送到 ${loc}，价格为 ${price_i}。
+r:^(?i)(.+), Day (\\d+)$=$1，第 $2 天
+r:^(?i)(<color\=#16F01C>\\$\\d{1,3}(?:,\\d{3})?<\\/color>) Laundered$=$1 已洗钱
+r:^(?i)([A-Za-z]+) is out dealing$=$1 出去做交易了
+r:^(?i)([A-Za-z]+) is paying <color\=#50E65A>(.+)<\\/color> for:$=$1 将支付 <color\=#50E65A>$2</color> 购买：
+r:^(?i)(\\d+) mins remaining$=剩余 $1 分钟
+r:^(?i)(\\d+)\\% grown$=已生长 $1%
+r:^(?i)(\\d+)\\.(\\d+)L$=$1.$2升
+r:^(?i)(\\d+)\\/(\\d+) XP$=$1/$2 经验值
+r:^(?i)(\\d+)\\:(\\d+) AM (.+)$=$3 上午 $1:$2
+r:^(?i)(\\d+)\\:(\\d+) AM$=上午 $1:$2
+r:^(?i)(\\d+)\\:(\\d+) PM (.+)$=$3 下午 $1:$2
+r:^(?i)(\\d+)\\:(\\d+) PM$=下午 $1:$2
+r:^(?i)(\\d+)AM$=上午$1点
+r:^(?i)(\\d+)h (\\d+)m until next tier$=距离下一等级还需 $1小时 $2分钟
+r:^(?i)(\\d+)m$=$1米
+r:^(?i)(\\d+)PM$=下午$1点
+r:^(?i)-(\\d+) mins remaining$=-剩余 $1 分钟
+r:^(?i)Agreed\\. I'll be (in|under) the ([\\w\\s]+) for the next (\\d+) hours\\.$=好的。接下来 $3 小时我会在$2。
+r:^(?i)Assign Pots/Drying Racks \\((\\d+)/(\\d+)\\)$=分配盆栽/晾晒架 ($1/$2)
+r:^(?i)Assign Stations \\((\\d+)\\/(\\d+)\\)$=已分配工作站 ($1/$2)
+r:^(?i)Assigned Trash Cans \\((\\d)\\/3\\)$=已分配的垃圾桶 ($1/3)
+r:^(?i)AVAILABLE AT ([A-Z]+ [IVX]+)$=在 $1 可用
+r:^(?i)I NEED (\\d+)x (.+)\\. I GOT (.+)\\. DEAL\\?$=我需要 $1 份 $2。我有 $3。成交吗？
+r:^(?i)Place cash in the briefcase on the (.+?)'s bed$=将现金放在$1床上的公文包里
+r:^(?i)That'll be a (<color\=#54E717>\\$\\d{1,3}(?:,\\d{3})?<\\/color>) signing free, and the employee's daily wage will be (<color\=#54E717>\\$\\d{1,3}(?:,\\d{3})?<\\/color>)\\.$=签约费为 $1，员工每日工资为 $2。
+r:^([0-9]+) mins left$=剩下 $1 分钟
+r:^(\\$.+) fine \\(paid in cash\\)=$1 罚款（现金支付）
+r:^(\\+\\d+) more$=另外 $1 个
+r:^(\\d+) min$=$1 分钟
+r:^(\\d+) robbery$=$1 次抢劫
+r:^(\\d+)% Chance of Success$=<size\=28><color\=#808080>成功率:</color> <b>$1%</b></size>
+r:^(\\d+)\\:(\\d+) AM$=上午 $1:$2
+r:^(\\d+)\\:(\\d+) PM$=下午 $1:$2
+r:^(\\d+)AM-(\\d+)AM$=上午$1点-上午$2点
+r:^(\\d+)AM-(\\d+)PM$=上午$1点-下午$2点
+r:^(\\d+)PM-(\\d+)AM$=下午$1点-上午$2点
+r:^(\\d+)PM-(\\d+)PM$=下午$1点-下午$2点
+r:^(\\d{1,2}) hours$=$1 小时
+r:^<color\=#54E717>(\\+\\$\\d+)</color> Curfew Bonus$=+<color\=#54E717>$1</color> 宵禁奖金
+r:^<color\=#54E717>(\\+\\$\\d+)</color> Quality Bonus$=+<color\=#54E717>$1</color> 品质奖金
+r:^<color\=#54E717>(\\+\\$\\d+)</color> Quick Delivery Bonus$=+<color\=#54E717>$1</color> 快速送达奖金
+r:^\\$([0-9]+)K$=$$$1千
+r:^\\$([0-9]+)M$=$$$1百万
+r:^\\[PawnShop receipt\\]\n\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n\nTotal: \\$(\\d{1,3}(?:,\\d{3})*) — Mick$=[当铺收据]\n\n$1\\: $2 x $$$3 \= $$$4\n\n总计\\: $$$5 — Mick
+r:^\\[PawnShop receipt\\]\n\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n\nTotal: \\$(\\d{1,3}(?:,\\d{3})*) — Mick$=[当铺收据]\n\n$1\\: $2 x $$$3 \= $$$4\n$5\\: $6 x $$$7 \= $$$8\n\n总计\\: $$$9 — Mick
+r:^\\[PawnShop receipt\\]\n\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n\nTotal\\: \\$(\\d{1,3}(?:,\\d{3})*) \\— Mick$=[当铺收据]\n\n$1\\: $2 x $$$3 \= $$$4\n$5\\: $6 x $$$7 \= $$$8\n$9\\: $10 x $$$11 \= $$$12\n\n总计\\: $$$13 — Mick
+r:^\\[PawnShop receipt\\]\n\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n\nTotal\\: \\$(\\d{1,3}(?:,\\d{3})*) \\— Mick$=[当铺收据]\n\n$1\\: $2 x $$$3 \= $$$4\n$5\\: $6 x $$$7 \= $$$8\n$9\\: $10 x $$$11 \= $$$12\n$13\\: $14 x $$$15 \= $$$16\n\n总计\\: $$$17 — Mick
+r:^\\[PawnShop receipt\\]\n\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n\nTotal\\: \\$(\\d{1,3}(?:,\\d{3})*) \\— Mick$=[当铺收据]\n\n$1\\: $2 x $$$3 \= $$$4\n$5\\: $6 x $$$7 \= $$$8\n$9\\: $10 x $$$11 \= $$$12\n$13\\: $14 x $$$15 \= $$$16\n$17\\: $18 x $$$19 \= $$$20\n\n总计\\: $$$21 — Mick
+r:^\\[PawnShop receipt\\]\n\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n\nTotal\\: \\$(\\d{1,3}(?:,\\d{3})*) \\— Mick$=[当铺收据]\n\n$1\\: $2 x $$$3 \= $$$4\n$5\\: $6 x $$$7 \= $$$8\n$9\\: $10 x $$$11 \= $$$12\n$13\\: $14 x $$$15 \= $$$16\n$17\\: $18 x $$$19 \= $$$20\n$21\\: $22 x $$$23 \= $$$24\n\n总计\\: $$$25 — Mick
+r:^\\[PawnShop receipt\\]\n\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n\nTotal\\: \\$(\\d{1,3}(?:,\\d{3})*) \\— Mick$=[当铺收据]\n\n$1\\: $2 x $$$3 \= $$$4\n$5\\: $6 x $$$7 \= $$$8\n$9\\: $10 x $$$11 \= $$$12\n$13\\: $14 x $$$15 \= $$$16\n$17\\: $18 x $$$19 \= $$$20\n$21\\: $22 x $$$23 \= $$$24\n$25\\: $26 x $$$27 \= $$$28\n\n总计\\: $$$29 — Mick
+r:^\\[PawnShop receipt\\]\n\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n\nTotal\\: \\$(\\d{1,3}(?:,\\d{3})*) \\— Mick$=[当铺收据]\n\n$1\\: $2 x $$$3 \= $$$4\n$5\\: $6 x $$$7 \= $$$8\n$9\\: $10 x $$$11 \= $$$12\n$13\\: $14 x $$$15 \= $$$16\n$17\\: $18 x $$$19 \= $$$20\n$21\\: $22 x $$$23 \= $$$24\n$25\\: $26 x $$$27 \= $$$28\n$29\\: $30 x $$$31 \= $$$32\n\n总计\\: $$$33 — Mick
+r:^\\[PawnShop receipt\\]\n\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n\nTotal\\: \\$(\\d{1,3}(?:,\\d{3})*) \\— Mick$=[当铺收据]\n\n$1\\: $2 x $$$3 \= $$$4\n$5\\: $6 x $$$7 \= $$$8\n$9\\: $10 x $$$11 \= $$$12\n$13\\: $14 x $$$15 \= $$$16\n$17\\: $18 x $$$19 \= $$$20\n$21\\: $22 x $$$23 \= $$$24\n$25\\: $26 x $$$27 \= $$$28\n$29\\: $30 x $$$31 \= $$$32\n$33\\: $34 x $$$35 \= $$$36\n\n总计\\: $$$37 — Mick
+r:^\\[PawnShop receipt\\]\n\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n\nTotal\\: \\$(\\d{1,3}(?:,\\d{3})*) \\— Mick$=[当铺收据]\n\n$1\\: $2 x $$$3 \= $$$4\n$5\\: $6 x $$$7 \= $$$8\n$9\\: $10 x $$$11 \= $$$12\n$13\\: $14 x $$$15 \= $$$16\n$17\\: $18 x $$$19 \= $$$20\n$21\\: $22 x $$$23 \= $$$24\n$25\\: $26 x $$$27 \= $$$28\n$29\\: $30 x $$$31 \= $$$32\n$33\\: $34 x $$$35 \= $$$36\n$37\\: $38 x $$$39 \= $$$40\n\n总计\\: $$$41 — Mick
+r:^Already assigned to (.+)$=已分配给 $1
+r:^Alright, I'll be a dealer for you but there is a <color\=#54E717>(.+)<\\/color> signing fee, and I'll take a <color\=#54E717>(.+)<\\/color> cut of each sale\\. We got a deal\\?$=行，我帮你卖货，不过你得先付<color\=#54E717>$1</color>的签约费，而且每笔交易我还要抽<color\=#54E717>$2</color>。成交吗？
+r:^Best I can do is (\\$\\d{1,3}(?:,\\d{3})*)=我最多给 $1 。
+r:^Cheers. My friend (.+) might like your stuff. Go check them out$=谢了。我朋友 $1 可能会喜欢你的东西。去看看他们吧。
+r:^Day (\\d+)=第 $1 天
+r:^Deal for (.+)<color\=#c0c0c0ff> \\(Begins in (\\d+) hrs\\)</color>$=与 $1 的交易<color\=#c0c0c0ff>（$2 小时后开始）</color>
+r:^Deal for (.+)<color\=#c0c0c0ff> \\(Begins in (\\d+) min\\)</color>$=与 $1 的交易<color\=#c0c0c0ff>（$2 分钟后开始）</color>
+r:^Deal for (.+)<color\=#FF5555FF> \\(Expires in (\\d+) hrs\\)</color>$=与 $1 的交易<color\=#FF5555FF>（$2 小时后到期）</color>
+r:^Deal for (.+)<color\=#FF5555FF> \\(Expires in (\\d+) min\\)</color>$=与 $1 的交易<color\=#FF5555FF>（$2 分钟后到期）</color>
+r:^Deal for (.+)<color\=green> \\(Expires in (\\d+) hrs\\)</color>$=与 $1 的交易<color\=green>（$2 小时后到期）</color>
+r:^Deal for (.+)<color\=green> \\(Expires in (\\d+) min\\)</color>$=与 $1 的交易<color\=green>（$2 分钟后到期）</color>
+r:^Drag (\\d+x) product into input slots$=将 $1 份产品拖曳到输入槽
+r:^Forfeit and collect <color\=#54E717>\\$(\\d{1,3}(?:,\\d{3})*)</color>$=没收并拿走 <color\=#54E717>$$$1</color>
+r:^Host version: (.+)=主机版本: $1
+r:^How 'bout (\\$\\d{1,3}(?:,\\d{3})*)?=那 $1 怎么样？
+r:^How does (\\$\\d{1,3}(?:,\\d{3})*) sound?=$1 听起来怎么样？
+r:^How's (\\$\\d{1,3}(?:,\\d{3})*)?= $1 如何？
+r:^I can do (\\$\\d{1,3}(?:,\\d{3})*). We got a deal?=我可以出 $1 。如何？
+r:^I can give you (\\$\\d{1,3}(?:,\\d{3})*)=我可以给你 $1 。
+r:^I need to collect the earnings <color\=#54E717>\\((\\$\\d{1,3}(?:,\\d{3})*)\\)</color>$=我需要收取收益 <color\=#54E717>($1)</color>
+r:^I'm still currently waiting on a payment of (<color\=#46CB4F>\\$\\d+(?:,\\d+)?<\\/color>)\\. Please deposit it into my stash box when you've got a chance\\.=我还在等你付<color\=#46CB4F>$1</color>呢。有空的时候请把它存入我的藏匿箱。
+r:^Initial Offer \\$(\\d+)$=<size\=28>初始出价: <color\=#2FC443>$$$1</color></size>
+r:^Let's call it (\\$\\d{1,3}(?:,\\d{3})*). Deal?=就定在 $1 吧。成交吗？
+r:^Much appreciated. Maybe go talk to (.+). I think they'd like your product$=非常感谢。也许可以去跟 $1 谈谈。我觉得他们会喜欢你的产品。
+r:^Page (\\d+)/(\\d+)$=第 $1/$2 页
+r:^Pots/Drying Racks \\((\\d+)/(\\d+)\\)$=盆栽/晾晒架 ($1/$2)
+r:^Select items to order from (.+)=从$1那选择要订购的东西
+r:^So you\\'d like to reassign me to (.+)\\? I\\'ll go there as soon as I finish my current task.$=那么你想把我重新分配到 $1？我一完成当前任务就过去。
+r:^Speed Multiplier: (\\d+(\\.\\d+)?)x$=速度倍率：$1x
+r:^Spend Limit: \\$(\\d+)$=<size\=28>消费上限: <color\=#2FC443>$$$1</color></size>
+r:^Thanks. Hey my friend (.+) might be interested in your stuff. You should go talk to them.$=谢了。嘿，我朋友 $1 可能对你的东西感兴趣。你应该去找他们谈谈。
+r:^That'll be <color\=#54E717>\\$(\\d{1,3}(?:,\\d{3})*)</color> for the (.+)\\. Sound good\\?$='$2' 的话要 <color\=#54E717>$$$1</color>。听起来不错吧？
+r:^Use (.+)$=使用 $1
+r:^v((\\d+)\\.(\\d+)\\.(\\d+)f(\\d+)) Alternate$=v$1 替代|简体中文版
+r:^v((\\d+)\\.(\\d+)\\.(\\d+)f(\\d+))$=v$1 \n简体中文版
+r:^Waiting for (.+)\\.\\.\\.$=等待 $1 中...
+r:^Waiting for players\\.{3} \\((\\d+/\\d+)\\)$=等待玩家 ($1)
+r:^We’ll buy your items for (\\d+)% of their retail value!$=我们将用物品零售价的 $1% 收购你的物品！
+r:^Working on it\\. Should be ready in around (\\d+) hour(s?) (\\d+) min$=正在处理。大约 $1 小时 $3 分钟后准备好。
+r:^Working on it\\. Should be ready in around (\\d+) hour(s?)$=正在处理。大约 $1 小时后准备好。
+r:^Working on it\\. Should be ready in around (\\d+) min(s?)$=正在处理。应该在大约 $1 分钟内准备就绪。
+r:^You owe ([A-Z][a-z]+ [A-Z][a-z]+) <color\=#54E717>(\\$\\d{1,3}(?:,\\d{3})*)</color>\\. Insert cash and exit stash to pay off your debt$=你欠 $1 <color\=#54E717>($2)</color>。放入现金并退出藏匿处以偿还债务。
+r:^Your drop is ready\\. Grab it (.+)=你的物品已经准备好了。去$1拿
+r:^Your version: (.+)=你的版本: $1
+r:Agreed\\. I'll be (.+) for the next (\\d+) hours\\.=成交。接下来 $2 小时我会在$1。
+r:Assign Packaging Stations \\((\\d+)/(\\d+)\\)=分配打包台 ($1/$2)
+r:Assign to botanist (.+)=分配给种植员 $1
+r:Assign Trash Cans \\((\\d+)/(\\d+)\\)=分配垃圾桶 ($1/$2)
+r:Assigned (.+)=已分配 $1
+r:Assigned Customers \\((\\d+)\\/(\\d+)\\)=已分配顾客 ($1/$2)
+r:Assigned Stations \\((\\d+)/(\\d+)\\)=已分配的工作站 ($1/$2)
+r:Assigned to (.+)=分配给 $1
+r:Autosave_(.+)=自动保存_$1
+r:Ay bro you got ([0-9]+)x (.+?)\\? I'll pay <color\=#46CB4F>(.+?)<\\/color> for it=嘿兄弟，你有 $1 份 $2 吗？我出 <color\=#46CB4F>$$$3</color>。
+r:Ayo dawg, if you got (.+) I'll pay <color\=#46CB4F>(.+)<\\/color> for it. Deal?=嘿哥们，如果你有 $1，我愿意付 <color\=#46CB4F>$2</color>，成交？
+r:Bungalow \\[(\\d+)\\]=平房 [$1]
+r:Click and hold over buds to harvest \\((\\d+)/(\\d+)\\)=点击并按住花蕾进行收获 ($1/$2)
+r:Click and hold over leaves to harvest \\((\\d+)/(\\d+)\\)=点击并按住叶子进行收获 ($1/$2)
+r:Click and hold over mushrooms to harvest (.+)=点击并按住蘑菇进行收获 $1
+r:Click and hold tap to fill (.+)=单击并按住点击以填充 $1
+r:Click buds to harvest \\((\\d+)\\/(\\d+)\\)=点击花蕾以收获 ($1/$2)
+r:Click leaves to harvest \\((\\d+)/(\\d+)\\)=点击叶子进行收获 ($1/$2)
+r:Click soil chunks to bury seed \\((\\d+)\\/(\\d+)\\)=点击土块以埋下种子 ($1/$2)
+r:Combine ingredients in (beaker|bowl) \\((\\d{1,2})/(\\d{1,2})\\)=在$1中混合成分 ($2/$3)
+r:Complete 3 deals (.+)=完成3笔交易 $1
+r:Confirm \\(<color\=#4CBFFF>(.+)</color>\\)=确认（<color\=#4CBFFF>$1</color>）
+r:Copy\\. I'll message you when it's ready in about (\\d+) hour(s?) (\\d+) min$=收到。大约 $1 小时 $3 分钟后准备好时我会通知你。
+r:Copy\\. I'll message you when it's ready in about (\\d+) hour(s?) (\\d+) min\\.$=收到。大约 $1 小时 $3 分钟后准备好时我会通知你。
+r:Copy\\. I'll message you when it's ready in about (\\d+) hour(s?)\\.$=收到。大约 $1 小时后准备好时我会通知你。
+r:Copy\\. I'll message you when it's ready in about (\\d+) hours? (\\d+) min\\.=收到。大约 $1 小时 $2 分钟后备好，到时我会通知你。
+r:Copy\\. I'll message you when it's ready in about (\\d+) min(s?)\\.$=收到。大约 $1 分钟后准备好时我会通知你。
+r:Copy\\. I'll message you when it's ready in about (\\d+) mins?\\.=收到。大约 $1 分钟后备好，到时我会通知你。
+r:Cover soil with Fertilizer \\((\\d+)%\\)=用肥料覆盖土壤 ($1%)
+r:Cover soil with PGR \\((\\d+)%\\)=用PGR覆盖土壤 ($1%)
+r:Cover soil with Speed Grow (.+)=使用速生剂覆盖土壤 $1
+r:CURFEW ACTIVE\n UNTIL (\\d+)AM=宵禁生效中\n 直至上午 $1 点
+r:CURFEW ACTIVE\n(\\d+)PM - (\\d+)AM=宵禁进行中\n晚 $1 点至早 $2 点
+r:CURFEW SOON\n(\\d+) MINS=宵禁即将开始\n $1 分钟后
+r:CURFEW TONIGHT\n(\\d+)PM - (\\d+)AM=今晚宵禁\n晚 $1 点至早 $2 点
+r:Deal completed for (.+)=$1 的交易已完成
+r:Deal for (.+)=与 $1 的交易
+r:Deal for (.+)<color\=#c0c0c0ff> \\(Begins in (\\d+) hrs\\)</color>=与$1的交易<color\=#c0c0c0ff>（$2 小时后开始）</color>
+r:Deal for Benzies Cartel\\n<color\=#F7B119>\\((\\d+) hour remaining\\)=与本吉斯卡特尔的交易\\n<color\=#F7B119>（剩余 $1 小时）
+r:Deal for Benzies Cartel\\n<color\=#F7B119>\\((\\d+) hours remaining\\)=与本吉斯卡特尔的交易\\n<color\=#F7B119>（剩余 $1 小时）
+r:Deal for Benzies Cartel\\n<color\=#FF5555>\\(Overdue, (\\d+) hours remaining\\)</color>=与本吉斯卡特尔的交易\\n<color\=#FF5555>（已逾期，剩余 $1 小时）</color>
+r:Deal for Benzies Cartel\\n<color\=green>\\((\\d+) day, (\\d+) hours remaining\\)=与本吉斯卡特尔的交易\\n<color\=green>（剩余 $1 天，$2 小时）
+r:Deal for Benzies Cartel\\n<color\=green>\\((\\d+) days, (\\d+) hours remaining\\)=与本吉斯卡特尔的交易\\n<color\=green>（剩余 $1 天，$2 小时）
+r:Deal for Benzies Family\\n<color\=#F7B119>\\((\\d+) hour remaining\\)=与本吉斯家族的交易\\n<color\=#F7B119>（剩余 $1 小时）
+r:Deal for Benzies Family\\n<color\=#F7B119>\\((\\d+) hours remaining\\)=与本吉斯家族的交易\\n<color\=#F7B119>（剩余 $1 小时）
+r:Deal for Benzies Family\\n<color\=green>\\((\\d+) day, (\\d+) hours remaining\\)=与本吉斯家族的交易\\n<color\=green>（剩余 $1 天，$2 小时）
+r:Deal for Benzies Family\\n<color\=green>\\((\\d+) days, (\\d+) hours remaining\\)=与本吉斯家族的交易\\n<color\=green>（剩余 $1 天，$2 小时）
+r:Deliver (\\d+x) (.+?) to Hyland Manor=将 $1 份 $2 送到海兰庄园
+r:DEPOSIT (.+)=存款 $1
+r:Earn (.+) \\((.+)\\/(.+)\\)=赚取 $1 ($2/$3)
+r:EMPLOYEE LIMIT REACHED \\((\\d+)/(\\d+)\\)=员工数量已达上限 ($1/$2)
+r:Fair price: (.+)=公平价格：$1
+r:Forfeit and collect (.+)=放弃并收取 $1
+r:Good!! I'll see u <b>(.+)</b> between (\\d{1,2}:\\d{2} [AP]M) and (\\d{1,2}:\\d{2} [AP]M)\\.=好！！$2 至 $3 在<b>$1</b>见。
+r:Good!! I'll see u <b>(.+)<\\/b> between (\\d{1,2}:\\d{2} [AP]M) and (\\d{1,2}:\\d{2} [AP]M).=好的！！我会在 $2 到 $3 之间在 <b>$1</b> 见你。
+r:Got it\\. I'll let you know when it's ready\\. Should be about (\\d+) hour(s?) (\\d+) min$=知道了。大约 $1 小时 $3 分钟后准备好时我会通知你。
+r:Got it\\. I'll let you know when it's ready\\. Should be about (\\d+) hour(s?) (\\d+) min\\.$=知道了。大约 $1 小时 $3 分钟后准备好时我会通知你。
+r:Got it\\. I'll let you know when it's ready\\. Should be about (\\d+) hour(s?)$=知道了。大约 $1 小时后准备好时我会通知你。
+r:Got it\\. I'll let you know when it's ready\\. Should be about (\\d+) hour(s?)\\.$=知道了。大约 $1 小时后准备好时我会通知你。
+r:Got it\\. I'll let you know when it's ready\\. Should be about (\\d+) min$=知道了。准备好后我会通知你。大约需要 $1 分钟。
+r:Got it\\. I'll let you know when it's ready\\. Should be about (\\d+) mins$=知道了。准备好后我会通知你。大约需要 $1 分钟。
+r:Hello, I'm after (.+). I can pay <color\=#46CB4F>(.+)</color> for it.=你好，我需要 $1，出价 <color\=#46CB4F>$2</color>。
+r:Hello, I'm after (.+)\\. I can pay <color\=#46CB4F>(.+)</color> for it\\.=你好，我想要$1，可以出<color\=#46CB4F>$2</color>。
+r:Hey dog, I need (\\d+)x (.+). I'll pay <color\=#46CB4F>(.+)<\\/color>. Deal?=嘿哥们，我需要 $1 份 $2。我出 <color\=#46CB4F>$3</color>。成交吗？
+r:Hey dog, I need (\\d+)x (.+)\\. I'll pay <color\=#46CB4F>(.+)</color>\\. Deal\\?=嘿，兄弟，我要 $1 份$2。我出<color\=#46CB4F>$3</color>。成交吗？
+r:Hey, can I get (\\d+)x (.+)? I'll pay <color\=#46CB4F>(.+)<\\/color>=嘿，能给我 $1 份 $2 吗？我出 <color\=#46CB4F>$3</color>。
+r:Hey, can I get (\\d+)x (.+)\\? I'll pay <color\=#46CB4F>(.+)</color>=嘿，能给我 $1 份$2吗？我出<color\=#46CB4F>$3</color>。
+r:Hey, have you got (\\d+)x (.+?)? I'll pay <color\=#46CB4F>(.+?)<\\/color> for it=嘿，你有 $1 份 $2 吗？我出 <color\=#46CB4F>$3</color>。
+r:Hey, have you got (\\d+)x (.+?)\\? I'll pay <color\=#46CB4F>(.+?)</color> for it=嘿，你有 $1 份$2吗？我出<color\=#46CB4F>$3</color>。
+r:Hey, I need (\\d+)x (.+). I'll pay <color\=#46CB4F>(.+)</color>. Deal?=嘿，我需要 $1 份 $2，出价 <color\=#46CB4F>$3</color>，成交？
+r:Hey, I need (\\d+)x (.+)\\. I'll pay <color\=#46CB4F>(.+)</color>\\. Deal\\?=嘿，我要 $1 份$2，出<color\=#46CB4F>$3</color>。成交吗？
+r:Hey, if you got (\\d+)x (.+) I'll pay <color\=#46CB4F>(.+)</color> for it\\. Deal\\?=嘿，如果你有 $1 份$2，我出<color\=#46CB4F>$3</color>。成交吗？
+r:Hey, if you got (\\d+)x (.+) I'll pay <color\=#46CB4F>(.+)<\\/color> for it\\. Deal\\?=嘿，如果你有 $1 份 $2，我出 <color\=#46CB4F>$3</color>。成交吗？
+r:Hey, that drop is ready (.+)=嘿，秘密交货已经备好，地点在$1。
+r:Hmm... Oscar seen one lying around somewhere in <color\=#76C9FF>(.+)</color> I think...=嗯...奥斯卡看到一个躺在某个地方 <color\=#76C9FF>$1</color> 我认为...
+r:How about (\\d+)x (.+) for (.+)?=$1 份 $2 卖 $3，怎么样？
+r:How about (\\d+)x (.+) for (.+)\\?=$1 份$2卖 $3，怎么样？
+r:I need a dead drop:\n(\\d+)x (.+)=我需要秘密交货：\n$1 份$2
+r:I'm after (\\d+)x (.+). I can pay <color\=#46CB4F>(.+)</color> for it.=我需要 $1 份 $2，我出 <color\=#46CB4F>$3</color>。
+r:I'm after (\\d+)x (.+)\\. I can pay <color\=#46CB4F>(.+)</color> for it\\.=我想要 $1 份$2，可以出<color\=#46CB4F>$3</color>。
+r:I'm still currently waiting on a payment of (<color\=#46CB4F>.+?</color>)\\. Please deposit it into my stash box when you've got a chance\\.=我还在等你支付$1。有空时请把钱放进我的藏匿箱。
+r:I've received (.+) cash from you. Your debt is now (.+)=我收到了你支付的 $1 现金。你现在的欠款是 $2。
+r:I've received (.+) cash from you. Your debt is now paid off=我收到了你支付的 $1 现金。你的债务已还清。
+r:I've received (.+) cash from you\\. Your debt is now (.+)=我收到了你支付的 $1 现金。你还欠 $2。
+r:I've received (.+) cash from you\\. Your debt is now paid off\\.=我收到了你支付的 $1 现金。你的欠款已结清。
+r:In use by (.+)=正在被 $1 使用
+r:Insert <color\=#FFC73D>(\\d+x)</color> coca leaves and <color\=#FFC73D>(\\d+x)</color> gasoline=放入 <color\=#FFC73D>$1 份</color> 古柯叶和 <color\=#FFC73D>$2 份</color> 汽油
+r:It is (\\d+)AM =现在是上午 $1 点
+r:It is (\\d+)PM =现在是下午 $1 点
+r:Just reminding you that you owe me <color\=#46CB4F>(.+?)<\\/color>\\. Please deposit the amount into my stash box when you're ready\\.=提醒一下，你还欠我 <color\=#46CB4F>$1</color>。准备好后请把钱存入我的藏匿箱。
+r:Last save was (\\d+) minute ago=最后存档时间为 $1 分钟前
+r:Last save was (\\d+) minutes ago=最后存档时间为 $1 分钟前
+r:Last save was (\\d+) seconds ago=最后存档时间为 $1 秒前
+r:Last save was (\\d+) seconds? ago=上次保存是在 $1 秒前
+r:Learn how to manage (.+).=学习如何管理 $1。
+r:Lobby \\((\\d+)\\/(\\d+)\\)=大厅 ($1/$2)
+r:Manage (\\d+x) Brick Press=管理 $1 压块机
+r:Manage (\\d+x) Cauldron=管理 $1 反应锅
+r:Manage (\\d+x) Chemistry Station=管理 $1 化学站
+r:Manage (\\d+x) Drying Rack=管理 $1 晾晒架
+r:Manage (\\d+x) Lab Oven=管理 $1 实验室烘箱
+r:Manage (\\d+x) Mixing Station=管理 $1 混合台
+r:Manage (\\d+x) Packaging Station=管理 $1 打包台
+r:Manage (\\d+x) Pot=管理 $1 盆栽
+r:Market Value: (.+)=市场价值：$1
+r:MAX (.+)$=最大 $1
+r:Mix the chunks into the soil (.+)=将大块物混合到土壤中 $1
+r:Monitor (\\d+)=屏幕 $1
+r:Need me (\\d+)x (.+?)! I'll pay <color\=#46CB4F>(.+)<\\/color> yeah\\?\\?=我需要 $1 份 $2！我出<color\=#46CB4F>$3</color>，行吗？？
+r:Oh! and I remember hearing <color\=#76C9FF>(.+)</color> has one! Sorry, Oscar isn't very good with names. Hope this helps.=哦！我想起来听人说，<color\=#76C9FF>$1</color> 有一个！抱歉，奥斯卡不太擅长记名字。希望这有帮助。
+r:One '(.+)' marijuana seed\\.=一颗「$1」大麻种子。
+r:Order (.+) Seed=订购 $1 种子
+r:Owned Vehicle\n\\((.+) Bruiser\\)=已拥有载具\n（$1 布鲁泽）
+r:Owned Vehicle\n\\((.+) Cheetah\\)=已拥有载具\n（$1 猎豹）
+r:Owned Vehicle\n\\((.+) Dinkler\\)=已拥有载具\n（$1 丁克勒）
+r:Owned Vehicle\n\\((.+) Hounddog\\)=拥有载具\n($1 猎犬)
+r:Owned Vehicle\n\\((.+) Shitbox\\)=拥有载具\n($1 破车)
+r:Owned Vehicle\n\\((.+) Veeper\\)=拥有载具\n($1 蝰蛇)
+r:Owned Vehicle\n\\((.+)\\)=拥有载具\n($1)
+r:Place a product here for (.+) to try=将产品放在这里供 $1 试用
+r:Players \\((\\d+)\\/(\\d+)\\)=玩家 ($1/$2)
+r:Police curfew in effect until (\\d+)AM=警方宵禁生效至上午 $1 点
+r:Poor (.)=劣质 $1
+r:Potential Customer\n(.+)=潜在顾客\n$1
+r:Potential Dealer\n(.+)=潜在交易员\n$1
+r:Pour into pot (.+)=倒入锅中 $1
+r:Pour product into mould \\((\\d+)/(\\d+)\\)$=将产品倒入模具 ($1/$2)
+r:Pour soil into pot (.+)=将土壤倒入盆中 $1
+r:Push the plunger (.+)=推动柱塞 $1
+r:REACH 'FRIENDLY' WITH ONE OF ([A-Z']+)'S CONNECTIONS=与 $1 的一位联系人达到“友好”关系
+r:Reach the rank of <color\=#88CBFF>(.+) ([IVX]+)<\\/color> to access this area.=达到 <color\=#88CBFF>$1 $2</color> 级别才能进入此区域。
+r:Reverting in (.+) seconds=将在 $1 秒后恢复
+r:Save (.+) for a new property=攒够 $1 买新房产
+r:So you'd like to purchase ([a-zA-Z ]+)\\? Payments are made from your online balance\\.=你想购买 $1 吗？将从你的在线余额中扣款。
+r:So you'd like to purchase the ([a-zA-Z ]+)\\?=那么你想购买 $1 吗？
+r:Start burner \\((\\d+)%\\)=启动燃烧器 ($1%)
+r:Stir mixture \\((\\d+)%\\)=搅拌混合物 ($1%)
+r:Suggested: (.+)=建议：$1
+r:Supplier Meeting \\((.+)\\)=供应商会面 ($1)
+r:Talk to (.+)=与 $1 交谈
+r:Thank you\\. You should go talk to ([A-Za-z' ]+) - they might be able to help you move your stuff\\.=谢谢。你应该去和 $1 谈谈 - 他们也许能帮你处理你的货。
+r:That'll be <color\=#54E717>(\\$\\d+)<\\/color> for the (.+)\\. Sound good?=这个 $2 要 <color\=#54E717>$1</color>。怎么样？
+r:That'll be <color\=#54E717>(\\$\\d{1,3}(?:,\\d{3})*)</color> for the (.+)\\. We got a deal, partner\\?=$2 要 <color\=#54E717>$1</color>。成交吗，伙计？
+r:The drop is ready. You can find it (.+)$=交接点已准备好。你可以在 $1 找到它。
+r:This delivery is waiting for the loading dock (\\d+) to be empty.=这批货正在等待 $1 号装货码头清空。
+r:This is what they got:\n(.+)=这是他们抢的东西:\n$1
+r:Total: <color\=#5AB95A>(.+)=总计： <color\=#5AB95A>$1
+r:Total: <color\=#5AB95AFF>(.+)<\\/color>=总计： <color\=#5AB95AFF>$1</color>
+r:U got (\\d+)x (.+?)\\?\\?\\? I'll pay <color\=#46CB4F>(.+?)<\\/color> for it\\. DEAL\\?=你有 $1 份 $2 吗？？？我出 <color\=#46CB4F>$3</color>。成交？！
+r:Unlock (\\d+) customers (.+)=解锁 $1 位顾客 $2
+r:UNLOCK ONE OF (.+?)'S CONNECTIONS FIRST=必须先解锁$1的其中一位人脉
+r:Unlocks at (.+) ([IVX]+)=在 <color\=#2DB92D>$1 $2</color> 解锁
+r:View (.+)'s stash=查看 $1 的藏匿处
+r:Wait (\\d+)s=等待 $1 秒
+r:Wait for the dead drop \\((\\d+) mins\\)=等待死信投递（$1分钟）
+r:Waking up at (\\d+):(\\d+) AM=将在上午 $1:$2 醒来
+r:We need (\\d+x) (.+?)\\. You've got (\\d+) days to get it to us\\. Payment is \\$(\\d{1,3}(?:,\\d{3})?).=我们需要 $1 份 $2。你必须在 $3 天内交货。报酬是 $4。
+r:Whats up bro, I'm after (\\d+)x (.+). I can pay <color\=#46CB4F>(.+)</color> for it.=怎么了兄弟，我想要 $1 份 $2。我可以出 <color\=#46CB4F>$3</color>。
+r:When you're ready please deposit (<color\=#46CB4F>.+?</color>) into my stash box - your debt is still unpaid\\.=准备好后请把$1放进我的藏匿箱——你的欠款还没付清。
+r:WITHDRAW (.+)=取款 $1
+r:Yo homie, can I get (.+)? I'll pay <color\=#46CB4F>(.+)<\\/color>=哟哥们，能给我来点 $1 吗？我出<color\=#46CB4F>$2</color>。
+r:You can now hire <color\=#88CBFF>(.+?)<\\/color> as a dealer\\.=你现在可以雇佣 <color\=#88CBFF>$1</color> 作为交易员了。
+r:You can pay off your debt by placing cash in my stash. It's (.+)=你可以把现金放进我的藏匿处来还债。它在 $1。
+r:You got (\\d+)x (.+?)\\? I'll pay <color\=#46CB4F>(.+)</color> for it=你有 $1 份$2吗？我出<color\=#46CB4F>$3</color>。
+r:You got (\\d+)x (.+?)\\? I'll pay <color\=#46CB4F>(.+)<\\/color> for it=你有 $1 份 $2 吗？我出 <color\=#46CB4F>$3</color> 购买。
+r:You have deposited (.+)=你已存入 $1 到你的账户
+r:You have withdrawn (.+)=你已取出 $1
+r:Your drop is ready\\. Grab it (.+)=你的货已经备好，去$1取货。
+r:• Learn how to manage (.+).=• 学习如何管理 $1。
+r:• Unlock (.+) customers (.+)=• 解锁 $1 位顾客 $2

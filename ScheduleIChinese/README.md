@@ -1,0 +1,40 @@
+# ScheduleIChinese 1.3.11
+
+适配 Schedule I v0.4.5f2 / Steam Build 22829923 的简体中文离线汉化。
+
+本版不修改游戏原始 Unity 资源、`global-metadata.dat` 或存档。固定 UI、
+动态对话、地点和效果名都由 BepInEx IL2CPP 插件在显示层使用本地词表
+翻译；不调用在线翻译。人物姓名、基础品种名和玩家自定义名称按设计保留。
+
+- 拦截 `TMP_Text.text`、字符串 `SetText` 重载和旧版 uGUI Text。
+- 场景切换、动态面板和关系面板事件会触发有界补扫。
+- `NotoSansSC.otf` 作为动态多图集 TMP fallback。
+- 翻译文件位于 `BepInEx/plugins/ScheduleIChinese/Translations`。
+- 效果/形容词词表支持项目符号、颜色标签和 TMP 富文本组合。
+- 在线自动翻译默认关闭，离线显示层翻译默认开启。
+- 不对每帧或每两秒执行全局扫描，降低载入和 UI 卡顿。
+
+## 1.3.11 变更
+
+- 回退了 1500 余条疑似变量名的翻译（控制台命令如 `addxp`、按键名如
+  `Backspace`、枚举值如 `Standard`/`Premium`/`Heavenly`、颜色值等单标记
+  词条）。这些字符串会被游戏代码读回，翻译后会导致金钱/联系人/短信等
+  逻辑异常以及品质等级文本粘连。
+- `TranslationStore.LoadFile` 新增加载时防护：除效果词表外，所有形如
+  `^[A-Za-z0-9_]+$` 的裸单词词条一律拒绝加载并记录日志，防止此类
+  条目再次被引入。
+
+构建：
+
+```powershell
+# 源码放在游戏目录内的 ModSource 下时可直接构建；
+# 否则需要指定游戏根目录（仓库不包含任何游戏文件）：
+dotnet build .\ScheduleIChinese.csproj -c Release -p:ScheduleIGameDir="C:\Program Files (x86)\Steam\steamapps\common\Schedule I"
+```
+
+验证：
+
+```powershell
+python C:\Users\mohui666\modtools\validate_translations.py .\Translations\zh_CN.txt
+python .\tools\check_dynamic_rules.py
+```

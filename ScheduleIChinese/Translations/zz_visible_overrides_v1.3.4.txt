@@ -1,0 +1,226 @@
+# v1.3.4 可见文本复查补丁。人物、品种及用户命名保持英文；动态占位符和富文本标签必须原样保留。
+
+# 主界面、操作、管理和角色定制
+Dealer Management=经销商管理
+Mrs.=Mrs.
+Granddaddy Purple=Granddaddy Purple
+Green Crack=Green Crack
+OG Kush=OG Kush
+Sour Diesel=Sour Diesel
+enter vehicle=进入载具
+Keyboard and Mouse=键盘和鼠标
+Toggle Load Into Vehicle=切换装入载具
+Accelerate/Decelerate=加速/减速
+Shitbox Trunk=破车后备箱
+Officer <Name>=<Name> 警官
+Upper Body Tattoos=上身纹身
+Female Underwear=女式内衣
+Male Underwear=男式内衣
+Frown Pout=皱眉撅嘴
+Slight Pout=微微撅嘴
+Slight Frown=微微皱眉
+Smug Pout=得意撅嘴
+Button-up Shirt (Rolled)=卷袖纽扣衬衫
+Liquid Biker Crank=液态机车冰毒
+Open Phone=打开手机
+Cannot be multi-edited=无法同时编辑多个对象
+Retrieve key=取得钥匙
+Move items=搬运物品
+Unbox new product=拆开新产品
+Pick up phone=拿起电话
+Modify Amount=修改数量
+Total Cost: $99,999=总价：$99,999
++ Good=+ 良好
+New Message=新消息
+Mushroom \nSpawn Station=蘑菇\n菌种培育台
+Amount:=数量：
+Purchase ($500)=购买（$500）
+Nelson's contact=Nelson 的联系人
+Potato Run=土豆快跑
+This customer has High standards=这位顾客的要求很高
+Why not=为什么不呢
+That sounds good=听起来不错
+Uh... no=呃……不了
+Thanks, partner.=谢了，伙计。
+Need something?=要点什么？
+No thanks...=不了，谢谢……
+Oh aight...=哦，行吧……
+This is a shop.=这里是一家商店。
+Cartel Intro Note=卡特尔来信
+
+# 工作台与员工管理提示
+^Any required materials will be automatically retrieved from here=^所需材料会自动从这里取用
+^ Supplies will be  retrieved from here=^补给品会从这里取用
+^Minimum amount of buds/leaves for the assigned botanist to begin the drying process=^分配的种植员开始晾晒所需的花苞/叶片最低数量
+Select destination for packaging station output=选择打包台产物的存放位置
+Select destination for pot output=选择花盆产物的存放位置
+Select destination for spawn station output=选择菌种培育台产物的存放位置
+Select destination for lab oven output=选择实验室烘箱产物的存放位置
+Select destination for drying rack output=选择晾晒架产物的存放位置
+Select destination for chemistry station output=选择化学台产物的存放位置
+Select botanist's supplies source=选择种植员的补给来源
+<Employee> will draw their daily wage from this briefcase.=<Employee> 每天会从这个公文包中领取工资。
+Filters tell employees what items\\n can or cannot be placed in this slot.=筛选条件会告诉员工哪些物品\\n可以或不可以放入此槽位。
+Botanists can be assigned:\n- Pots\n- Drying racks\n- Mushroom beds\n- Mushroom spawn stations=种植员可分配至：\n- 花盆\n- 晾晒架\n- 蘑菇种植床\n- 菌种培育台
+Handlers will attempt to move items from each \n'source' object to it's corresponding 'destination'.=搬运工会尝试把每个\n“来源”对象中的物品搬到对应的“目的地”。
+Handlers can be assigned:\n- Packaging stations\n- Brick presses=搬运工可分配至：\n- 打包台\n- 压块机
+Chemists can be assigned:\n- Chemistry stations\n- Lab ovens\n- Cauldrons\n- Mixing stations=化学师可分配至：\n- 化学台\n- 实验室烘箱\n- 反应锅\n- 混合台
+This is the vehicle you last drove. \nMust be within 20 meters.=这是你最后驾驶的载具。\n它必须位于 20 米以内。
+
+# 帮助、教程和系统说明
+There is a <h1>map</h> on your phone. Press <Input_OpenMap> to quickly open it.=手机里有一张<h1>地图</h>。按 <Input_OpenMap> 可快速打开。
+There are two types of currency: <h3>cash</h> and <h1>online balance</h>. Customers pay with cash, but most legal shops only accept card.=货币分为<h3>现金</h>和<h1>线上余额</h>两种。顾客使用现金付款，但大多数合法商店只接受刷卡。
+Visit an <h1>ATM</h> to deposit or withdraw cash.=前往<h1>自动取款机</h>存入或取出现金。
+There is a <h2>mandatory curfew</h> between 9PM and 5AM. Police will <h2>arrest</h> you if you're seen outside.=晚上 9 点至早上 5 点实行<h2>强制宵禁</h>。若被警察发现你在外活动，他们会<h2>逮捕</h>你。
+The purple area indicates the <h1>approximate area</h> of the customer.=紫色区域表示顾客所在的<h1>大致范围</h>。
+Press {0} to submit feedback.=按 {0} 提交反馈。
+Dead drops take time to fulfill, depending on the size of the order. The supplier will <h1>message you</h> when it's ready.=秘密交货需要一定准备时间，具体取决于订单大小。准备好后，供应商会<h1>给你发消息</h>。
+That's your first mix done! There's a wide range of different <h1>ingredients</h> with <h1>unique effects</h>. Each one will affect the value of your product differently.=你的第一份混合产品完成了！各种<h1>原料</h>拥有不同的<h1>独特效果</h>，会以不同方式影响产品价值。
+If a customer rejects a sample, you'll have to wait until <h1>tomorrow</h> before you can give them another.=如果顾客拒绝了样品，你必须等到<h1>第二天</h>才能再次赠送。
+Remember to list your new product for sale in the <h1>product manager app</h>.=记得在<h1>产品管理应用</h>中把新产品上架销售。
+The compass at the top of your screen will show the location of all your tracked quests.=屏幕顶部的指南针会显示所有已追踪任务的位置。
+Press <Input_TogglePhone> to open your phone.=按 <Input_TogglePhone> 打开手机。
+This is your <h1>contacts web</h>. This is where you can view all your customers and potential customers.=这是你的<h1>联系人网络</h>。你可以在这里查看所有顾客和潜在顾客。
+The fastest way to unlock new customers is to give a <h1>free sample</h> to a friend of an existing customer.=解锁新顾客最快的方法，是向现有顾客的朋友赠送一份<h1>免费样品</h>。
+
+# 捐赠箱、天气和路人反应
+Thanks for the free stuff, \nbozo=多谢你的免费东西，\n笨蛋
+Your donation \nis much appreciated!=非常感谢\n你的捐赠！
+So much rain...=雨也太大了……
+Rainy one, isn't it?=这雨下得够大的，对吧？
+Rainy one, ain't it?=这雨下得够大的，是吧？
+Lovely weather, huh?=天气真不错，是吧？
+The sun is too damn bright!=太阳也太他妈刺眼了！
+Too damn WET!=湿透了，真该死！
+Too much rain...=雨也太大了……
+I HATE the rain!=我讨厌下雨！
+You got a problem?=你有意见？
+The hell is your problem?=你他妈有什么毛病？
+The fuck is wrong with you?=你他妈怎么回事？
+What?! I'm calling the cops=什么？！我要报警！
+No way! I'm calling the cops=想都别想！我要报警！
+No way dog! I'm calling the cops=门都没有，哥们！我要报警！
+
+# 卡特尔、供应商、员工和任务对话
+This is not a meeting you want to miss. You've got 24 hours to get here.=这场会面你最好别错过。你有 24 小时赶到这里。
+Fine, have it your way. This town belongs to the Benzies, and you're no longer welcome.=很好，随你的便。这座城属于 Benzies 家族，这里不再欢迎你。
+We need <PRODUCT>. You've got <DUE_DAYS> days to get it to us. Payment is <PAYMENT>.=我们需要 <PRODUCT>。你有 <DUE_DAYS> 天时间送来，报酬是 <PAYMENT>。
+You're late. Our deadlines are not suggestions. You've got another 24 hours to deliver, and your payment is halved. Don't disappoint us.=你迟到了。我们的期限不是建议。再给你 24 小时交货，报酬减半。别让我们失望。
+If you're wanting to get into the art of cultivating magic mushrooms, you're in luck!=如果你想学会种植迷幻蘑菇，那你走运了！
+Hey, buddy - got an exciting opportunity for you. The lovely Hyland Manor is up for sale!=嘿，伙计——有个令人心动的机会。漂亮的海兰庄园正在出售！
+It recently suffered some minor damage - a gas leak, or electrical fault, or something like that. But it's undergone a full renovation and is in pristine condition ready for a new owner!=它最近受过一点小损伤——燃气泄漏、电气故障之类的。不过已经全面翻修，现在状态完美，正等着新主人入住！
+You've been a good customer - I'll start doing in-person meetings with you now if you want to buy larger quantities.=你一直是个好顾客。以后想买更大的量，我可以和你当面交易。
+Send me a message when you want to meet.=想见面时给我发消息。
+Hmmm... I guess there's some <color\=red>RDX</color> down at the plant. That would definitely get the job done.=嗯……厂里应该有些 <color\=red>RDX</color>。那东西肯定能把事情办妥。
+Let's say, <color\=blue>20 grams of the white stuff</color>. Pure - no additives or shit. You bring me that, and you've got your RDX.=就拿<color\=blue>20 克白货</color>来换吧。要纯的——不准掺任何乱七八糟的东西。带来以后，RDX 就归你。
+Sorry boss, I'm missing the items required to perform any tasks on my assigned pots. If you haven't already, you can assign a supplies source where I'll automatically grab required items from.=抱歉，老板。我缺少照料已分配花盆所需的物品。你可以给我指定补给来源，我会自动从那里拿取所需物品。
+Sorry boss, I haven't been assigned to any pots.=抱歉，老板。我还没有被分配任何花盆。
+There are plants ready for harvest, but they're missing a destination. Each pot must have a selected destination so I know where to move the harvested product.=有些植物已经可以收获，但还没有指定目的地。每个花盆都必须选择目的地，我才知道该把收获的产品搬到哪里。
+You can use your management clipboard on each pot to assign it's destination.=你可以用管理夹板给每个花盆指定目的地。
+Sorry boss, I need to be assigned a locker before I can get to work.=抱歉，老板。先给我分配一个储物柜，我才能开始工作。
+That'll be a <SIGN_FEE> signing free, and the employee's daily wage will be <DAILY_WAGE>.=签约费是 <SIGN_FEE>，这名员工的日薪是 <DAILY_WAGE>。
+I've got a couple spare keys lying around, but you really shouldn't be down there unless you're on official city business...=我手头确实有几把备用钥匙，不过除非是在执行市政公务，否则你真不该下去……
+
+# 游戏进程教程和解锁消息
+Time to think about recruiting a <h1>dealer</h>. There's a guy... hmm... <h1>Benji Coleman</h> his name is, I think. He'll be the first dealer you can work with.=该考虑招募一名<h1>交易员</h>了。有个家伙……嗯……好像叫 <h1>Benji Coleman</h>。他会是你能合作的第一名交易员。
+You won't be able to hire a dealer until one of their friends has recommended you. Benji is friends with <h1>Peggy, Beth,</h> and <h1>Ludwig</h>. Focus on selling to them until one of them recommends you.=只有得到交易员朋友的推荐后，你才能雇用他。Benji 与 <h1>Peggy、Beth</h> 和 <h1>Ludwig</h> 是朋友。先专注向他们销售，直到其中一人推荐你。
+You've finished a few deals and made some decent cash, but if you're looking to make real money, you'll need to expand your operations - more <h1>product</h> and more <h1>customers</h>.=你已经完成了几笔交易，也赚了些钱。但想真正赚大钱，就得扩大经营——生产更多<h1>产品</h>，发展更多<h1>顾客</h>。
+The best way to gain new customers is to give a <h1>free sample</h> to a friend of an existing customer.=发展新顾客最好的方法，是向现有顾客的朋友赠送一份<h1>免费样品</h>。
+You can view all potential customers on your <h1>map</h>. Grab some weed and give them a <h1>free sample</h>. With a bit of luck, they'll agree to become a customer.=你可以在<h1>地图</h>上查看所有潜在顾客。拿些大麻给他们一份<h1>免费样品</h>，运气好的话，他们会同意成为你的顾客。
+There's a cheap room for sale above the Chinese restaurant just north of your motel room. Save <h1>$800</h>, then go ask about buying the room.=汽车旅馆房间北边的中餐馆楼上有个便宜房间出售。攒够 <h1>$800</h> 后去询问购买事宜。
+With Benji's help, you'll be able to move a good quantity of product. Now it's time to start manufacturing and selling <h1>higher value</h> product.=有了 Benji 的帮助，你可以卖出相当数量的产品。现在该开始生产并销售<h1>价值更高</h>的产品了。
+You might've noticed you can buy different weed seed strains from Albert, but you can create even more unique products with a <h1>mixing station</h>.=你可能已经注意到，可以从 Albert 那里购买不同品种的大麻种子；使用<h1>混合台</h>还能创造更独特的产品。
+At a <h1>mixing station</h>, you mix products with special <h1>ingredients</h> to create new mixes with <h1>unique effects</h>. Customers will pay more for these products.=在<h1>混合台</h>上，可以把产品与特殊<h1>原料</h>混合，制造带有<h1>独特效果</h>的新产品。顾客愿意为这些产品支付更高价格。
+To get started, go purchase a <h1>mixing station</h> from Dan's hardware. After that, you'll want to grab something to mix with your weed from the local Gas-Mart.=先去 Dan 的五金店购买一台<h1>混合台</h>，然后到本地加油站超市买些能和大麻混合的东西。
+There's probably some of my cash stashed not far from you. It isn't much, but it should be enough to get you going. You can find it <h1>near the skatepark</b>.=我可能在离你不远的地方藏了些现金。虽然不多，但应该够你起步。你可以在<h1>滑板公园附近</b>找到。
+Looks like you're diversifying your product range - good idea. Just remember to list your new product for sale in the <h1>product manager app</h>.=看来你正在丰富产品种类——好主意。记得在<h1>产品管理应用</h>里把新产品上架销售。
+You're almost ready to go, but you're missing one key ingredient - <h1>weed seeds</h>.=一切快准备好了，但还缺一种关键材料——<h1>大麻种子</h>。
+You'll need to speak to a supplier to get your hands on some seeds. I've passed your number onto <h1>Albert Hoover</h> - the local weed seed supplier.=你得联系供应商才能弄到种子。我已经把你的号码给了本地大麻种子供应商 <h1>Albert Hoover</h>。
+Send him a <h1>message</h> and request a <h1>dead drop</h>. I've vouched for you so you won't have to pay up front. Your order will go on your tab, which you can pay off in the future.=给他发一条<h1>消息</h>，要求进行一次<h1>秘密交货</h>。我替你担保过，所以不必预付；订单会记在账上，以后再偿还。
+There's a powerful cartel in town, the <h1>Benzies family.</h> I figured they'd eventually be a problem, but didn't think they'd find you this quickly...=镇上有个势力强大的卡特尔——<h1>Benzies 家族</h>。我早就觉得他们会成为麻烦，只是没想到这么快就找上你……
+Looks like you're gonna need somewhere low key to stay for a while. Head over to the <h1>motel</h> and ask about getting a room.=看来你得找个低调的地方住一阵子。去<h1>汽车旅馆</h>问问能不能弄到一个房间。
+After that, you'll be needing some new equipment. There's a hardware store just north-east of the motel. Grab a <h1>grow tent, soil</h>, and <h1>watering can.</h>=之后还需要一些新设备。汽车旅馆东北边有家五金店，去买<h1>种植帐篷、土壤</h>和<h1>浇水壶</h>。
+Looks like you've reached your <h1>weekly deposit limit...</h> To avoid arousing suspicion, you can only deposit so much cash each week via ATMs.=看来你已达到<h1>每周存款上限</h>。为避免引起怀疑，每周通过自动取款机存入的现金有限。
+If you want to convert more cash to online balance, you're gonna need to start <h1>laundering</h>.=如果想把更多现金转为线上余额，就得开始<h1>洗钱</h>。
+First thing's first, you're gonna need a business. Go check out <h1>Rays Realty</h>. You're probably not gonna be buying out the casino any time soon, but there should be a cheap business for sale.=首先，你需要一家企业。去看看 <h1>Ray 房产</h>。你暂时大概买不起赌场，但那里应该有便宜的生意可供出售。
+There's an old <h1>escape tunnel</h> that runs from the manor down to the cliff face beneath it. It's sealed up from the inside, but if you could get access to it, you could get real close to them without their knowing...=有一条旧的<h1>逃生隧道</h>从庄园通往下方的悬崖。入口从内部封死了，但如果能打通，你就能神不知鬼不觉地靠近他们……
+I say you treat these clowns to a taste of their own medicine. If you could plant a <h1>bomb</h> in that tunnel... well, safe to say they won't be a problem no more.=我看该让这些小丑尝尝自己的手段。如果能在隧道里放一枚<h1>炸弹</h>……那他们以后肯定不会再成为麻烦。
+A bomb of that size won't be easy to come by - go ask around <h1>Koyama Chemical Company</h> and see if someone can sneak you some raw explosives. After that, <h1>Stan</h>, the weapons dealer, should be able to wire it up to a usable bomb for you.=那么大的炸弹可不好弄——去<h1>小山化工公司</h>打听一下，看有没有人能偷运些炸药原料给你。之后，军火商 <h1>Stan</h> 应该能把它装配成可用的炸弹。
+You'll also need to get into that tunnel. <h1>Sam</h>, the local construction and demolition guy can probably help you out for the right price.=你还得进入那条隧道。本地承接建筑与爆破工作的 <h1>Sam</h> 或许愿意收钱帮忙。
+You can find it stashed near the <h1>town hall fountain, in the canal,</h> and <h1>behind the supermarket</h>. Go grab it, head back to the RV, and we'll go from there.=藏匿物分别在<h1>市政厅喷泉附近、运河里</h>和<h1>超市后面</h>。把它们取回来，然后回到房车，我们再继续。
+Oscar will sell everything you need to make meth, with the exception of <h1>pseudo</h>. For that, you're gonna need to hook yourself up with a supplier.=除了<h1>伪麻黄碱</h>，制作冰毒所需的东西 Oscar 都会出售。伪麻黄碱得另找供应商。
+I don't know any pseudo suppliers, so you're on your own for this one. There ought to be someone in <h1>Westville</h> that can get you what you need.=我不认识伪麻黄碱供应商，这次只能靠你自己。<h1>西城区</h>应该有人能提供你需要的东西。
+10K in earnings - not bad at all! Soon you'll have the capital needed to start manufacturing <h1>meth</h>. But first, you're gonna need to purchase some equipment.=赚到 1 万美元——很不错！很快你就有资本开始生产<h1>冰毒</h>了，不过首先得购买一些设备。
+Your best bet for getting the tools you need is the <h1>warehouse.</h> It's the local spot where you can do business with... like-minded individuals. Weapons, specialized equipment, workers for hire - all the good stuff.=想弄到所需工具，最好的去处是<h1>仓库</h>。当地志同道合的人都在那里做生意——武器、专业设备、可雇员工，应有尽有。
+Rise and shine, buddy. Looks like those plants are coming along nicely, though they won't be ready for harvest until later today.=起床了，伙计。那些植物长势不错，不过要到今天晚些时候才能收获。
+Head over to the hardware store to grab these supplies. It might also be a good idea to grab some <h1>Speed Grow</h> while you're at it.=去五金店购买这些补给品。顺便买些<h1>速效生长剂</h>也是个好主意。
+You owe some cash to some mean fellas, and you've only got a few days before they catch up to ya. Lucky for you, I've got some experience in this field.=你欠了一群狠角色的钱，过不了几天他们就会找上门。好在我对这行有些经验。
+Oh right, you probably ain't familiar with this town - welcome to charming Hyland Point. You can view a map on your <h1>phone</h>. Press <Input_TogglePhone> to view it.=对了，你大概还不熟悉这里——欢迎来到迷人的海兰角。你可以在<h1>手机</h>上查看地图。按 <Input_TogglePhone> 打开手机。
+Over by the storage racks is the local <h1>merchant</h> - he'll sell you everything you need to run a proud and proper underworld empire.=储物架旁边是本地<h1>商人</h>，经营地下帝国所需的一切东西他都能卖给你。
+Up the stairs in the office is the local <h1>fixer</h> - he's the guy to talk to if you're looking to hire employees.=楼上办公室里是本地<h1>中介人</h>。如果想雇用员工，就去找他。
+For now, just grab an <h1>OG Kush seed</h>. Head on over to the merchant and purchase it.=现在先买一颗<h1>OG 库什种子</h>。去商人那里购买。
+
+# 物品、产品与效果说明
+Soft fabric headwear to keep your noggin warm.=柔软的布质帽子，为你的脑袋保暖。
+It smells as good as it looks!=闻起来和看起来一样“棒”！
+The 'Baby Blue' methamphetamine variant in liquid form. Use a drying oven to bake into solid form.=“Baby Blue”冰毒的液态版本。使用实验室烘箱烘烤成固体。
+The 'Biker Crank' methamphetamine variant in liquid form. Use a drying oven to bake into solid form.=“Biker Crank”冰毒的液态版本。使用实验室烘箱烘烤成固体。
+The 'Glass' methamphetamine variant in liquid form. Use a drying oven to bake into solid form.=“Glass”冰毒的液态版本。使用实验室烘箱烘烤成固体。
+Psychoactive magic mushroom. Induces strong hallucinogenic effects.=具有精神活性的迷幻蘑菇，会引发强烈的致幻效果。
+Makes the user hungry.=使使用者感到饥饿。
+Makes the user unbearably smelly.=使使用者散发难以忍受的恶臭。
+Results in immediate weight gain.=使使用者立即增重。
+Increases the users energy.=提升使用者的精力。
+Silences the users foot steps.=消除使用者的脚步声。
+Induces hallucinations and unpredictable behaviour in the user.=使使用者产生幻觉并表现出不可预测的行为。
+Increases the size of the user's head.=增大使用者的头部。
+Inverts the user's skin color.=反转使用者的肤色。
+Skateboard with big ass wheels for off-road travel. Does not slow down when rolling over terrain.=配有超大轮胎的越野滑板，在崎岖地形上滑行时不会减速。
+Workstation that contains the interface for laundering money. Must be placed at a business to work.=用于操作洗钱业务的工作台，必须放置在企业场所内才能使用。
+
+# 动态交易、顾客及供应商消息
+This is the Benzies' town!=这座城是 Benzies 家族的！
+Working on it. Should be ready in around <TIME>=正在处理，大约 <TIME> 后准备好。
+This is good shit. <NAME> might be interested. You should go talk to them.=这货不错。<NAME> 可能会感兴趣，你该去和对方谈谈。
+Ok, I'll meet you <LOCATION> between <WINDOW_START> and <WINDOW_END>.=好，我会在 <WINDOW_START> 至 <WINDOW_END> 之间到 <LOCATION> 见你。
+Sick as, I'll meet you <LOCATION> between <WINDOW_START> and <WINDOW_END>.=太棒了，我会在 <WINDOW_START> 至 <WINDOW_END> 之间到 <LOCATION> 见你。
+My friend Albert can hook you up with <h1>weed seeds</h>. I've passed your number on to him.=我的朋友 Albert 能给你弄到<h1>大麻种子</h>。我已经把你的号码给他了。
+You can now order <h1>weed seeds</h> from <h1>Albert Hoover</h>.=你现在可以向 <h1>Albert Hoover</h> 订购<h1>大麻种子</h>。
+My friend Phil can hook you up with supplies to grow <color\=blue>shrooms</color>. I've passed your number on to him.=我的朋友 Phil 能给你提供种植<color\=blue>迷幻蘑菇</color>所需的补给。我已经把你的号码给他了。
+You can now order <h1>magic mushroom supplies</h> from <h1>Fungal Phil</h>.=你现在可以向 <h1>Fungal Phil</h> 订购<h1>迷幻蘑菇种植补给</h>。
+I know a guy called <h1>Salvador</h>. He can hook you up with some <h1>coca seeds</h>. I've passed your number on to him.=我认识一个叫 <h1>Salvador</h> 的人，他能给你弄到<h1>古柯种子</h>。我已经把你的号码给他了。
+You can now order <h1>coca seeds</h> from <h1>Salvador Moreno</h>. Coca seeds are the key ingredient in <h1>cocaine</h> production.=你现在可以向 <h1>Salvador Moreno</h> 订购<h1>古柯种子</h>。古柯种子是生产<h1>可卡因</h>的关键原料。
+My friend Shirley can hook you up with some <h1>pseudo</h>. I've passed your number on to her.=我的朋友 Shirley 能给你弄到一些<h1>伪麻黄碱</h>。我已经把你的号码给她了。
+You can now order <h1>pseudo</h> from <h1>Shirley Watts</h>. Pseudo is the key ingredient in <h1>meth</h> production.=你现在可以向 <h1>Shirley Watts</h> 订购<h1>伪麻黄碱</h>。伪麻黄碱是生产<h1>冰毒</h>的关键原料。
+You can now order <h1>coca seeds</h> from Salvador. Coca plants yield <h1>coca leaves</h>, which are the main precursor ingredient for <h1>cocaine</h>.=你现在可以向 Salvador 订购<h1>古柯种子</h>。古柯植株会产出<h1>古柯叶</h>，它是生产<h1>可卡因</h>的主要前体原料。
+You can now order <h1>pseudo</h> from Shirley. Pseudo is the main precursor ingredient for <h1>methamphetamine</h>.=你现在可以向 Shirley 订购<h1>伪麻黄碱</h>。伪麻黄碱是生产<h1>冰毒</h>的主要前体原料。
+You’re welcome friend. If you need special equipment or supplies, Oscar has what you need.=不客气，朋友。如果需要特殊设备或补给，Oscar 那里都有。
+Hmm... Oscar seen one lying around somewhere in <color\=blue><REGION></color> I think...=嗯……Oscar 好像见过一把，应该丢在 <color\=blue><REGION></color> 的某个地方……
+Oh! and I remember hearing <color\=blue><NPC_DESCRIPTION></color> has one! Sorry, Oscar isn't very good with names. Hope this helps.=哦！我想起来了，听说 <color\=blue><NPC_DESCRIPTION></color> 有一把！抱歉，Oscar 不太会记名字，希望这能帮到你。
+No it ain't. Infact, ol' Nellie already owes us some serious cash...=才不是。事实上，老 Nellie 已经欠了我们一大笔钱……
+Hey, it’s Ray. If you’re looking to purchase any properties or businesses in town - I’m your guy. Come down to Ray’s Realty (just south of town hall) to see our available listings.=嘿，我是 Ray。如果你想购买镇上的房产或企业，就来找我。到市政厅南边的 Ray 房产看看现有挂牌项目。
+
+# NPC 短句与环境感叹
+The hell?!=搞什么？！
+Hmm?=嗯？
+Yep!=对！
+Enough!=够了！
+The fuck?=搞什么鬼？
+Yes please!=好，请给我！
+Yes!=好！
+Gross!=真恶心！
+Goddammit!!=该死！！
+Fuck!=操！
+Nah...=不了……
+Shitskies...=真他妈糟……
+Hello!=你好！
+Morning!=早上好！
+Afternoon!=下午好！
+Evening!=晚上好！
+So rainy!=雨真大！
+Oh crap!=糟了！
+HEY!!=嘿！！
+Enough!!=够了！！
+SHIT!=操！
+You crazy?=你疯了？
+HEY!=嘿！

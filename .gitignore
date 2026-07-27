@@ -1,0 +1,16 @@
+# 构建产物
+bin/
+obj/
+[Bb]uild/
+
+# 安装器载荷（包含游戏资源文件，因版权原因不包含在仓库中）
+payload.zip
+
+# 开发与冒烟测试产物
+menu.png
+launch_timing.txt
+launch_start_*.txt
+
+# 系统文件
+Thumbs.db
+.DS_Store
