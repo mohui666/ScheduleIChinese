@@ -1,4 +1,4 @@
-# ScheduleIChinese 1.3.11
+# ScheduleIChinese 1.3.13
 
 适配 Schedule I v0.4.5f2 / Steam Build 22829923 的简体中文离线汉化。
 
@@ -14,21 +14,41 @@
 - 在线自动翻译默认关闭，离线显示层翻译默认开启。
 - 不对每帧或每两秒执行全局扫描，降低载入和 UI 卡顿。
 
+## 1.3.13 变更
+
+- 新增烘焙标签翻译：拦截 `TextMeshProUGUI`/`TextMeshPro`/uGUI `Text`
+  的 `OnEnable`，覆盖预制体里烘焙、从不经过文本 setter 的静态标签
+  （手机应用、商店、订单面板、罚单等界面标题）。
+- 联系人列表地区后缀统一为英文：删除 48 条按人名翻译地区的精确词条，
+  所有人名标签统一走动态规则（地区名是 `EMapRegion` 枚举成员，在
+  黑名单中，避免游戏读回出错）。
+- 新增词条与动态规则：罚单标题/重度毒品没收、短信 "Deal??" 变体、
+  每周最常购买/总消费、其余地区的卡特尔影响力。
+- 自检更新：人名+地区样本不再要求输出含中文（地区按设计保留英文）。
+
+## 1.3.12 变更
+
+- 恢复了 1.3.11 中误删的 1119 条安全单词翻译（Add、Apply、Alarm 等
+  常用 UI 词）。
+- 拦截改为精确黑名单（`Translations/deny_keys.txt`，594 条）：只覆盖
+  游戏自身会被代码读回的枚举成员——品质等级 `EQuality`、按键
+  `KeyCode`/`ButtonCode`、设置面板枚举、等级 `ERank`、地区
+  `EMapRegion`、星期 `EDay`、角色创建分类、UI 弹窗应答、员工/赌场/
+  任务枚举——外加控制台命令与颜色值等垃圾键。名单由游戏 interop
+  程序集提取（`tools/restore_safe_keys.py`），加载时最先读入、
+  不区分大小写拒绝。
+
 ## 1.3.11 变更
 
 - 回退了 1500 余条疑似变量名的翻译（控制台命令如 `addxp`、按键名如
   `Backspace`、枚举值如 `Standard`/`Premium`/`Heavenly`、颜色值等单标记
   词条）。这些字符串会被游戏代码读回，翻译后会导致金钱/联系人/短信等
   逻辑异常以及品质等级文本粘连。
-- `TranslationStore.LoadFile` 新增加载时防护：除效果词表外，所有形如
-  `^[A-Za-z0-9_]+$` 的裸单词词条一律拒绝加载并记录日志，防止此类
-  条目再次被引入。
 
 构建：
 
 ```powershell
-# 源码放在游戏目录内的 ModSource 下时可直接构建；
-# 否则需要指定游戏根目录（仓库不包含任何游戏文件）：
+# 需要指定游戏根目录（仓库不包含任何游戏文件）：
 dotnet build .\ScheduleIChinese.csproj -c Release -p:ScheduleIGameDir="C:\Program Files (x86)\Steam\steamapps\common\Schedule I"
 ```
 

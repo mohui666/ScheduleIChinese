@@ -209,5 +209,30 @@ namespace ScheduleIChinese
                 return true;
             }
         }
+
+        /// <summary>
+        /// Translate labels baked into prefabs. Deserialization fills TMP fields
+        /// without touching the managed setter, so neither the setter patch nor
+        /// the change event ever fires for them; the periodic scan also misses
+        /// panels that are inactive at scan time. OnEnable is the exact moment a
+        /// baked label becomes visible (phone apps, shop panels, popups).
+        /// TMP_Text itself does not declare OnEnable in the interop assemblies —
+        /// only the concrete subclasses do — so each is patched explicitly.
+        /// </summary>
+        [HarmonyPatch(typeof(TextMeshProUGUI), "OnEnable")]
+        [HarmonyPatch(typeof(TextMeshPro), "OnEnable")]
+        [HarmonyPatch(typeof(UnityEngine.UI.Text), "OnEnable")]
+        public static class BakedTextOnEnable
+        {
+            public static void Postfix(UnityEngine.UI.MaskableGraphic __instance)
+            {
+                try
+                {
+                    if (__instance is TMP_Text tmp) ApplyExisting(tmp);
+                    else if (__instance is UnityEngine.UI.Text ugui) ApplyExisting(ugui);
+                }
+                catch { }
+            }
+        }
     }
 }

@@ -49,14 +49,17 @@ namespace ScheduleIChinese
         private static readonly Regex IdentifierLike = new Regex(
             @"^[A-Za-z_][A-Za-z0-9_]*\d[A-Za-z0-9_]*$",
             RegexOptions.Compiled);
-        // A bare single-token key (no spaces or punctuation) is almost always a
-        // variable, enum or command name that game code reads back (for example
-        // quality tiers like "Standard" or console commands like "addxp").
-        // Translating these has repeatedly broken saves and UI logic, so exact
-        // entries of this shape are rejected at load time. The effects glossary
-        // is exempt: its terms are matched through the decorated-effect path.
-        private static readonly Regex VariableLikeKey = new Regex(
-            @"^[A-Za-z0-9_]+$",
+        // Keys the game reads back in code must never be translated (quality
+        // tiers like "Standard", input bindings like "Backspace", console
+        // commands like "addxp", UI popup responses like "Accept"). They are
+        // curated in Translations/deny_keys.txt, generated from the game's
+        // enum metadata (see tools/restore_safe_keys.py). Junk keys such as
+        // hex color blobs or digit-containing tokens are rejected as well.
+        // Translating these has repeatedly broken saves and UI logic.
+        private static readonly HashSet<string> _denyKeys =
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private static readonly Regex JunkKey = new Regex(
+            @"^(?:[0-9A-Fa-f]{6,8}|[A-Za-z0-9_]*\d[A-Za-z0-9_]*)$",
             RegexOptions.Compiled);
         private static readonly Regex PlaceholderLike = new Regex(
             @"^<[A-Z][A-Z0-9 _-]+>$",
@@ -93,6 +96,12 @@ namespace ScheduleIChinese
             // Auto-generated translations load first so curated files override them.
             var files = new List<string>(Directory.GetFiles(_transDir, "*.txt", SearchOption.AllDirectories));
             files.Sort(StringComparer.OrdinalIgnoreCase);
+            // The denylist must be fully populated before any translation file
+            // loads, otherwise an alphabetically earlier file (Auto.zh_CN.txt)
+            // could sneak denied keys in.
+            foreach (var f in files)
+                if (Path.GetFileName(f).Equals("deny_keys.txt", StringComparison.OrdinalIgnoreCase))
+                    LoadDenyKeys(f);
             string effectsFile = null;
             foreach (var f in files)
             {
@@ -100,6 +109,8 @@ namespace ScheduleIChinese
                     LoadPreservedNames(f);
                 else if (Path.GetFileName(f).Equals("effects_zh_CN.txt", StringComparison.OrdinalIgnoreCase))
                     effectsFile = f;
+                else if (Path.GetFileName(f).Equals("deny_keys.txt", StringComparison.OrdinalIgnoreCase))
+                    continue;
                 else
                     LoadFile(f);
             }
@@ -109,8 +120,8 @@ namespace ScheduleIChinese
             BuildPatternList();
             Plugin.Log.LogInfo(
                 $"Loaded {_dict.Count} exact translations and {_patterns.Count} dynamic rules " +
-                $"from {files.Count} file(s); {_effects.Count} effect terms and " +
-                $"{_preserveNames.Count} names are protected.");
+                $"from {files.Count} file(s); {_effects.Count} effect terms, " +
+                $"{_preserveNames.Count} names are protected; {_denyKeys.Count} keys are denied.");
             RunSelfTest();
         }
 
@@ -135,7 +146,7 @@ namespace ScheduleIChinese
                     _patternSources[pattern] = val;
                 else
                 {
-                    if (!isEffects && VariableLikeKey.IsMatch(rawKey))
+                    if (!isEffects && (_denyKeys.Contains(rawKey) || JunkKey.IsMatch(rawKey)))
                     {
                         blocked++;
                         continue;
@@ -147,7 +158,19 @@ namespace ScheduleIChinese
             }
             Plugin.Log.LogInfo($"  {Path.GetFileName(path)}: {n} entries" +
                 (malformed > 0 ? $", {malformed} malformed line(s) skipped" : "") +
-                (blocked > 0 ? $", {blocked} variable-like key(s) rejected" : ""));
+                (blocked > 0 ? $", {blocked} denied/junk key(s) rejected" : ""));
+        }
+
+        private static void LoadDenyKeys(string path)
+        {
+            int n = 0;
+            foreach (var raw in File.ReadAllLines(path, Encoding.UTF8))
+            {
+                var line = raw.Trim();
+                if (line.Length == 0 || line.StartsWith("#") || line.StartsWith("//")) continue;
+                if (_denyKeys.Add(line)) n++;
+            }
+            Plugin.Log.LogInfo($"  {Path.GetFileName(path)}: {n} denied keys");
         }
 
         private static void LoadPreservedNames(string path)
@@ -224,7 +247,9 @@ namespace ScheduleIChinese
                 "Hello, I'm after 3x OG Kush. I can pay <color=#46CB4F>$110</color> for it.",
                 "I've received $480 cash from you. Your debt is now paid off.",
                 "Molly Presley\n(Dealer)",
-                "Elizabeth Homley<color=#A0A0A0FF> (Downtown)</color>",
+                // Region names intentionally stay English in person labels
+                // (they are EMapRegion members on the denylist); the dedicated
+                // namedRegion check below only requires the name to survive.
                 "Last save was 48 seconds ago",
                 "<color=#FFD19BFF>•  Calming</color>",
                 "•  Sedating",

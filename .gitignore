@@ -7,7 +7,7 @@ obj/
 payload.zip
 
 # 开发与冒烟测试产物
-menu.png
+menu*.png
 launch_timing.txt
 launch_start_*.txt
 

@@ -14,6 +14,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- tools/ 下的独立工具（如 EnumDump）不参与插件编译 -->
+    <Compile Remove="tools/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="BepInEx.Core">
       <HintPath>$(ScheduleIGameDir)\BepInEx\core\BepInEx.Core.dll</HintPath>
       <Private>false</Private>
