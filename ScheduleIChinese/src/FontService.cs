@@ -63,6 +63,26 @@ namespace ScheduleIChinese
             Plugin.Log.LogInfo("CJK font asset ready.");
         }
 
+        /// <summary>Direct CJK font for components showing translated text.</summary>
+        public static TMP_FontAsset CjkFont => _cjkFont;
+
+        /// <summary>
+        /// Force the component's font to the CJK asset. Per-asset and global
+        /// fallback registration covers most UI, but some components (shop grid
+        /// name labels) silently refuse the fallback chain and render CJK as
+        /// blank; assigning the font directly always renders.
+        /// </summary>
+        public static void ApplyCjkFont(TMP_Text comp)
+        {
+            EnsureCjkFont(comp);
+            if (!Ready || comp == null) return;
+            try
+            {
+                if (comp.font != _cjkFont) comp.font = _cjkFont;
+            }
+            catch { }
+        }
+
         /// <summary>Make sure the given component can render CJK (per-font-asset fallback).</summary>
         public static void EnsureCjkFont(TMP_Text comp)
         {
@@ -73,7 +93,6 @@ namespace ScheduleIChinese
                 if (font == null) return;
                 var key = font.Pointer;
                 if (_patchedFontAssets.Contains(key)) return;
-                _patchedFontAssets.Add(key);
 
                 var table = font.fallbackFontAssetTable;
                 if (table == null)
@@ -82,6 +101,7 @@ namespace ScheduleIChinese
                     font.fallbackFontAssetTable = table;
                 }
                 if (!table.Contains(_cjkFont)) table.Add(_cjkFont);
+                _patchedFontAssets.Add(key);
             }
             catch { }
         }

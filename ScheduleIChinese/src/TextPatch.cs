@@ -83,10 +83,9 @@ namespace ScheduleIChinese
         private static void Transform(TMP_Text comp, ref string value)
         {
             if (string.IsNullOrEmpty(value)) return;
-
             if (TranslationStore.ContainsCjk(value))
             {
-                FontService.EnsureCjkFont(comp);
+                FontService.ApplyCjkFont(comp);
                 if (ModConfig.EnableRuntimeTranslationFallback.Value)
                 {
                     var partial = TranslationStore.TranslateDisplayText(value);
@@ -99,7 +98,7 @@ namespace ScheduleIChinese
             var translated = TranslationStore.TranslateDisplayText(value);
             if (translated != null)
             {
-                FontService.EnsureCjkFont(comp);
+                FontService.ApplyCjkFont(comp);
                 value = translated;
             }
             else if (ModConfig.EnableAutoTranslate.Value &&
@@ -120,7 +119,7 @@ namespace ScheduleIChinese
                 if (string.IsNullOrEmpty(current)) return;
                 if (TranslationStore.ContainsCjk(current))
                 {
-                    FontService.EnsureCjkFont(comp);
+                    FontService.ApplyCjkFont(comp);
                     if (!ModConfig.EnableRuntimeTranslationFallback.Value) return;
                     var partial = TranslationStore.TranslateDisplayText(current);
                     if (partial == null || partial == current) return;
@@ -131,7 +130,7 @@ namespace ScheduleIChinese
 
                 var translated = TranslationStore.TranslateDisplayText(current);
                 if (translated == null || translated == current) return;
-                FontService.EnsureCjkFont(comp);
+                FontService.ApplyCjkFont(comp);
                 comp.text = translated;
             }
             catch { }
