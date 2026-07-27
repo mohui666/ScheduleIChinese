@@ -15,17 +15,17 @@ r:(.+)'s Stash=$1的藏匿处
 r:(.+)<color\=#A0A0A0FF> \\((.+)\\)</color>=$1<color\=#A0A0A0FF>（$2）</color>
 r:(.+)\\n\\(Dealer\\)=$1（经销商）
 r:(?:Great, I'll meet you|Ok, I'll meet you|Alright cool, I'll meet you|Sweet as homie, I'll meet you|Hell yeah my friend, I'll meet you|Sick as, I'll meet you|Cheers bro, I'll meet you) <b>(.+?)</b> between (\\d{1,2}:\\d{2} [AP]M) and (\\d{1,2}:\\d{2} [AP]M)\\.=好的，$2 至 $3 在<b>$1</b>见。
-r:(?i)^Bagman ([IVX]+)$=中间人 $1
-r:(?i)^Baron ([IVX]+)$=巨头 $1
-r:(?i)^Block Boss ([IVX]+)$=地盘老大 $1
-r:(?i)^Enforcer ([IVX]+)$=执行者 $1
-r:(?i)^Hoodlum ([IVX]+)$=地痞 $1
-r:(?i)^Hustler ([IVX]+)$=骗徒 $1
-r:(?i)^Kingpin ([IVX]+)$=首脑 $1
-r:(?i)^Peddler ([IVX]+)$=小贩 $1
-r:(?i)^Shot Caller ([IVX]+)$=指挥者 $1
-r:(?i)^Street Rat ([IVX]+)$=过街老鼠 $1
-r:(?i)^Underlord ([IVX]+)$=地下权威 $1
+r:(?i)^Bagman ([IVX]+)$=押货人 $1
+r:(?i)^Baron ([IVX]+)$=大亨 $1
+r:(?i)^Block Boss ([IVX]+)$=一方霸主 $1
+r:(?i)^Enforcer ([IVX]+)$=打手 $1
+r:(?i)^Hoodlum ([IVX]+)$=地痞流氓 $1
+r:(?i)^Hustler ([IVX]+)$=老油条 $1
+r:(?i)^Kingpin ([IVX]+)$=一代枭雄 $1
+r:(?i)^Peddler ([IVX]+)$=摆摊小贩 $1
+r:(?i)^Shot Caller ([IVX]+)$=话事人 $1
+r:(?i)^Street Rat ([IVX]+)$=街头混混 $1
+r:(?i)^Underlord ([IVX]+)$=地下皇帝 $1
 r:(?i)^Unlocks at <color\=#2DB92D>(.+) ([IVX]+)</color>$=在 <color\=#2DB92D>$1 $2</color> 解锁
 r:([A-Za-z\\s]+) will draw his daily wage of <color\=#54E717>(\\$\\d+)<\\/color> from this briefcase\\.=$1 将从这个公文包提取 <color\=#54E717>$2</color> 作为他的每日工资。
 r:(\\d+) \\/ (\\d+) XP=$1 / $2 经验值

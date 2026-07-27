@@ -122,23 +122,18 @@ namespace ScheduleIChinese
                 if (rect == null)
                     throw new InvalidOperationException("Overlay GameObject has no RectTransform.");
 
-                // Sibling of the label, anchored exactly where the label sits.
-                // The label's own rect is degenerate (-6x20), so size comes
-                // from the preferred text size instead.
-                var labelRt = label.rectTransform;
-                rect.SetParent(label.transform.parent, false);
-                rect.pivot = labelRt.pivot;
-                rect.anchorMin = labelRt.anchorMin;
-                rect.anchorMax = labelRt.anchorMax;
-                rect.anchoredPosition = labelRt.anchoredPosition;
-                rect.localRotation = labelRt.localRotation;
-                rect.localScale = labelRt.localScale;
-                float w = label.preferredWidth;
-                float h = label.preferredHeight;
-                if (w < 30f) w = 160f;
-                if (h < 8f) h = 22f;
-                rect.sizeDelta = new Vector2(w, h);
-                rect.SetSiblingIndex(label.transform.GetSiblingIndex() + 1);
+                // Child of the label, filling its rect: the rect position is
+                // the only reliable anchor (its size is degenerate, but TMP
+                // draws overflowing text anyway). This keeps names exactly
+                // where the original layout put them.
+                rect.SetParent(label.transform, false);
+                rect.anchorMin = Vector2.zero;
+                rect.anchorMax = Vector2.one;
+                rect.offsetMin = Vector2.zero;
+                rect.offsetMax = Vector2.zero;
+                rect.localRotation = Quaternion.identity;
+                rect.localScale = Vector3.one;
+                rect.SetAsLastSibling();
 
                 var renderer = go.AddComponent<CanvasRenderer>();
                 if (renderer == null)

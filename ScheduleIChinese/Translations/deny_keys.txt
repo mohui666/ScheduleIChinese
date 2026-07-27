@@ -6,8 +6,6 @@ Accessories
 Accessory
 Ace
 Active
-Agriculture
-All
 Alpha0
 Alpha1
 Alpha2
@@ -140,7 +138,6 @@ Forward
 Four
 Friday
 FullscreenWindow
-Furniture
 G
 Gamepad
 Grape
@@ -168,7 +165,6 @@ I
 ImmediateDirection
 Imperial
 Inactive
-Ingredients
 Insert
 InsideOrOutside
 Interact
@@ -397,7 +393,6 @@ Less
 LightGreen
 LightGrey
 LightRed
-Lights
 Lime
 Low
 M
@@ -438,7 +433,6 @@ OpenTexts
 Orange
 Outerwear
 P
-Packaging
 PageDown
 PageUp
 Pause
@@ -506,7 +500,6 @@ Space
 Spades
 Sprint
 Standard
-Storage
 Store
 Street_Rat
 Submit
@@ -525,7 +518,6 @@ Tilde
 ToggleFlashlight
 TogglePauseMenu
 TogglePhone
-Tools
 Top
 TopLeft
 Trash
