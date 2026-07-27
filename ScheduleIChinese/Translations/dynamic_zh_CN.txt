@@ -334,3 +334,6 @@ r:• Learn how to manage (.+).=• 学习如何管理 $1。
 r:• Unlock (.+) customers (.+)=• 解锁 $1 位顾客 $2
 r:(\d+) high-severity drugs confiscated=没收了$1种高风险毒品
 r:I'm after (\d+)x (.+)\. I can pay <color\=#46CB4F>(.+)</color> for it Deal\?\?=我想要 $1 份$2，可以出<color=#46CB4F>$3</color>。成交吗？
+r:Wanted Level (\d+)=通缉等级 $1
+r:Wanted Level: (\d+)=通缉等级：$1
+r:WANTED LEVEL (\d+)=通缉等级 $1
