@@ -211,6 +211,30 @@ namespace ScheduleIChinese
             catch { }
         }
 
+        public static void CleanupCache()
+        {
+            if (OverlayByLabelId.Count == 0) return;
+
+            var dead = new List<int>();
+            foreach (var pair in OverlayByLabelId)
+            {
+                try
+                {
+                    if (!pair.Value.TryGetTarget(out var overlay) ||
+                        overlay == null ||
+                        overlay.gameObject == null)
+                        dead.Add(pair.Key);
+                }
+                catch
+                {
+                    dead.Add(pair.Key);
+                }
+            }
+
+            foreach (int id in dead)
+                OverlayByLabelId.Remove(id);
+        }
+
         private static void CopyVisualStyle(TMP_Text source, TMP_Text destination)
         {
             destination.fontSize = source.fontSize;

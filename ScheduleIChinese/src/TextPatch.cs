@@ -8,7 +8,10 @@ using UnityEngine;
 
 namespace ScheduleIChinese
 {
-    /// <summary>Intercepts text assignments on TMP components and swaps in Chinese.</summary>
+    /// <summary>
+    /// Observes TMP text changes and component activation, then applies Chinese
+    /// translations on the main thread.
+    /// </summary>
     public static class TextPatch
     {
         private static readonly object PendingLock = new object();
@@ -96,44 +99,13 @@ namespace ScheduleIChinese
             try { comp.havePropertiesChanged = true; } catch { }
         }
 
-        private static void Transform(TMP_Text comp, ref string value)
+        public static void CleanupCaches()
         {
-            if (comp == null || string.IsNullOrEmpty(value))
-                return;
-
-            // 必须先完成翻译，再同步商店覆盖层。
-            if (TranslationStore.ContainsCjk(value))
-            {
-                if (ModConfig.EnableRuntimeTranslationFallback.Value)
-                {
-                    var partial = TranslationStore.TranslateDisplayText(value);
-                    if (partial != null) value = partial;
-                }
-            }
-            else if (ModConfig.EnableRuntimeTranslationFallback.Value)
-            {
-                var translated = TranslationStore.TranslateDisplayText(value);
-                if (translated != null)
-                {
-                    value = translated;
-                }
-                else if (ModConfig.EnableAutoTranslate.Value &&
-                         TranslationStore.IsTranslatable(value))
-                {
-                    // remember who is showing this text so a late auto-translation can be applied
-                    TranslationStore.RegisterLive(comp, value);
-                }
-            }
-
-            if (TranslationStore.ContainsCjk(value))
-            {
-                if (FontService.ApplyCjkFont(comp))
-                    MarkDirty(comp);
-            }
-
-            // 必须放在所有翻译处理之后，传入最终文本。
-            if (NameOverlay.IsShopNameLabel(comp))
-                NameOverlay.Sync(comp, value);
+            // Instance IDs can eventually be reused after objects are destroyed.
+            // This cache is only a one-time mesh rebuild guard, so clearing it
+            // occasionally is both safe and prevents stale IDs accumulating.
+            if (_nullFontRebuilt.Count > 4096)
+                _nullFontRebuilt.Clear();
         }
 
         public static void ApplyExisting(TMP_Text comp)
@@ -186,10 +158,15 @@ namespace ScheduleIChinese
                     }
                 }
 
+                if (TranslationStore.ContainsCjk(finalText) &&
+                    FontService.ApplyCjkFont(comp))
+                    MarkDirty(comp);
+
                 if (finalText != current)
                 {
-                    // setter 里会再次经过 Transform，由它同步覆盖层。
                     comp.text = finalText;
+                    if (NameOverlay.IsShopNameLabel(comp))
+                        NameOverlay.Sync(comp, finalText);
                     MainThreadRunner.RememberText(comp, finalText);
                     return;
                 }
@@ -235,84 +212,6 @@ namespace ScheduleIChinese
             catch { }
         }
 
-        [HarmonyPatch(typeof(TMP_Text), nameof(TMP_Text.text), MethodType.Setter)]
-        public static class SetTextProp
-        {
-            public static bool Prefix(TMP_Text __instance, ref string value)
-            {
-                Transform(__instance, ref value);
-                return true;
-            }
-        }
-
-        /// <summary>
-        /// Patch every TMP SetText overload whose first argument is a string. This
-        /// includes the float-formatting overloads used for money, quantities and
-        /// progress values, while avoiding brittle per-version overload lists.
-        /// </summary>
-        [HarmonyPatch]
-        public static class SetTextStringOverloads
-        {
-            public static IEnumerable<MethodBase> TargetMethods()
-            {
-                foreach (var method in AccessTools.GetDeclaredMethods(typeof(TMP_Text)))
-                {
-                    if (method.Name != nameof(TMP_Text.SetText)) continue;
-                    var parameters = method.GetParameters();
-                    if (parameters.Length > 0 && parameters[0].ParameterType == typeof(string))
-                        yield return method;
-                }
-            }
-
-            public static void Prefix(TMP_Text __instance, object[] __args)
-            {
-                if (__args == null || __args.Length == 0 || !(__args[0] is string sourceText)) return;
-                Transform(__instance, ref sourceText);
-                __args[0] = sourceText;
-            }
-        }
-
-        /// <summary>
-        /// Patch SetText(StringBuilder) overloads. List-heavy UI (effect lists,
-        /// inventory rows) is commonly built through StringBuilder, which never
-        /// passes through the string overloads above; without this hook those
-        /// strings stay English and never even reach the translation dump.
-        /// </summary>
-        [HarmonyPatch]
-        public static class SetTextBuilderOverloads
-        {
-            public static IEnumerable<MethodBase> TargetMethods()
-            {
-                foreach (var method in AccessTools.GetDeclaredMethods(typeof(TMP_Text)))
-                {
-                    if (method.Name != nameof(TMP_Text.SetText)) continue;
-                    var parameters = method.GetParameters();
-                    if (parameters.Length == 1 &&
-                        parameters[0].ParameterType == typeof(Il2CppSystem.Text.StringBuilder))
-                        yield return method;
-                }
-            }
-
-            public static void Prefix(TMP_Text __instance, object[] __args)
-            {
-                if (__args == null || __args.Length == 0) return;
-                var sb = __args[0] as Il2CppSystem.Text.StringBuilder;
-                if (sb == null) return;
-                try
-                {
-                    var sourceText = sb.ToString();
-                    var before = sourceText;
-                    Transform(__instance, ref sourceText);
-                    if (sourceText != before)
-                    {
-                        sb.Clear();
-                        sb.Append(sourceText);
-                    }
-                }
-                catch { }
-            }
-        }
-
         /// <summary>Legacy uGUI Text support.</summary>
         [HarmonyPatch(typeof(UnityEngine.UI.Text), "text", MethodType.Setter)]
         public static class LegacyText
@@ -338,10 +237,9 @@ namespace ScheduleIChinese
 
         /// <summary>
         /// Translate labels baked into prefabs. Deserialization fills TMP fields
-        /// without touching the managed setter, so neither the setter patch nor
-        /// the change event ever fires for them; the periodic scan also misses
-        /// panels that are inactive at scan time. OnEnable is the exact moment a
-        /// baked label becomes visible (phone apps, shop panels, popups).
+        /// without dispatching the change event; the periodic scan also misses
+        /// panels that are inactive at scan time. OnEnable is the exact moment
+        /// a baked label becomes visible (phone apps, shop panels, popups).
         /// TMP_Text itself does not declare OnEnable in the interop assemblies —
         /// only the concrete subclasses do — so each is patched explicitly via
         /// TargetMethods. Every component seen here is also registered for the

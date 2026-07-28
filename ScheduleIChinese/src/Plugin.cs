@@ -53,7 +53,7 @@ namespace ScheduleIChinese
 
             phaseStart = startupTimer.ElapsedMilliseconds;
             var harmony = new Harmony(Guid);
-            harmony.PatchAll(typeof(TextPatch).Assembly);
+            ApplyHarmonyPatches(harmony);
             long patchesMs = startupTimer.ElapsedMilliseconds - phaseStart;
 
             phaseStart = startupTimer.ElapsedMilliseconds;
@@ -80,6 +80,23 @@ namespace ScheduleIChinese
                 $"Startup timings: config {configMs} ms, translations {translationsMs} ms, " +
                 $"patches {patchesMs} ms, runner {runnerMs} ms, " +
                 $"total {startupTimer.ElapsedMilliseconds} ms.");
+        }
+
+        private static void ApplyHarmonyPatches(Harmony harmony)
+        {
+            var patchTypes = new[]
+            {
+                typeof(TextPatch.LegacyText),
+                typeof(TextPatch.BakedTextOnEnable)
+            };
+
+            foreach (var patchType in patchTypes)
+            {
+                var timer = Stopwatch.StartNew();
+                harmony.CreateClassProcessor(patchType).Patch();
+                Log.LogInfo(
+                    $"Harmony patch {patchType.Name}: {timer.ElapsedMilliseconds} ms.");
+            }
         }
     }
 }

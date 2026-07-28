@@ -18,6 +18,10 @@ namespace ScheduleIChinese
         private static readonly Dictionary<string, string> _patternSources =
             new Dictionary<string, string>(StringComparer.Ordinal);
         private static readonly List<PatternEntry> _patterns = new List<PatternEntry>();
+        private static readonly List<PatternEntry> _fallbackPatterns =
+            new List<PatternEntry>();
+        private static readonly Dictionary<char, List<PatternEntry>> _patternCandidates =
+            new Dictionary<char, List<PatternEntry>>();
         private static readonly Dictionary<string, string> _resultCache =
             new Dictionary<string, string>(StringComparer.Ordinal);
         private static readonly Dictionary<string, string> _effects =
@@ -86,6 +90,7 @@ namespace ScheduleIChinese
             public string Source;
             public string Replacement;
             public Regex Regex;
+            public char? RequiredFirstCharacter;
         }
 
         public static int Count => _dict.Count;
@@ -97,6 +102,8 @@ namespace ScheduleIChinese
             _dict.Clear();
             _patternSources.Clear();
             _patterns.Clear();
+            _fallbackPatterns.Clear();
+            _patternCandidates.Clear();
             _resultCache.Clear();
             _effects.Clear();
             _nameSources.Clear();
@@ -104,6 +111,7 @@ namespace ScheduleIChinese
             _denyKeys.Clear();
             _noHit.Clear();
             _dumped.Clear();
+            _disabledPatterns.Clear();
             _resultCacheHits = 0;
             _negativeCacheHits = 0;
             _regexEvaluations = 0;
@@ -251,7 +259,11 @@ namespace ScheduleIChinese
                     {
                         Source = kv.Key,
                         Replacement = kv.Value,
-                        Regex = regex
+                        Regex = regex,
+                        RequiredFirstCharacter =
+                            TryGetRequiredFirstCharacter(kv.Key, out var first)
+                                ? NormalizePatternKey(first)
+                                : (char?)null
                     });
                 }
                 catch (Exception ex)
@@ -262,6 +274,90 @@ namespace ScheduleIChinese
 
             // More specific rules win over generic capture-all rules.
             _patterns.Sort((a, b) => b.Source.Length.CompareTo(a.Source.Length));
+            foreach (var entry in _patterns)
+                if (!entry.RequiredFirstCharacter.HasValue)
+                    _fallbackPatterns.Add(entry);
+        }
+
+        /// <summary>
+        /// Return a literal first character only when the regex syntax makes it
+        /// mandatory. Anything ambiguous stays in the fallback list, so this
+        /// optimization can add candidates but can never exclude a valid rule.
+        /// </summary>
+        private static bool TryGetRequiredFirstCharacter(
+            string pattern,
+            out char first)
+        {
+            first = '\0';
+            if (string.IsNullOrEmpty(pattern)) return false;
+
+            int index = 0;
+            for (int pass = 0; pass < 3; pass++)
+            {
+                if (index < pattern.Length && pattern[index] == '^')
+                {
+                    index++;
+                    continue;
+                }
+                if (index + 4 <= pattern.Length &&
+                    string.CompareOrdinal(pattern, index, "(?i)", 0, 4) == 0)
+                {
+                    index += 4;
+                    continue;
+                }
+                if (index + 2 <= pattern.Length &&
+                    pattern[index] == '\\' &&
+                    pattern[index + 1] == 'A')
+                {
+                    index += 2;
+                    continue;
+                }
+                break;
+            }
+
+            if (index >= pattern.Length) return false;
+            char token = pattern[index];
+            if (token == '\\')
+            {
+                if (index + 1 >= pattern.Length) return false;
+                char escaped = pattern[index + 1];
+                // Escaped punctuation represents that exact character. Escape
+                // classes such as \d, \s, \p and numeric backreferences do not.
+                if (char.IsLetterOrDigit(escaped)) return false;
+                first = escaped;
+                return true;
+            }
+
+            if (token == '.' || token == '$' || token == '(' ||
+                token == '[' || token == '{' || token == '|' ||
+                token == '*' || token == '+' || token == '?')
+                return false;
+
+            first = token;
+            return true;
+        }
+
+        private static char NormalizePatternKey(char value)
+        {
+            return char.ToUpperInvariant(value);
+        }
+
+        private static List<PatternEntry> GetPatternCandidates(string source)
+        {
+            if (string.IsNullOrEmpty(source)) return _fallbackPatterns;
+            char key = NormalizePatternKey(source[0]);
+            if (_patternCandidates.TryGetValue(key, out var candidates))
+                return candidates;
+
+            candidates = new List<PatternEntry>(_fallbackPatterns.Count + 16);
+            foreach (var entry in _patterns)
+            {
+                if (!entry.RequiredFirstCharacter.HasValue ||
+                    entry.RequiredFirstCharacter.Value == key)
+                    candidates.Add(entry);
+            }
+            _patternCandidates[key] = candidates;
+            return candidates;
         }
 
         private static void RunSelfTest()
@@ -638,7 +734,7 @@ namespace ScheduleIChinese
         private static bool TryTranslatePattern(string source, out string translated)
         {
             translated = null;
-            foreach (var entry in _patterns)
+            foreach (var entry in GetPatternCandidates(source))
             {
                 if (_disabledPatterns.Contains(entry.Source)) continue;
                 try

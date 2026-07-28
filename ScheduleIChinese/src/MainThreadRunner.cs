@@ -138,9 +138,10 @@ namespace ScheduleIChinese
             if (ModConfig.DumpUntranslated.Value)
                 TranslationStore.FlushDumpIfDue();
 
-            // Setter patches cover live changes. Scan only once when the CJK font
-            // becomes ready and once after the loaded-scene set changes. The old
-            // two-second global scan caused avoidable stalls on large save loads.
+            // The TMP change event covers live changes. Scan only once when the
+            // CJK font becomes ready and once after the loaded-scene set changes.
+            // The old two-second global scan caused avoidable stalls on large
+            // save loads.
             int fingerprint = SceneManager.sceneCount;
             for (int i = 0; i < SceneManager.sceneCount; i++)
             {
@@ -187,6 +188,8 @@ namespace ScheduleIChinese
             {
                 _nextCleanup = Time.time + 60f;
                 TranslationStore.CleanupLive();
+                TextPatch.CleanupCaches();
+                NameOverlay.CleanupCache();
             }
 
             RollingScan();

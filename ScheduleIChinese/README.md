@@ -6,7 +6,8 @@
 动态对话、地点和效果名都由 BepInEx IL2CPP 插件在显示层使用本地词表
 翻译；不调用在线翻译。人物姓名、基础品种名和玩家自定义名称按设计保留。
 
-- 拦截 `TMP_Text.text`、字符串 `SetText` 重载和旧版 uGUI Text。
+- 通过 TMP 文本变更事件统一处理 `text`/`SetText`，Harmony 仅拦截
+  烘焙标签的 `OnEnable` 和旧版 uGUI Text，减少启动补丁开销。
 - 场景切换、动态面板和关系面板事件会触发有界补扫。
 - `NotoSansSC.otf` 作为动态多图集 TMP fallback。
 - 翻译文件位于 `BepInEx/plugins/ScheduleIChinese/Translations`。
