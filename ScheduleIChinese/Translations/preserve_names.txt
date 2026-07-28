@@ -1,5 +1,23 @@
 # 人物姓名保护表：左侧英文姓名，右侧是旧译名，仅用于从译文中还原英文。
 # 此文件不会把姓名加入普通翻译词典；玩家自定义名称也默认保持原样。
+# 从交互提示审计补回的 NPC 姓名/昵称。
+Addy=艾迪
+Chris=克里斯
+Cranky=怪人
+Cranky Frank=暴躁弗兰克
+Dan=丹
+Igor=伊戈尔
+Jackie=杰基
+Javier=哈维尔
+Louis=路易斯
+Mac=麦克
+Manny=曼尼
+Nelson=尼尔森
+Pam=帕姆
+Pearl=珀尔
+Tobas=托巴斯
+Uncle Nelson=尼尔森叔叔
+Wei=魏
 Adam=亚当
 Adams=亚当斯
 Albert=艾伯特

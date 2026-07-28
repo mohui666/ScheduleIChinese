@@ -508,6 +508,16 @@ namespace ScheduleIChinese
                 {
                     "$400.00 fine (paid in cash)",
                     "罚款：$400.00（现金支付）"
+                },
+                new[]
+                {
+                    "Talk to Pearl",
+                    "与 Pearl 交谈"
+                },
+                new[]
+                {
+                    "Talk to Uncle Nelson",
+                    "与 Uncle Nelson 交谈"
                 }
             };
             foreach (var check in criticalDynamic)
