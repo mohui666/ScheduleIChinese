@@ -1,7 +1,7 @@
 # v1.3.4 可见文本复查补丁。人物、品种及用户命名保持英文；动态占位符和富文本标签必须原样保留。
 
 # 主界面、操作、管理和角色定制
-Dealer Management=经销商管理
+Dealer Management=交易员管理
 Mrs.=Mrs.
 Granddaddy Purple=Granddaddy Purple
 Green Crack=Green Crack
@@ -142,7 +142,7 @@ Looks like you're gonna need somewhere low key to stay for a while. Head over to
 After that, you'll be needing some new equipment. There's a hardware store just north-east of the motel. Grab a <h1>grow tent, soil</h>, and <h1>watering can.</h>=之后还需要一些新设备。汽车旅馆东北边有家五金店，去买<h1>种植帐篷、土壤</h>和<h1>浇水壶</h>。
 Looks like you've reached your <h1>weekly deposit limit...</h> To avoid arousing suspicion, you can only deposit so much cash each week via ATMs.=看来你已达到<h1>每周存款上限</h>。为避免引起怀疑，每周通过自动取款机存入的现金有限。
 If you want to convert more cash to online balance, you're gonna need to start <h1>laundering</h>.=如果想把更多现金转为线上余额，就得开始<h1>洗钱</h>。
-First thing's first, you're gonna need a business. Go check out <h1>Rays Realty</h>. You're probably not gonna be buying out the casino any time soon, but there should be a cheap business for sale.=首先，你需要一家企业。去看看 <h1>Ray 房产</h>。你暂时大概买不起赌场，但那里应该有便宜的生意可供出售。
+First thing's first, you're gonna need a business. Go check out <h1>Rays Realty</h>. You're probably not gonna be buying out the casino any time soon, but there should be a cheap business for sale.=首先，你得先买下一家企业。去 <h1>Ray 房产</h>看看吧。赌场你暂时大概买不起，不过那里应该有便宜的企业正在出售。
 There's an old <h1>escape tunnel</h> that runs from the manor down to the cliff face beneath it. It's sealed up from the inside, but if you could get access to it, you could get real close to them without their knowing...=有一条旧的<h1>逃生隧道</h>从庄园通往下方的悬崖。入口从内部封死了，但如果能打通，你就能神不知鬼不觉地靠近他们……
 I say you treat these clowns to a taste of their own medicine. If you could plant a <h1>bomb</h> in that tunnel... well, safe to say they won't be a problem no more.=我看该让这些小丑尝尝自己的手段。如果能在隧道里放一枚<h1>炸弹</h>……那他们以后肯定不会再成为麻烦。
 A bomb of that size won't be easy to come by - go ask around <h1>Koyama Chemical Company</h> and see if someone can sneak you some raw explosives. After that, <h1>Stan</h>, the weapons dealer, should be able to wire it up to a usable bomb for you.=那么大的炸弹可不好弄——去<h1>小山化工公司</h>打听一下，看有没有人能偷运些炸药原料给你。之后，军火商 <h1>Stan</h> 应该能把它装配成可用的炸弹。
@@ -198,7 +198,7 @@ You’re welcome friend. If you need special equipment or supplies, Oscar has wh
 Hmm... Oscar seen one lying around somewhere in <color\=blue><REGION></color> I think...=嗯……Oscar 好像见过一把，应该丢在 <color\=blue><REGION></color> 的某个地方……
 Oh! and I remember hearing <color\=blue><NPC_DESCRIPTION></color> has one! Sorry, Oscar isn't very good with names. Hope this helps.=哦！我想起来了，听说 <color\=blue><NPC_DESCRIPTION></color> 有一把！抱歉，Oscar 不太会记名字，希望这能帮到你。
 No it ain't. Infact, ol' Nellie already owes us some serious cash...=才不是。事实上，老 Nellie 已经欠了我们一大笔钱……
-Hey, it’s Ray. If you’re looking to purchase any properties or businesses in town - I’m your guy. Come down to Ray’s Realty (just south of town hall) to see our available listings.=嘿，我是 Ray。如果你想购买镇上的房产或企业，就来找我。到市政厅南边的 Ray 房产看看现有挂牌项目。
+Hey, it’s Ray. If you’re looking to purchase any properties or businesses in town - I’m your guy. Come down to Ray’s Realty (just south of town hall) to see our available listings.=嘿，我是 Ray。想买镇上的房产或企业，找我就对了。来市政厅南边的 Ray 房产看看现有房源吧。
 
 # NPC 短句与环境感叹
 The hell?!=搞什么？！
@@ -224,3 +224,64 @@ Enough!!=够了！！
 SHIT!=操！
 You crazy?=你疯了？
 HEY!=嘿！
+
+# v1.3.52 全量文本复核：统一职业、经营、车辆和秘密交货术语
+Add Dealer=添加交易员
+Assigned Dealer=已分配的交易员
+Choose Dealer=选择交易员
+DEALER=交易员
+Dealer=交易员
+Dealer Assignments=交易员分配
+Dealer Earnings=交易员收益
+Dealer Settings=交易员设置
+Dealers=交易员
+No dealers assigned=未分配交易员
+Business=企业
+Businesses=企业
+Cartel=卡特尔
+Cauldron=反应锅
+Chemists=化学师
+chemists=化学师
+Fixer=中间人
+Shroom=迷幻蘑菇
+Shrooms=迷幻蘑菇
+Weather=天气
+
+# 车辆型号采用短而有辨识度的中文名
+Bruiser=猛汉
+Hotbox=闷烟车
+hotbox=闷烟车
+Hounddog=猎犬
+hounddog=猎犬
+Hotbox Trunk=闷烟车后备箱
+
+# 供应商订单中的 dead drop 统一为“秘密交货（点）”
+Collect Dead Drop=前往秘密交货点取货
+Collect the dead drop=前往秘密交货点取货
+Collect the dead drop.=前往秘密交货点取货。
+Dead Drop=秘密交货点
+I need a dead drop:=我想安排一次秘密交货：
+I need to order a dead drop=我想订一批货，请安排秘密交货
+Request Dead Drop=请求秘密交货
+Request dead drop=请求秘密交货
+View dead drop=查看秘密交货点
+Wait for the dead drop=等待秘密交货准备完成
+Don't leave items attended for too long in dead drops, otherwise they might be stolen...=不要把物品在秘密交货点放太久，否则可能会被偷走……
+
+# 剧情称谓、品牌和显眼机器翻译修正
+Excellent taste, formal_address=眼光不错。
+Fungal Phil=Fungal Phil
+Rays Realty=Ray 房产
+Dealer's turn...=庄家回合……
+Dealers keep getting robbed? Give them a weapon to defend themselves with.=交易员老是被抢？给他们一件武器防身。
+Dealers will automatically split up bricks/jars when necessary.=必要时，交易员会自动拆分砖块或罐装货品。
+Dealers will sell whatever is in their inventory, regardless of if it's listed for sale or not.=交易员会卖出库存里的任何货品，无论是否已经上架。
+Dealers will sell whatever is in their inventory, regardless of it's listed for sale or not.=交易员会卖出库存里的任何货品，无论是否已经上架。
+Make sure you are providing the right quality product to your dealers for their assigned customers.=务必给交易员提供符合其顾客品质要求的货品。
+Recruit and manage your first dealer to handle distribution for you.=招募并管理你的第一名交易员，让对方替你出货。
+Recruit Benji Coleman as a dealer=招募 Benji Coleman 担任交易员
+This dealer is ready to be hired. Go to them and pay their signing free to recruit them.=这名交易员已经可以雇用了。去找对方支付签约费，即可完成招募。
+Use the <color\=#88CBFF>dealer management app</color> to assign customers to dealers.=使用<color\=#88CBFF>交易员管理应用</color>给交易员分配顾客。
+You can assign customers to me with the dealer management app on your phone.=你可以用手机上的交易员管理应用给我分配顾客。
+Your employees (excluding dealers) will consume any bagged product that you place in their inventory.=除交易员外，员工会食用你放进其物品栏的任何袋装货品。
+You can now order <color\=#88CBFF>pseudo</color> from Shirley. Pseudo is the main precursor ingredient for <color\=#88CBFF>methamphetamine</color>.=你现在可以向 Shirley 订购<color\=#88CBFF>伪麻黄碱</color>。伪麻黄碱是生产<color\=#88CBFF>冰毒</color>的主要前体原料。
