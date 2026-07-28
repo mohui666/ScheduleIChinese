@@ -418,7 +418,8 @@ namespace ScheduleIChinese
                 Translate("40x Granddaddy Purple") != null ||
                 Translate("OG Kush") != null ||
                 Translate("Sour Diesel") != null ||
-                Translate("Face") != null)
+                Translate("Face") != null ||
+                Translate("Jump") != null)
                 failed++;
             var compositeEffects = TranslateDisplayText(
                 "<color=#4CB0FF>• Focused</color>\n" +

@@ -21,6 +21,8 @@ namespace ScheduleIChinese
         private static readonly HashSet<int> _nullFontRebuilt = new HashSet<int>();
         private static readonly Dictionary<int, FaceContextEntry> FaceContextById =
             new Dictionary<int, FaceContextEntry>();
+        private static readonly Dictionary<int, WeakReference<TMP_Text>> ArcadeControlById =
+            new Dictionary<int, WeakReference<TMP_Text>>();
         private static Il2CppSystem.Action<UnityEngine.Object> _textChangedHandler;
 
         private sealed class PendingText
@@ -115,6 +117,11 @@ namespace ScheduleIChinese
 
         private static string TranslateContextual(TMP_Text comp, string source)
         {
+            if ((string.Equals(source, "Jump", StringComparison.Ordinal) ||
+                 string.Equals(source, "Drop", StringComparison.Ordinal)) &&
+                IsArcadeControlLabel(comp))
+                return source == "Jump" ? "跳跃" : "下落";
+
             // "Face" is an appearance enum value and therefore deliberately
             // remains on the global denylist. It is safe to localize only the
             // visible tattoo-shop category label.
@@ -181,6 +188,71 @@ namespace ScheduleIChinese
             return null;
         }
 
+        private static bool IsArcadeControlLabel(TMP_Text comp)
+        {
+            if (comp == null) return false;
+            try
+            {
+                int id = comp.GetInstanceID();
+                if (ArcadeControlById.TryGetValue(id, out var cached))
+                {
+                    if (cached.TryGetTarget(out var cachedComp) &&
+                        cachedComp != null &&
+                        cachedComp.gameObject != null)
+                        return true;
+                    ArcadeControlById.Remove(id);
+                }
+
+                bool isArcadeControl = false;
+                var ancestor = comp.transform;
+                for (int depth = 0; depth < 8 && ancestor != null; depth++)
+                {
+                    var ancestorName = ancestor.name;
+                    if (ancestorName.IndexOf(
+                            "Arcade",
+                            StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        ancestorName.IndexOf(
+                            "Minigame",
+                            StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        isArcadeControl = true;
+                        break;
+                    }
+
+                    bool hasSpace = false;
+                    bool hasCtrl = false;
+                    bool hasScore = false;
+                    foreach (var label in ancestor.GetComponentsInChildren<TMP_Text>(true))
+                    {
+                        if (label == null) continue;
+                        var text = label.text;
+                        if (text == "Space") hasSpace = true;
+                        else if (text == "Ctrl") hasCtrl = true;
+                        else if (text == "High Score" || text == "HIGH SCORE" ||
+                                 text == "最高分" || text == "最高分数" ||
+                                 text == "Score" || text == "SCORE" ||
+                                 text == "分数")
+                            hasScore = true;
+
+                        if (hasSpace && hasCtrl && hasScore)
+                        {
+                            isArcadeControl = true;
+                            break;
+                        }
+                    }
+                    if (isArcadeControl) break;
+                    ancestor = ancestor.parent;
+                }
+
+                if (isArcadeControl)
+                    ArcadeControlById[id] =
+                        new WeakReference<TMP_Text>(comp);
+                return isArcadeControl;
+            }
+            catch { }
+            return false;
+        }
+
         private static void TransformImmediate(TMP_Text comp, ref string value)
         {
             if (comp == null || string.IsNullOrEmpty(value))
@@ -236,6 +308,27 @@ namespace ScheduleIChinese
                 }
                 foreach (int id in dead)
                     FaceContextById.Remove(id);
+            }
+
+            if (ArcadeControlById.Count > 0)
+            {
+                var dead = new List<int>();
+                foreach (var pair in ArcadeControlById)
+                {
+                    try
+                    {
+                        if (!pair.Value.TryGetTarget(out var comp) ||
+                            comp == null ||
+                            comp.gameObject == null)
+                            dead.Add(pair.Key);
+                    }
+                    catch
+                    {
+                        dead.Add(pair.Key);
+                    }
+                }
+                foreach (int id in dead)
+                    ArcadeControlById.Remove(id);
             }
         }
 
