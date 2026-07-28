@@ -2,6 +2,9 @@
 # 规则必须匹配整段文本；$1/${name} 为捕获组，$$ 为美元符号。
 # 仅供本离线插件使用，不启用在线翻译。
 r:^\\[(\\d+)\\]\\s+(Cheap Skateboard|Skateboard|Lightweight Skateboard|Cruiser|Golden Skateboard|Offroad Skateboard)\\s+\\((\\$[\\d,]+)\\)$=[$1] $2 ($3)
+r:^\\[(\\d+)\\]\\s+\\[Complete Deal\\]$=[$1] [完成交易]
+r:^\\[(\\d+)\\]\\s+I want to buy a sewer access key$=[$1] 我想买一把下水道通行钥匙
+r:^'FRIENDLY' RELATIONSHIP REQUIRED$=需要达到“友好”关系
 r:^Pick up (.+)$=拾取$1
 r:^(.+) required$=需要$1
 r:'(.+)' REGION MUST BE UNLOCKED=必须先解锁“$1”区域
@@ -17,7 +20,7 @@ r:(.+)'s Inventory=$1 的物品栏
 r:(.+)'s Stash=$1 的藏匿处
 r:(.+)<color\=#A0A0A0FF> \\((.+)\\)</color>=$1<color\=#A0A0A0FF>（$2）</color>
 r:(.+)\\n\\(Dealer\\)=$1（交易员）
-r:(?:Great, I'll meet you|Ok, I'll meet you|Alright cool, I'll meet you|Sweet as homie, I'll meet you|Hell yeah my friend, I'll meet you|Sick as, I'll meet you|Cheers bro, I'll meet you) <b>(.+?)</b> between (\\d{1,2}:\\d{2} [AP]M) and (\\d{1,2}:\\d{2} [AP]M)\\.=好的，$2 至 $3 在<b>$1</b>见。
+r:(?:Great, I'll meet you|Ok, I'll meet you|Alright cool, I'll meet you|Sweet as homie, I'll meet you|Hell yeah my friend, I'll meet you|Sick as, I'll meet you|Cheers bro, I'll meet you) <b>(.+?)</b> between (\\d{1,2}:\\d{2} [AP]M) and (\\d{1,2}:\\d{2} [AP]M)\\.=好的，$2 至 $3 <b>$1</b>见。
 r:(?i)^Bagman ([IVX]+)$=押货人 $1
 r:(?i)^Baron ([IVX]+)$=大亨 $1
 r:(?i)^Block Boss ([IVX]+)$=街区老大 $1
@@ -29,7 +32,7 @@ r:(?i)^Peddler ([IVX]+)$=小贩 $1
 r:(?i)^Shot Caller ([IVX]+)$=话事人 $1
 r:(?i)^Street Rat ([IVX]+)$=街头混混 $1
 r:(?i)^Underlord ([IVX]+)$=地下霸主 $1
-r:(?i)^Unlocks at <color\=#2DB92D>(.+) ([IVX]+)</color>$=在 <color\=#2DB92D>$1 $2</color> 解锁
+r:(?i)^Unlocks at <color\=#2DB92D>(.+) ([IVX]+)</color>$=解锁：<color\=#2DB92D>$1 $2</color>
 r:([A-Za-z\\s]+) will draw his daily wage of <color\=#54E717>(\\$\\d+)<\\/color> from this briefcase\\.=$1 将从这个公文包提取 <color\=#54E717>$2</color> 作为他的每日工资。
 r:(\\d+) \\/ (\\d+) XP=$1 / $2 经验值
 r:(\\d+) Customers\n(\\d+) Suppliers\n(\\d+) Dealer=$1 位顾客\n$2 位供应商\n$3 位交易员
@@ -55,7 +58,7 @@ r:(\\d+)° C=$1°C
 r:(\\d+)°C=$1°C
 r:(\\d+x) (.+)\\, (.+)=$1 份 $2 | $3
 r:(\\d{1,2}:\\d{2} [AP]M) ([A-Za-z]+)=$1 $2
-r:(Great, I'll meet you|Ok, I'll meet you|Alright cool, I'll meet you|Sweet as homie, I'll meet you|Hell yeah my friend, I'll meet you|Sick as, I'll meet you|Cheers bro, I'll meet you) <b>(.+?)</b> between (\\d{1,2}:\\d{2} [AP]M) and (\\d{1,2}:\\d{2} [AP]M).=$1 $3 到 $4 之间在 $2 见你。
+r:(Great, I'll meet you|Ok, I'll meet you|Alright cool, I'll meet you|Sweet as homie, I'll meet you|Hell yeah my friend, I'll meet you|Sick as, I'll meet you|Cheers bro, I'll meet you) <b>(.+?)</b> between (\\d{1,2}:\\d{2} [AP]M) and (\\d{1,2}:\\d{2} [AP]M).=$3 至 $4 <b>$2</b>见。
 r:- Property\n- Property\n- Property\n- Property\n\\+ (\\d+) More=- 房产\n- 房产\n- 房产\n- 房产\n+ 另有 $1 处
 r:<color\=#FFC73D>(\\d+)x</color> (.+)=<color\=#FFC73D>$1 份</color> $2
 r:<color\=(#[0-9A-Fa-f]{6,8})>(.+)</color>=<color\=$1>$2</color>
@@ -106,9 +109,13 @@ r:^(\\d+)AM-(\\d+)PM$=上午$1点-下午$2点
 r:^(\\d+)PM-(\\d+)AM$=下午$1点-上午$2点
 r:^(\\d+)PM-(\\d+)PM$=下午$1点-下午$2点
 r:^(\\d{1,2}) hours$=$1 小时
-r:^<color\=#54E717>(\\+\\$\\d+)</color> Curfew Bonus$=+<color\=#54E717>$1</color> 宵禁奖金
-r:^<color\=#54E717>(\\+\\$\\d+)</color> Quality Bonus$=+<color\=#54E717>$1</color> 品质奖金
-r:^<color\=#54E717>(\\+\\$\\d+)</color> Quick Delivery Bonus$=+<color\=#54E717>$1</color> 快速送达奖金
+r:^<color\=#54E717>(\\+\\$\\d+)</color> Curfew Bonus$=<color\=#54E717>$1</color> 宵禁奖金
+r:^<color\=#54E717>(\\+\\$\\d+)</color> Quality Bonus$=<color\=#54E717>$1</color> 品质奖金
+r:^<color\=#54E717>(\\+\\$\\d+)</color> Quick Delivery Bonus$=<color\=#54E717>$1</color> 快速送达奖金
+r:^<color\=#54E717>(\\+\\$\\d+)</color> Exceeded Quality Bonus$=<color\=#54E717>$1</color> 超额品质奖金
+r:^<color\=#54E717>(\\+\\$\\d+)</color> Rainy Bonus$=<color\=#54E717>$1</color> 雨天奖金
+r:^(\\+\\$\\d+) Exceeded Quality Bonus$=$1 超额品质奖金
+r:^(\\+\\$\\d+) Rainy Bonus$=$1 雨天奖金
 r:^\\$([0-9]+)K$=$$$1千
 r:^\\$([0-9]+)M$=$$$1百万
 r:^\\[PawnShop receipt\\]\n\n(.+)\\: (\\d+) x \\$(\\d{1,3}(?:,\\d{3})*) \= \\$(\\d{1,3}(?:,\\d{3})*)\n\nTotal: \\$(\\d{1,3}(?:,\\d{3})*) — Mick$=[当铺收据]\n\n$1\\: $2 x $$$3 \= $$$4\n\n总计\\: $$$5 — Mick
@@ -157,6 +164,7 @@ r:^Use (.+)$=使用 $1
 r:^v((\\d+)\\.(\\d+)\\.(\\d+)f(\\d+)) Alternate$=v$1 替代|简体中文版
 r:^v((\\d+)\\.(\\d+)\\.(\\d+)f(\\d+))$=v$1 简体中文版
 r:^Waiting for (.+)\\.\\.\\.$=正在等待 $1……
+r:^Waiting for others\\.\\.\\.$=正在等待其他玩家……
 r:^Waiting for players\\.{3} \\((\\d+/\\d+)\\)$=等待玩家 ($1)
 r:^We’ll buy your items for (\\d+)% of their retail value!$=我们将用物品零售价的 $1% 收购你的物品！
 r:^Working on it\\. Should be ready in around (\\d+) hour(s?) (\\d+) min$=正在处理。大约 $1 小时 $3 分钟后准备好。
@@ -174,15 +182,16 @@ r:Assigned Customers \\((\\d+)\\/(\\d+)\\)=已分配顾客 ($1/$2)
 r:Assigned Stations \\((\\d+)/(\\d+)\\)=已分配的工作站 ($1/$2)
 r:Assigned to (.+)=分配给 $1
 r:Autosave_(.+)=自动保存_$1
-r:Ay bro you got ([0-9]+)x (.+?)\\? I'll pay <color\=#46CB4F>(.+?)<\\/color> for it=嘿兄弟，你有 $1 份 $2 吗？我出 <color\=#46CB4F>$$$3</color>。
+r:Ay bro you got ([0-9]+)x (.+?)\\? I'll pay <color\=#46CB4F>(.+?)<\\/color> for it=嘿兄弟，你有 $1 份 $2 吗？我出 <color\=#46CB4F>$3</color>。
 r:Ayo dawg, if you got (.+) I'll pay <color\=#46CB4F>(.+)<\\/color> for it. Deal?=嘿哥们，如果你有 $1，我愿意付 <color\=#46CB4F>$2</color>，成交？
+r:^Ayo dawg, if you got (.+?) I'll pay (.+?) for it\\. Deal\\?$=嘿哥们，你有 $1 吗？我出 $2。成交吗？
 r:Bungalow \\[(\\d+)\\]=平房 [$1]
-r:Click and hold over buds to harvest \\((\\d+)/(\\d+)\\)=点击并按住花蕾进行收获 ($1/$2)
-r:Click and hold over leaves to harvest \\((\\d+)/(\\d+)\\)=点击并按住叶子进行收获 ($1/$2)
+r:Click and hold over buds to harvest \\((\\d+)/(\\d+)\\)=点击并按住花穗进行采收 ($1/$2)
+r:Click and hold over leaves to harvest \\((\\d+)/(\\d+)\\)=点击并按住叶片进行采收 ($1/$2)
 r:Click and hold over mushrooms to harvest (.+)=点击并按住蘑菇进行收获 $1
-r:Click and hold tap to fill (.+)=在水龙头处按住操作，为 $1 加水
-r:Click buds to harvest \\((\\d+)\\/(\\d+)\\)=点击花蕾以收获 ($1/$2)
-r:Click leaves to harvest \\((\\d+)/(\\d+)\\)=点击叶子进行收获 ($1/$2)
+r:Click and hold tap to fill (.+)=在水龙头处按住操作键，加水至 $1
+r:Click buds to harvest \\((\\d+)\\/(\\d+)\\)=点击花穗进行采收 ($1/$2)
+r:Click leaves to harvest \\((\\d+)/(\\d+)\\)=点击叶片进行采收 ($1/$2)
 r:Click soil chunks to bury seed \\((\\d+)\\/(\\d+)\\)=点击土块以埋下种子 ($1/$2)
 r:Combine ingredients in (beaker|bowl) \\((\\d{1,2})/(\\d{1,2})\\)=在$1中混合成分 ($2/$3)
 r:Complete 3 deals (.+)=完成3笔交易 $1
@@ -218,8 +227,8 @@ r:Earn (.+) \\((.+)\\/(.+)\\)=赚取 $1 ($2/$3)
 r:EMPLOYEE LIMIT REACHED \\((\\d+)/(\\d+)\\)=员工数量已达上限 ($1/$2)
 r:Fair price: (.+)=公平价格：$1
 r:Forfeit and collect (.+)=放弃并收取 $1
-r:Good!! I'll see u <b>(.+)</b> between (\\d{1,2}:\\d{2} [AP]M) and (\\d{1,2}:\\d{2} [AP]M)\\.=好！！$2 至 $3 在<b>$1</b>见。
-r:Good!! I'll see u <b>(.+)<\\/b> between (\\d{1,2}:\\d{2} [AP]M) and (\\d{1,2}:\\d{2} [AP]M).=好的！！我会在 $2 到 $3 之间在 <b>$1</b> 见你。
+r:Good!! I'll see u <b>(.+)</b> between (\\d{1,2}:\\d{2} [AP]M) and (\\d{1,2}:\\d{2} [AP]M)\\.=好！！$2 至 $3 <b>$1</b>见。
+r:Good!! I'll see u <b>(.+)<\\/b> between (\\d{1,2}:\\d{2} [AP]M) and (\\d{1,2}:\\d{2} [AP]M).=好的！！$2 至 $3 <b>$1</b>见。
 r:Got it\\. I'll let you know when it's ready\\. Should be about (\\d+) hour(s?) (\\d+) min$=知道了。大约 $1 小时 $3 分钟后准备好时我会通知你。
 r:Got it\\. I'll let you know when it's ready\\. Should be about (\\d+) hour(s?) (\\d+) min\\.$=知道了。大约 $1 小时 $3 分钟后准备好时我会通知你。
 r:Got it\\. I'll let you know when it's ready\\. Should be about (\\d+) hour(s?)$=知道了。大约 $1 小时后准备好时我会通知你。
@@ -290,7 +299,8 @@ r:Police curfew in effect until (\\d+)AM=警方宵禁生效至上午 $1 点
 r:Poor (.)=劣质 $1
 r:Potential Customer\n(.+)=潜在顾客\n$1
 r:Potential Dealer\n(.+)=潜在交易员\n$1
-r:Pour into pot (.+)=倒入锅中 $1
+r:Pour into pot \\((\\d+%)\\)=倒入花盆中（$1）
+r:Pour into pot (.+)=倒入花盆中 $1
 r:Pour product into mould \\((\\d+)/(\\d+)\\)$=将产品倒入模具 ($1/$2)
 r:Pour soil into pot (.+)=将土壤倒入盆中 $1
 r:Push the plunger (.+)=推动柱塞 $1
@@ -316,7 +326,9 @@ r:Total: <color\=#5AB95AFF>(.+)<\\/color>=总计： <color\=#5AB95AFF>$1</color>
 r:U got (\\d+)x (.+?)\\?\\?\\? I'll pay <color\=#46CB4F>(.+?)<\\/color> for it\\. DEAL\\?=你有 $1 份 $2 吗？？？我出 <color\=#46CB4F>$3</color>。成交？！
 r:Unlock (\\d+) customers (.+)=解锁 $1 位顾客 $2
 r:UNLOCK ONE OF (.+?)'S CONNECTIONS FIRST=必须先解锁$1的其中一位人脉
-r:Unlocks at (.+) ([IVX]+)=在 <color\=#2DB92D>$1 $2</color> 解锁
+r:UNLOCK ONE OF (.+?)'S CONNECTIONS=解锁 $1 的一位人脉
+r:^Much appreciated\\. Maybe go talk to (.+)\\. I think (?:she|he|they)'d like your product$=多谢。去找 $1 聊聊吧，我觉得对方会喜欢你的货。
+r:Unlocks at (.+) ([IVX]+)=解锁：<color\=#2DB92D>$1 $2</color>
 r:View (.+)'s stash=查看 $1 的藏匿处
 r:Wait (\\d+)s=等待 $1 秒
 r:Wait for the dead drop \\((\\d+) mins\\)=等待秘密交货（剩余 $1 分钟）

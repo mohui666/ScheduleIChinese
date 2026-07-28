@@ -523,6 +523,66 @@ namespace ScheduleIChinese
                 {
                     "Sewer Key required",
                     "需要下水道钥匙"
+                },
+                new[]
+                {
+                    "[1] [Complete Deal]",
+                    "[1] [完成交易]"
+                },
+                new[]
+                {
+                    "[1] I want to buy a sewer access key",
+                    "[1] 我想买一把下水道通行钥匙"
+                },
+                new[]
+                {
+                    "'FRIENDLY' RELATIONSHIP REQUIRED",
+                    "需要达到“友好”关系"
+                },
+                new[]
+                {
+                    "Waiting for others...",
+                    "正在等待其他玩家……"
+                },
+                new[]
+                {
+                    "Click and hold tap to fill (86%)",
+                    "在水龙头处按住操作键，加水至 (86%)"
+                },
+                new[]
+                {
+                    "Pour into pot (32%)",
+                    "倒入花盆中（32%）"
+                },
+                new[]
+                {
+                    "Ay bro you got 4x OG Kush? I'll pay <color=#46CB4F>$195</color> for it",
+                    "嘿兄弟，你有 4 份 OG Kush 吗？我出 <color=#46CB4F>$195</color>。"
+                },
+                new[]
+                {
+                    "<color=#54E717>+$25</color> Exceeded Quality Bonus",
+                    "<color=#54E717>+$25</color> 超额品质奖金"
+                },
+                new[]
+                {
+                    "<color=#54E717>+$33</color> Rainy Bonus",
+                    "<color=#54E717>+$33</color> 雨天奖金"
+                },
+                new[]
+                {
+                    "Good!! I'll see u <b>at the north waterfront</b> between 12:00 PM and 6:00 PM.",
+                    "好的！！12:00 PM 至 6:00 PM <b>在北滨水区</b>见。"
+                },
+                new[]
+                {
+                    "UNLOCK ONE OF BRAD'S CONNECTIONS",
+                    "解锁 BRAD 的一位人脉"
+                },
+                new[]
+                {
+                    "Much appreciated. Maybe go talk to Chelsey. I think she'd like your product",
+                    "多谢。去找 Chelsey 聊聊吧，我觉得对方会喜欢你的货。"
                 }
             };
             foreach (var check in criticalDynamic)
@@ -536,7 +596,38 @@ namespace ScheduleIChinese
                         $"'{Escape(actual ?? "<null>")}', expected '{Escape(check[1])}'");
                 }
             }
-            var total = samples.Length + 4 + criticalDynamic.Length;
+
+            var criticalDisplay = new[]
+            {
+                new[] { "OG 库什种子", "OG Kush 种子" },
+                new[] { "蓝梦种子", "Blue Dream 种子" },
+                new[] { "请求秘密交货", "安排秘密交货" },
+                new[]
+                {
+                    "从 Albert 那选择要订购的东西",
+                    "选择向 Albert 订购的商品"
+                }
+            };
+            foreach (var check in criticalDisplay)
+            {
+                var actual = TranslateDisplayText(check[0]);
+                if (!string.Equals(actual, check[1], StringComparison.Ordinal))
+                {
+                    failed++;
+                    Plugin.Log.LogWarning(
+                        $"Display self-test mismatch: '{Escape(check[0])}' => " +
+                        $"'{Escape(actual ?? "<null>")}', expected '{Escape(check[1])}'");
+                }
+            }
+
+            if (Translate("Andy ") != null ||
+                Translate("Chelsey") != null ||
+                Translate("KAESUL") != null ||
+                Translate("HYDROBRO") != null)
+                failed++;
+
+            var total = samples.Length + 5 +
+                        criticalDynamic.Length + criticalDisplay.Length;
             if (failed == 0)
                 Plugin.Log.LogInfo($"Offline translation self-test passed ({total}/{total}).");
             else
@@ -604,6 +695,10 @@ namespace ScheduleIChinese
         {
             if (string.IsNullOrEmpty(src) || src.Length > 1000) return null;
             if (_preserveNames.Contains(src)) return null;
+            var protectedTrimmed = src.Trim();
+            if (protectedTrimmed.Length > 0 &&
+                _preserveNames.Contains(protectedTrimmed))
+                return null;
             if (_resultCache.TryGetValue(src, out var cached))
             {
                 _resultCacheHits++;
@@ -697,6 +792,13 @@ namespace ScheduleIChinese
             }
             else if (source.IndexOf('\n') < 0)
             {
+                // Curated corrections may intentionally use an already-Chinese
+                // string as their key. This repairs stale Auto.zh_CN output and
+                // inconsistent built-in terms without sending mixed text through
+                // the normal English translation path.
+                if (_dict.TryGetValue(source, out var corrected) &&
+                    !string.Equals(source, corrected, StringComparison.Ordinal))
+                    return corrected;
                 return null;
             }
 
@@ -917,7 +1019,7 @@ namespace ScheduleIChinese
             // Product request captures often contain "2x Meth" as one group.
             var quantity = Regex.Match(trimmed, @"\A(\d+)x\s+(.+)\z");
             if (quantity.Success && _dict.TryGetValue(quantity.Groups[2].Value, out translated))
-                return quantity.Groups[1].Value + " 份" +
+                return quantity.Groups[1].Value + " 份 " +
                        RestoreNames(quantity.Groups[2].Value, translated);
 
             return value;

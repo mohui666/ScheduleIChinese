@@ -51,7 +51,7 @@ Cartel Intro Note=卡特尔来信
 # 工作台与员工管理提示
 ^Any required materials will be automatically retrieved from here=^所需材料会自动从这里取用
 ^ Supplies will be  retrieved from here=^补给品会从这里取用
-^Minimum amount of buds/leaves for the assigned botanist to begin the drying process=^分配的种植员开始晾晒所需的花苞/叶片最低数量
+^Minimum amount of buds/leaves for the assigned botanist to begin the drying process=^分配的种植员开始晾晒所需的花穗/叶片最低数量
 Select destination for packaging station output=选择打包台产物的存放位置
 Select destination for pot output=选择花盆产物的存放位置
 Select destination for spawn station output=选择菌种培育台产物的存放位置
@@ -285,3 +285,37 @@ Use the <color\=#88CBFF>dealer management app</color> to assign customers to dea
 You can assign customers to me with the dealer management app on your phone.=你可以用手机上的交易员管理应用给我分配顾客。
 Your employees (excluding dealers) will consume any bagged product that you place in their inventory.=除交易员外，员工会食用你放进其物品栏的任何袋装货品。
 You can now order <color\=#88CBFF>pseudo</color> from Shirley. Pseudo is the main precursor ingredient for <color\=#88CBFF>methamphetamine</color>.=你现在可以向 Shirley 订购<color\=#88CBFF>伪麻黄碱</color>。伪麻黄碱是生产<color\=#88CBFF>冰毒</color>的主要前体原料。
+
+# v1.3.54 实机反馈：角色创建、专名、任务与动态界面
+Andy =Andy
+Dismiss=关闭
+Enter=Enter
+Female=女
+Male=男
+Making the Rounds=拓展客源
+Provide a sample to Chelsey near the doctor's office=在诊所附近给 Chelsey 一份样品
+Place a product here for Chelsey to try=把货品放在这里供 Chelsey 试用
+Reach 'friendly' relationship status with Chloe, Ludwig, or Beth=与 Chloe、Ludwig 或 Beth 的关系达到“友好”
+Insert packaged product into output=将包装好的货品放入出货口
+Grab the trimmers from the storage rack and harvest the fully-grown weed plant=从储物架上拿起修枝剪，收获成熟的大麻植株
+Eyebrow Scale=眉毛大小
+Eye Color=眼睛颜色
+Mohawk=鸡冠头
+Balding=秃顶
+Messy Mullet=凌乱狼尾
+Mullet=狼尾发型
+Side-part Bob=侧分波波头
+others=其他玩家
+KAESUL=KAESUL
+HYDROBRO=HYDROBRO
+OG Kush Seed=OG Kush 种子
+Request Dead Drop=安排秘密交货
+Request dead drop=安排秘密交货
+Next to Bud's Bar=Bud's Bar 旁边
+
+# 修正旧自动翻译或游戏内已生成的混合中文
+请求秘密交货=安排秘密交货
+从 Albert 那选择要订购的东西=选择向 Albert 订购的商品
+OG 库什种子=OG Kush 种子
+OG库什种子=OG Kush 种子
+蓝梦种子=Blue Dream 种子

@@ -149,7 +149,10 @@ namespace ScheduleIChinese
                     throw new InvalidOperationException("Failed to create TextMeshProUGUI.");
 
                 overlay.raycastTarget = false;
-                overlay.maskable = false;
+                // Shop entries live inside a masked ScrollRect. Disabling masking
+                // lets translated names from rows below the viewport bleed into
+                // the otherwise blank area under the shop window.
+                overlay.maskable = true;
                 overlay.overflowMode = TextOverflowModes.Overflow;
 
                 var cjkFont = FontService.CjkFont;
@@ -253,6 +256,16 @@ namespace ScheduleIChinese
             destination.wordSpacing = source.wordSpacing;
             destination.lineSpacing = source.lineSpacing;
             destination.paragraphSpacing = source.paragraphSpacing;
+
+            // Keep the generated CJK label clipped by the same scroll-view mask
+            // as the original item name.
+            if (destination is TextMeshProUGUI destinationUi)
+            {
+                if (source is TextMeshProUGUI sourceUi)
+                    destinationUi.maskable = sourceUi.maskable;
+                else
+                    destinationUi.maskable = true;
+            }
         }
 
         private static string GetTransformPath(Transform transform)

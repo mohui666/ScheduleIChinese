@@ -23,6 +23,8 @@ namespace ScheduleIChinese
             new Dictionary<int, FaceContextEntry>();
         private static readonly Dictionary<int, WeakReference<TMP_Text>> ArcadeControlById =
             new Dictionary<int, WeakReference<TMP_Text>>();
+        private static readonly Dictionary<int, SafeUiContextEntry> SafeUiContextById =
+            new Dictionary<int, SafeUiContextEntry>();
         private static Il2CppSystem.Action<UnityEngine.Object> _textChangedHandler;
 
         private sealed class PendingText
@@ -34,6 +36,23 @@ namespace ScheduleIChinese
         private sealed class FaceContextEntry
         {
             public WeakReference<TMP_Text> Component;
+        }
+
+        [Flags]
+        private enum SafeUiContext
+        {
+            None = 0,
+            CharacterCreator = 1,
+            Phone = 2,
+            ItemQuality = 4,
+            Hotbar = 8,
+            InputPrompt = 16
+        }
+
+        private sealed class SafeUiContextEntry
+        {
+            public WeakReference<TMP_Text> Component;
+            public SafeUiContext Contexts;
         }
 
         /// <summary>
@@ -123,6 +142,9 @@ namespace ScheduleIChinese
                 IsArcadeControlLabel(comp))
                 return source == "Jump" ? "跳跃" : "下落";
 
+            var safeLabel = TranslateSafeUiLabel(comp, source);
+            if (safeLabel != null) return safeLabel;
+
             // "Face" is an appearance enum value and therefore deliberately
             // remains on the global denylist. It is safe to localize only the
             // visible tattoo-shop category label.
@@ -187,6 +209,221 @@ namespace ScheduleIChinese
             }
             catch { }
             return null;
+        }
+
+        private static string TranslateSafeUiLabel(TMP_Text comp, string source)
+        {
+            if (comp == null || string.IsNullOrEmpty(source)) return null;
+
+            switch (source)
+            {
+                case "Phone":
+                    return HasSafeUiContext(comp, SafeUiContext.Phone)
+                        ? "手机" : null;
+                case "Character":
+                    return HasSafeUiContext(comp, SafeUiContext.Phone)
+                        ? "角色" : null;
+                case "Yes":
+                    return HasSafeUiContext(comp, SafeUiContext.Phone)
+                        ? "接受" : null;
+                case "[Counter-offer]":
+                    return HasSafeUiContext(comp, SafeUiContext.Phone)
+                        ? "还价" : null;
+                case "Back":
+                    return HasSafeUiContext(comp, SafeUiContext.CharacterCreator) ||
+                           HasSafeUiContext(comp, SafeUiContext.Phone) ||
+                           HasSafeUiContext(comp, SafeUiContext.InputPrompt)
+                        ? "返回" : null;
+                case "Body":
+                    return HasSafeUiContext(comp, SafeUiContext.CharacterCreator)
+                        ? "身体" : null;
+                case "Hair":
+                    return HasSafeUiContext(comp, SafeUiContext.CharacterCreator)
+                        ? "发型" : null;
+                case "Eyebrows":
+                    return HasSafeUiContext(comp, SafeUiContext.CharacterCreator)
+                        ? "眉毛" : null;
+                case "Eyes":
+                    return HasSafeUiContext(comp, SafeUiContext.CharacterCreator)
+                        ? "眼睛" : null;
+                case "Clothing":
+                    return HasSafeUiContext(comp, SafeUiContext.CharacterCreator)
+                        ? "服装" : null;
+                case "Top":
+                    return HasSafeUiContext(comp, SafeUiContext.CharacterCreator)
+                        ? "上装" : null;
+                case "Cash":
+                    return HasSafeUiContext(comp, SafeUiContext.Hotbar)
+                        ? "现金" : null;
+                case "Trash":
+                    return HasSafeUiContext(comp, SafeUiContext.ItemQuality)
+                        ? "垃圾" : null;
+                case "Poor":
+                    return HasSafeUiContext(comp, SafeUiContext.ItemQuality)
+                        ? "劣质" : null;
+                case "Standard":
+                    return HasSafeUiContext(comp, SafeUiContext.ItemQuality)
+                        ? "标准" : null;
+                case "Premium":
+                    return HasSafeUiContext(comp, SafeUiContext.ItemQuality)
+                        ? "优质" : null;
+                case "Heavenly":
+                    return HasSafeUiContext(comp, SafeUiContext.ItemQuality)
+                        ? "极品" : null;
+                default:
+                    return null;
+            }
+        }
+
+        private static bool HasSafeUiContext(
+            TMP_Text comp,
+            SafeUiContext expected)
+        {
+            try
+            {
+                int id = comp.GetInstanceID();
+                if (SafeUiContextById.TryGetValue(id, out var cached))
+                {
+                    if (cached.Component.TryGetTarget(out var cachedComp) &&
+                        cachedComp != null &&
+                        cachedComp.gameObject != null)
+                    {
+                        if ((cached.Contexts & expected) != 0)
+                            return true;
+                    }
+                    else
+                    {
+                        SafeUiContextById.Remove(id);
+                    }
+                }
+
+                bool matched = DetectSafeUiContext(comp, expected);
+                if (!matched) return false;
+
+                if (!SafeUiContextById.TryGetValue(id, out cached))
+                {
+                    cached = new SafeUiContextEntry
+                    {
+                        Component = new WeakReference<TMP_Text>(comp)
+                    };
+                    SafeUiContextById[id] = cached;
+                }
+                cached.Contexts |= expected;
+                return true;
+            }
+            catch { }
+            return false;
+        }
+
+        private static bool DetectSafeUiContext(
+            TMP_Text comp,
+            SafeUiContext expected)
+        {
+            var ancestor = comp.transform;
+            for (int depth = 0; depth < 9 && ancestor != null; depth++)
+            {
+                var name = ancestor.name ?? string.Empty;
+                if (expected == SafeUiContext.CharacterCreator &&
+                    (ContainsIgnoreCase(name, "CharacterCreator") ||
+                     ContainsIgnoreCase(name, "Character Creator") ||
+                     ContainsIgnoreCase(name, "CharacterCreation") ||
+                     ContainsIgnoreCase(name, "AppearanceCreator")))
+                    return true;
+
+                if (expected == SafeUiContext.Phone &&
+                    (ContainsIgnoreCase(name, "Phone") ||
+                     ContainsIgnoreCase(name, "AppsCanvas")))
+                    return true;
+
+                if (expected == SafeUiContext.ItemQuality &&
+                    (ContainsIgnoreCase(name, "QualityLabel") ||
+                     ContainsIgnoreCase(name, "QualityUI") ||
+                     string.Equals(name, "Standards", StringComparison.OrdinalIgnoreCase) ||
+                     ContainsIgnoreCase(name, "StandardsLabel") ||
+                     ContainsIgnoreCase(name, "ProductQuality")))
+                    return true;
+
+                if (expected == SafeUiContext.Hotbar &&
+                    (ContainsIgnoreCase(name, "Hotbar") ||
+                     string.Equals(name, "Cash", StringComparison.OrdinalIgnoreCase) ||
+                     ContainsIgnoreCase(name, "CashSlot") ||
+                     ContainsIgnoreCase(name, "CashDisplay")))
+                    return true;
+
+                if (expected == SafeUiContext.InputPrompt &&
+                    (ContainsIgnoreCase(name, "InputPrompt") ||
+                     ContainsIgnoreCase(name, "ControlPrompt") ||
+                     ContainsIgnoreCase(name, "ActionPrompt") ||
+                     ContainsIgnoreCase(name, "BindingDisplay")))
+                    return true;
+
+                ancestor = ancestor.parent;
+            }
+
+            // Prefab object names vary between game builds. Fall back to a
+            // distinctive set of visible sibling labels, caching only a
+            // positive match so partially assembled panels can be retried.
+            ancestor = comp.transform;
+            for (int depth = 0; depth < 6 && ancestor != null; depth++)
+            {
+                bool first = false;
+                bool second = false;
+                foreach (var label in ancestor.GetComponentsInChildren<TMP_Text>(true))
+                {
+                    if (label == null) continue;
+                    var text = label.text;
+                    if (expected == SafeUiContext.CharacterCreator)
+                    {
+                        if (text == "Customize Appearance" || text == "自定义外观")
+                            first = true;
+                        else if (text == "Next" || text == "下一个")
+                            second = true;
+                    }
+                    else if (expected == SafeUiContext.Phone)
+                    {
+                        if (text == "Phone" || text == "手机")
+                            first = true;
+                        else if (text == "Character" || text == "角色")
+                            second = true;
+                    }
+                    else if (expected == SafeUiContext.ItemQuality)
+                    {
+                        if (text == "Quality" || text == "品质" ||
+                            text == "Standards" || text == "标准要求")
+                            first = true;
+                        else if (text == "Trash" || text == "Poor" ||
+                                 text == "Standard" || text == "Premium" ||
+                                 text == "Heavenly")
+                            second = true;
+                    }
+                    else if (expected == SafeUiContext.Hotbar)
+                    {
+                        if (text == "Cash" || text == "现金")
+                            first = true;
+                        else if (text == "$0")
+                            second = true;
+                    }
+                    else if (expected == SafeUiContext.InputPrompt)
+                    {
+                        if (text == "Back" || text == "返回")
+                            first = true;
+                        else if (text == "Close" || text == "关闭" ||
+                                 text == "Continue" || text == "继续")
+                            second = true;
+                    }
+
+                    if (first && second) return true;
+                }
+                ancestor = ancestor.parent;
+            }
+            return false;
+        }
+
+        private static bool ContainsIgnoreCase(string value, string fragment)
+        {
+            return value.IndexOf(
+                fragment,
+                StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         private static bool IsArcadeControlLabel(TMP_Text comp)
@@ -330,6 +567,27 @@ namespace ScheduleIChinese
                 }
                 foreach (int id in dead)
                     ArcadeControlById.Remove(id);
+            }
+
+            if (SafeUiContextById.Count > 0)
+            {
+                var dead = new List<int>();
+                foreach (var pair in SafeUiContextById)
+                {
+                    try
+                    {
+                        if (!pair.Value.Component.TryGetTarget(out var comp) ||
+                            comp == null ||
+                            comp.gameObject == null)
+                            dead.Add(pair.Key);
+                    }
+                    catch
+                    {
+                        dead.Add(pair.Key);
+                    }
+                }
+                foreach (int id in dead)
+                    SafeUiContextById.Remove(id);
             }
         }
 
