@@ -56,6 +56,7 @@ namespace ScheduleIChinese
             if (comp == null) return;
             try
             {
+                MainThreadRunner.RegisterText(comp);
                 int id = comp.GetInstanceID();
                 lock (PendingLock)
                 {
@@ -447,10 +448,11 @@ namespace ScheduleIChinese
         }
 
         /// <summary>
-        /// Patch only TMP's plain-string SetText overload. Numeric formatting
-        /// overloads remain covered by the change event on the following frame;
-        /// the plain overload is the common path for labels repeatedly rewritten
-        /// by UI refresh loops and must be translated before rendering.
+        /// Patch every TMP SetText overload whose first argument is a string.
+        /// Several document-style panels use formatting overloads even for their
+        /// static headings; handling only SetText(string, bool) leaves those
+        /// labels English until a later scan, or lets refresh loops overwrite
+        /// them every frame.
         /// </summary>
         [HarmonyPatch]
         public static class SetTextString
@@ -461,9 +463,8 @@ namespace ScheduleIChinese
                 {
                     if (method.Name != nameof(TMP_Text.SetText)) continue;
                     var parameters = method.GetParameters();
-                    if (parameters.Length == 2 &&
-                        parameters[0].ParameterType == typeof(string) &&
-                        parameters[1].ParameterType == typeof(bool))
+                    if (parameters.Length > 0 &&
+                        parameters[0].ParameterType == typeof(string))
                         yield return method;
                 }
             }

@@ -473,6 +473,41 @@ namespace ScheduleIChinese
                 {
                     "Noodle",
                     "贪吃蛇"
+                },
+                new[]
+                {
+                    "OFFENSE NOTICE",
+                    "处罚通知"
+                },
+                new[]
+                {
+                    "You have been convicted of the following:",
+                    "你因以下行为被定罪："
+                },
+                new[]
+                {
+                    "failure to comply with police instruction",
+                    "拒不服从警方指示"
+                },
+                new[]
+                {
+                    "possession of low-severity drug",
+                    "持有低危毒品"
+                },
+                new[]
+                {
+                    "6 low-severity drugs confiscated",
+                    "已没收 6 份低危毒品"
+                },
+                new[]
+                {
+                    "8 high-severity drugs confiscated",
+                    "已没收 8 份高危毒品"
+                },
+                new[]
+                {
+                    "$400.00 fine (paid in cash)",
+                    "罚款：$400.00（现金支付）"
                 }
             };
             foreach (var check in criticalDynamic)
