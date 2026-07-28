@@ -417,7 +417,8 @@ namespace ScheduleIChinese
                 Translate("Granddaddy Purple") != null ||
                 Translate("40x Granddaddy Purple") != null ||
                 Translate("OG Kush") != null ||
-                Translate("Sour Diesel") != null)
+                Translate("Sour Diesel") != null ||
+                Translate("Face") != null)
                 failed++;
             var compositeEffects = TranslateDisplayText(
                 "<color=#4CB0FF>• Focused</color>\n" +
@@ -441,6 +442,16 @@ namespace ScheduleIChinese
                 {
                     "Initial Offer $250",
                     "<size=28>初始出价: <color=#2FC443>$250</color></size>"
+                },
+                new[]
+                {
+                    "[1] Cheap Skateboard ($75)",
+                    "[1] 廉价滑板 ($75)"
+                },
+                new[]
+                {
+                    "[6] Offroad Skateboard ($1,500)",
+                    "[6] 越野滑板 ($1,500)"
                 }
             };
             foreach (var check in criticalDynamic)

@@ -19,11 +19,18 @@ namespace ScheduleIChinese
             new Queue<PendingText>();
         private static readonly HashSet<int> PendingInstanceIds = new HashSet<int>();
         private static readonly HashSet<int> _nullFontRebuilt = new HashSet<int>();
+        private static readonly Dictionary<int, FaceContextEntry> FaceContextById =
+            new Dictionary<int, FaceContextEntry>();
         private static Il2CppSystem.Action<UnityEngine.Object> _textChangedHandler;
 
         private sealed class PendingText
         {
             public int InstanceId;
+            public WeakReference<TMP_Text> Component;
+        }
+
+        private sealed class FaceContextEntry
+        {
             public WeakReference<TMP_Text> Component;
         }
 
@@ -99,6 +106,109 @@ namespace ScheduleIChinese
             try { comp.havePropertiesChanged = true; } catch { }
         }
 
+        private static string TranslateForComponent(TMP_Text comp, string source)
+        {
+            var contextual = TranslateContextual(comp, source);
+            if (contextual != null) return contextual;
+            return TranslationStore.TranslateDisplayText(source);
+        }
+
+        private static string TranslateContextual(TMP_Text comp, string source)
+        {
+            // "Face" is an appearance enum value and therefore deliberately
+            // remains on the global denylist. It is safe to localize only the
+            // visible tattoo-shop category label.
+            if (!string.Equals(source, "Face", StringComparison.Ordinal) ||
+                comp == null)
+                return null;
+
+            try
+            {
+                int id = comp.GetInstanceID();
+                if (FaceContextById.TryGetValue(id, out var cached))
+                {
+                    if (cached.Component.TryGetTarget(out var cachedComp) &&
+                        cachedComp != null &&
+                        cachedComp.gameObject != null)
+                        return "面部";
+                    FaceContextById.Remove(id);
+                }
+
+                bool isTattooCategory = false;
+                var ancestor = comp.transform;
+                for (int depth = 0; depth < 8 && ancestor != null; depth++)
+                {
+                    if (ancestor.name.IndexOf(
+                            "Tattoo",
+                            StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        isTattooCategory = true;
+                        break;
+                    }
+
+                    int categoryMatches = 0;
+                    foreach (var label in ancestor.GetComponentsInChildren<TMP_Text>(true))
+                    {
+                        if (label == null) continue;
+                        var text = label.text;
+                        if (text == "Tattoo Shop" || text == "纹身店" ||
+                            text == "Chest" || text == "胸部" ||
+                            text == "Left Arm" || text == "左臂" ||
+                            text == "Right Arm" || text == "右臂")
+                            categoryMatches++;
+                        if (categoryMatches >= 2)
+                        {
+                            isTattooCategory = true;
+                            break;
+                        }
+                    }
+                    if (isTattooCategory) break;
+
+                    ancestor = ancestor.parent;
+                }
+
+                // Cache only a positive match. The first assignment can happen
+                // before the tattoo panel and its sibling labels are assembled;
+                // caching that early negative would make the English label stick.
+                if (isTattooCategory)
+                    FaceContextById[id] = new FaceContextEntry
+                    {
+                        Component = new WeakReference<TMP_Text>(comp)
+                    };
+                return isTattooCategory ? "面部" : null;
+            }
+            catch { }
+            return null;
+        }
+
+        private static void TransformImmediate(TMP_Text comp, ref string value)
+        {
+            if (comp == null || string.IsNullOrEmpty(value))
+                return;
+
+            if (ModConfig.EnableRuntimeTranslationFallback.Value)
+            {
+                var translated = TranslateForComponent(comp, value);
+                if (translated != null)
+                {
+                    value = translated;
+                }
+                else if (!TranslationStore.ContainsCjk(value) &&
+                         ModConfig.EnableAutoTranslate.Value &&
+                         TranslationStore.IsTranslatable(value))
+                {
+                    TranslationStore.RegisterLive(comp, value);
+                }
+            }
+
+            if (TranslationStore.ContainsCjk(value) &&
+                FontService.ApplyCjkFont(comp))
+                MarkDirty(comp);
+
+            if (NameOverlay.IsShopNameLabel(comp))
+                NameOverlay.Sync(comp, value);
+        }
+
         public static void CleanupCaches()
         {
             // Instance IDs can eventually be reused after objects are destroyed.
@@ -106,6 +216,27 @@ namespace ScheduleIChinese
             // occasionally is both safe and prevents stale IDs accumulating.
             if (_nullFontRebuilt.Count > 4096)
                 _nullFontRebuilt.Clear();
+
+            if (FaceContextById.Count > 0)
+            {
+                var dead = new List<int>();
+                foreach (var pair in FaceContextById)
+                {
+                    try
+                    {
+                        if (!pair.Value.Component.TryGetTarget(out var comp) ||
+                            comp == null ||
+                            comp.gameObject == null)
+                            dead.Add(pair.Key);
+                    }
+                    catch
+                    {
+                        dead.Add(pair.Key);
+                    }
+                }
+                foreach (int id in dead)
+                    FaceContextById.Remove(id);
+            }
         }
 
         public static void ApplyExisting(TMP_Text comp)
@@ -139,14 +270,14 @@ namespace ScheduleIChinese
 
                     if (ModConfig.EnableRuntimeTranslationFallback.Value)
                     {
-                        var partial = TranslationStore.TranslateDisplayText(current);
+                        var partial = TranslateForComponent(comp, current);
                         if (partial != null)
                             finalText = partial;
                     }
                 }
                 else if (ModConfig.EnableRuntimeTranslationFallback.Value)
                 {
-                    var translated = TranslationStore.TranslateDisplayText(current);
+                    var translated = TranslateForComponent(comp, current);
                     if (translated != null)
                     {
                         finalText = translated;
@@ -210,6 +341,44 @@ namespace ScheduleIChinese
                 MainThreadRunner.RememberText(comp, translated);
             }
             catch { }
+        }
+
+        [HarmonyPatch(typeof(TMP_Text), nameof(TMP_Text.text), MethodType.Setter)]
+        public static class SetTextProp
+        {
+            public static bool Prefix(TMP_Text __instance, ref string value)
+            {
+                TransformImmediate(__instance, ref value);
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Patch only TMP's plain-string SetText overload. Numeric formatting
+        /// overloads remain covered by the change event on the following frame;
+        /// the plain overload is the common path for labels repeatedly rewritten
+        /// by UI refresh loops and must be translated before rendering.
+        /// </summary>
+        [HarmonyPatch]
+        public static class SetTextString
+        {
+            public static IEnumerable<MethodBase> TargetMethods()
+            {
+                foreach (var method in AccessTools.GetDeclaredMethods(typeof(TMP_Text)))
+                {
+                    if (method.Name != nameof(TMP_Text.SetText)) continue;
+                    var parameters = method.GetParameters();
+                    if (parameters.Length == 2 &&
+                        parameters[0].ParameterType == typeof(string) &&
+                        parameters[1].ParameterType == typeof(bool))
+                        yield return method;
+                }
+            }
+
+            public static void Prefix(TMP_Text __instance, ref string __0)
+            {
+                TransformImmediate(__instance, ref __0);
+            }
         }
 
         /// <summary>Legacy uGUI Text support.</summary>

@@ -86,6 +86,8 @@ namespace ScheduleIChinese
         {
             var patchTypes = new[]
             {
+                typeof(TextPatch.SetTextProp),
+                typeof(TextPatch.SetTextString),
                 typeof(TextPatch.LegacyText),
                 typeof(TextPatch.BakedTextOnEnable)
             };
