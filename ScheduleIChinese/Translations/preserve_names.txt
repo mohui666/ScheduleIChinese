@@ -17,7 +17,6 @@ Austin=奥斯汀
 Baker=贝克
 Ball=鲍尔
 Barbara=芭芭拉
-Barn=巴恩
 Baron=巴隆
 Barone=巴罗内
 Benji=本吉
