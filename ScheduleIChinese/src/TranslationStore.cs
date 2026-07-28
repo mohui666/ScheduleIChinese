@@ -518,6 +518,11 @@ namespace ScheduleIChinese
                 {
                     "Talk to Uncle Nelson",
                     "与 Uncle Nelson 交谈"
+                },
+                new[]
+                {
+                    "Sewer Key required",
+                    "需要下水道钥匙"
                 }
             };
             foreach (var check in criticalDynamic)
