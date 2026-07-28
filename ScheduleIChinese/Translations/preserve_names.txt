@@ -1,6 +1,12 @@
 # 人物姓名保护表：左侧英文姓名，右侧是旧译名，仅用于从译文中还原英文。
 # 此文件不会把姓名加入普通翻译词典；玩家自定义名称也默认保持原样。
 # 从交互提示审计补回的 NPC 姓名/昵称。
+Andy=安迪
+Blue Dream=蓝梦
+Chelsea=切尔西
+Chelsey=切尔西
+HYDROBRO=水电工
+KAESUL=凯瑟尔
 Addy=艾迪
 Chris=克里斯
 Cranky=怪人
@@ -3722,7 +3728,7 @@ Molly Presley=莫莉·普雷斯利
 Mrs. Ming=明太太
 Granddaddy Purple=Granddaddy Purple
 Green Crack=Green Crack
-OG Kush=OG Kush
+OG Kush=OG 库什
 Sour Diesel=Sour Diesel
 Nancy Adams=南希·亚当斯
 Nancy Allen=南希·艾伦
