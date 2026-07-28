@@ -2,6 +2,7 @@
 # 规则必须匹配整段文本；$1/${name} 为捕获组，$$ 为美元符号。
 # 仅供本离线插件使用，不启用在线翻译。
 r:^\\[(\\d+)\\]\\s+(Cheap Skateboard|Skateboard|Lightweight Skateboard|Cruiser|Golden Skateboard|Offroad Skateboard)\\s+\\((\\$[\\d,]+)\\)$=[$1] $2 ($3)
+r:^Pick up (.+)$=拾取$1
 r:'(.+)' REGION MUST BE UNLOCKED=必须先解锁“$1”区域
 r:(.+)\n(\\$\\d[\\d,]*)=$1\n$2
 r:(.+)\n\\(Dealer\\)=$1\n（交易员）

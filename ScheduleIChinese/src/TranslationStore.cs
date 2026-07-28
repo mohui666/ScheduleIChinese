@@ -452,6 +452,11 @@ namespace ScheduleIChinese
                 {
                     "[6] Offroad Skateboard ($1,500)",
                     "[6] 越野滑板 ($1,500)"
+                },
+                new[]
+                {
+                    "Pick up Cuke",
+                    "拾取酷口可乐"
                 }
             };
             foreach (var check in criticalDynamic)
