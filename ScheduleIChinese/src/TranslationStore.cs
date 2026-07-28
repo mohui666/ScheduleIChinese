@@ -18,7 +18,7 @@ namespace ScheduleIChinese
         private static readonly Dictionary<string, string> _patternSources =
             new Dictionary<string, string>(StringComparer.Ordinal);
         private static readonly List<PatternEntry> _patterns = new List<PatternEntry>();
-        private static readonly Dictionary<string, string> _patternCache =
+        private static readonly Dictionary<string, string> _resultCache =
             new Dictionary<string, string>(StringComparer.Ordinal);
         private static readonly Dictionary<string, string> _effects =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -29,6 +29,10 @@ namespace ScheduleIChinese
         private static readonly HashSet<string> _noHit = new HashSet<string>(StringComparer.Ordinal);
         private static readonly HashSet<string> _dumped = new HashSet<string>(StringComparer.Ordinal);
         private static readonly List<string> _dumpPending = new List<string>();
+        private static long _resultCacheHits;
+        private static long _negativeCacheHits;
+        private static long _regexEvaluations;
+        private static long _regexMatches;
 
         // source string -> components currently showing it (waiting for auto translation)
         private static readonly Dictionary<string, List<WeakReference<TMP_Text>>> _live =
@@ -93,13 +97,17 @@ namespace ScheduleIChinese
             _dict.Clear();
             _patternSources.Clear();
             _patterns.Clear();
-            _patternCache.Clear();
+            _resultCache.Clear();
             _effects.Clear();
             _nameSources.Clear();
             _preserveNames.Clear();
             _denyKeys.Clear();
             _noHit.Clear();
             _dumped.Clear();
+            _resultCacheHits = 0;
+            _negativeCacheHits = 0;
+            _regexEvaluations = 0;
+            _regexMatches = 0;
             lock (_dumpPending) _dumpPending.Clear();
             lock (_live) _live.Clear();
 
@@ -231,9 +239,13 @@ namespace ScheduleIChinese
                     // A translation rule must consume the whole visible string. This keeps
                     // broad community rules such as "Assigned (.+)" from replacing a
                     // substring in unrelated dialogue.
+                    // These rules are loaded from data files and most visible
+                    // strings are resolved once, then served by _resultCache.
+                    // Interpreted regex avoids cold-JITing hundreds of compiled
+                    // expressions during the first UI frames.
                     var regex = new Regex(
                         @"\A(?:" + kv.Key + @")\z",
-                        RegexOptions.Compiled | RegexOptions.CultureInvariant,
+                        RegexOptions.CultureInvariant,
                         TimeSpan.FromMilliseconds(10));
                     _patterns.Add(new PatternEntry
                     {
@@ -414,27 +426,38 @@ namespace ScheduleIChinese
         {
             if (string.IsNullOrEmpty(src) || src.Length > 1000) return null;
             if (_preserveNames.Contains(src)) return null;
+            if (_resultCache.TryGetValue(src, out var cached))
+            {
+                _resultCacheHits++;
+                return cached;
+            }
+            if (_noHit.Contains(src))
+            {
+                _negativeCacheHits++;
+                return null;
+            }
 
             // Curated dynamic rules must be allowed to handle display values such
             // as "$125K". Those are intentionally excluded from dumping and
             // automatic translation, but an explicit offline rule should still win.
             if (!IsTranslatable(src))
             {
-                if (_patternCache.TryGetValue(src, out var filteredHit))
-                    return filteredHit;
+                string filteredHit;
                 if (TryTranslatePattern(src, out filteredHit))
                 {
-                    if (_patternCache.Count > 4096) _patternCache.Clear();
                     filteredHit = RestoreNames(src, filteredHit);
-                    _patternCache[src] = filteredHit;
-                    return filteredHit;
+                    return CacheResult(src, filteredHit);
                 }
+                _noHit.Add(src);
                 return null;
             }
 
-            if (TryTranslateDecoratedEffect(src, out var hit)) return hit;
-            if (_dict.TryGetValue(src, out hit)) return RestoreNames(src, hit);
-            if (TryTranslateQuantityDisplay(src, out hit)) return hit;
+            if (TryTranslateDecoratedEffect(src, out var hit))
+                return CacheResult(src, hit);
+            if (_dict.TryGetValue(src, out hit))
+                return CacheResult(src, RestoreNames(src, hit));
+            if (TryTranslateQuantityDisplay(src, out hit))
+                return CacheResult(src, hit);
 
             // try trimmed lookup, preserving the surrounding whitespace
             var trimmed = src.Trim();
@@ -442,17 +465,16 @@ namespace ScheduleIChinese
             {
                 int lead = src.Length - src.TrimStart().Length;
                 int trail = src.Length - src.TrimEnd().Length;
-                return src.Substring(0, lead) + RestoreNames(trimmed, hit) +
-                       src.Substring(src.Length - trail);
+                return CacheResult(
+                    src,
+                    src.Substring(0, lead) + RestoreNames(trimmed, hit) +
+                    src.Substring(src.Length - trail));
             }
 
-            if (_patternCache.TryGetValue(src, out hit)) return hit;
             if (TryTranslatePattern(src, out hit))
             {
-                if (_patternCache.Count > 4096) _patternCache.Clear();
                 hit = RestoreNames(src, hit);
-                _patternCache[src] = hit;
-                return hit;
+                return CacheResult(src, hit);
             }
 
             if (_noHit.Add(src))
@@ -461,6 +483,24 @@ namespace ScheduleIChinese
                 if (ModConfig.EnableAutoTranslate.Value) AutoTranslator.Enqueue(src);
             }
             return null;
+        }
+
+        private static string CacheResult(string source, string translated)
+        {
+            // UI text has a bounded vocabulary in normal play. Keep the cache
+            // bounded as a guard against rapidly changing player-authored text.
+            if (_resultCache.Count < 16384)
+                _resultCache[source] = translated;
+            return translated;
+        }
+
+        public static string GetPerformanceSnapshot()
+        {
+            return
+                $"translation cache: {_resultCacheHits} hit(s), " +
+                $"{_negativeCacheHits} cached miss(es), " +
+                $"{_resultCache.Count} result(s), {_noHit.Count} miss(es); " +
+                $"dynamic regex: {_regexEvaluations} evaluation(s), {_regexMatches} match(es).";
         }
 
         /// <summary>
@@ -603,8 +643,10 @@ namespace ScheduleIChinese
                 if (_disabledPatterns.Contains(entry.Source)) continue;
                 try
                 {
+                    _regexEvaluations++;
                     var match = entry.Regex.Match(source);
                     if (!match.Success) continue;
+                    _regexMatches++;
                     translated = ExpandReplacement(entry.Replacement, match);
                     return !string.IsNullOrEmpty(translated);
                 }
@@ -706,6 +748,8 @@ namespace ScheduleIChinese
         public static void AddRuntime(string src, string translated)
         {
             if (string.IsNullOrEmpty(src) || string.IsNullOrEmpty(translated)) return;
+            _noHit.Remove(src);
+            _resultCache.Remove(src);
             _dict[src] = translated;
         }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Il2CppInterop.Runtime;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using TMPro;
@@ -14,6 +15,8 @@ namespace ScheduleIChinese
     public static class NameOverlay
     {
         private const string OverlayName = "SIC_NameOverlay";
+        private static readonly Dictionary<int, WeakReference<TextMeshProUGUI>> OverlayByLabelId =
+            new Dictionary<int, WeakReference<TextMeshProUGUI>>();
 
         public static bool IsShopNameLabel(TMP_Text comp)
         {
@@ -44,9 +47,9 @@ namespace ScheduleIChinese
                 // Find the overlay as sibling (current) or child (legacy);
                 // the 1.3.44 bug searched only children of the label, so a new
                 // overlay was created on every sync.
-                TextMeshProUGUI overlay = null;
+                TextMeshProUGUI overlay = GetCached(label);
                 var parent = label.transform.parent;
-                if (parent != null)
+                if (overlay == null && parent != null)
                 {
                     var tf = parent.Find(OverlayName);
                     if (tf != null) overlay = tf.GetComponent<TextMeshProUGUI>();
@@ -56,6 +59,8 @@ namespace ScheduleIChinese
                     var tf = label.transform.Find(OverlayName);
                     if (tf != null) overlay = tf.GetComponent<TextMeshProUGUI>();
                 }
+                if (overlay != null)
+                    Cache(label, overlay);
 
                 bool needsCjk =
                     !string.IsNullOrEmpty(text) &&
@@ -158,7 +163,8 @@ namespace ScheduleIChinese
 
                 CopyVisualStyle(label, overlay);
 
-                Plugin.Log?.LogInfo(
+                Cache(label, overlay);
+                Plugin.Log?.LogDebug(
                     "shop name overlay created for " +
                     GetTransformPath(label.transform));
 
@@ -171,6 +177,38 @@ namespace ScheduleIChinese
 
                 return null;
             }
+        }
+
+        private static TextMeshProUGUI GetCached(TMP_Text label)
+        {
+            int id;
+            try { id = label.GetInstanceID(); }
+            catch { return null; }
+
+            if (!OverlayByLabelId.TryGetValue(id, out var weak))
+                return null;
+
+            try
+            {
+                if (weak.TryGetTarget(out var overlay) &&
+                    overlay != null &&
+                    overlay.gameObject != null)
+                    return overlay;
+            }
+            catch { }
+
+            OverlayByLabelId.Remove(id);
+            return null;
+        }
+
+        private static void Cache(TMP_Text label, TextMeshProUGUI overlay)
+        {
+            try
+            {
+                OverlayByLabelId[label.GetInstanceID()] =
+                    new WeakReference<TextMeshProUGUI>(overlay);
+            }
+            catch { }
         }
 
         private static void CopyVisualStyle(TMP_Text source, TMP_Text destination)

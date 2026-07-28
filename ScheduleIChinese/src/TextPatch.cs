@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using HarmonyLib;
 using TMPro;
@@ -58,9 +59,14 @@ namespace ScheduleIChinese
             catch { }
         }
 
-        public static void ApplyPendingChanges(int budget = 256)
+        public static void ApplyPendingChanges(
+            int maxItems = 128,
+            double maxMilliseconds = 1.5)
         {
-            for (int i = 0; i < budget; i++)
+            long deadline = Stopwatch.GetTimestamp() +
+                (long)(maxMilliseconds * Stopwatch.Frequency / 1000d);
+
+            for (int i = 0; i < maxItems; i++)
             {
                 PendingText pending;
                 lock (PendingLock)
@@ -78,6 +84,10 @@ namespace ScheduleIChinese
                 catch { }
 
                 if (comp != null) ApplyExisting(comp);
+
+                // Checking the clock in batches keeps the budget itself cheap.
+                if ((i & 7) == 7 && Stopwatch.GetTimestamp() >= deadline)
+                    return;
             }
         }
 
@@ -139,6 +149,7 @@ namespace ScheduleIChinese
                 {
                     if (NameOverlay.IsShopNameLabel(comp))
                         NameOverlay.Sync(comp, current);
+                    MainThreadRunner.RememberText(comp, current);
                     return;
                 }
 
@@ -179,12 +190,14 @@ namespace ScheduleIChinese
                 {
                     // setter 里会再次经过 Transform，由它同步覆盖层。
                     comp.text = finalText;
+                    MainThreadRunner.RememberText(comp, finalText);
                     return;
                 }
 
                 // 已经是中文，或者商品格被复用成英文时，直接同步状态。
                 if (NameOverlay.IsShopNameLabel(comp))
                     NameOverlay.Sync(comp, finalText);
+                MainThreadRunner.RememberText(comp, finalText);
             }
             catch (Exception e)
             {
@@ -198,13 +211,26 @@ namespace ScheduleIChinese
             try
             {
                 var current = comp.text;
-                if (string.IsNullOrEmpty(current)) return;
-                if (!ModConfig.EnableRuntimeTranslationFallback.Value) return;
+                if (string.IsNullOrEmpty(current))
+                {
+                    MainThreadRunner.RememberText(comp, current);
+                    return;
+                }
+                if (!ModConfig.EnableRuntimeTranslationFallback.Value)
+                {
+                    MainThreadRunner.RememberText(comp, current);
+                    return;
+                }
                 var translated = TranslationStore.TranslateDisplayText(current);
-                if (translated == null || translated == current) return;
+                if (translated == null || translated == current)
+                {
+                    MainThreadRunner.RememberText(comp, current);
+                    return;
+                }
                 if (TranslationStore.ContainsCjk(translated) && FontService.LegacyCjkFont != null)
                     comp.font = FontService.LegacyCjkFont;
                 comp.text = translated;
+                MainThreadRunner.RememberText(comp, translated);
             }
             catch { }
         }
