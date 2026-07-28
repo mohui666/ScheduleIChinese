@@ -458,6 +458,21 @@ namespace ScheduleIChinese
                 {
                     "Pick up Cuke",
                     "拾取酷口可乐"
+                },
+                new[]
+                {
+                    "Egg Run",
+                    "鸡蛋快跑"
+                },
+                new[]
+                {
+                    "EGG RUN",
+                    "鸡蛋快跑"
+                },
+                new[]
+                {
+                    "Noodle",
+                    "贪吃蛇"
                 }
             };
             foreach (var check in criticalDynamic)
