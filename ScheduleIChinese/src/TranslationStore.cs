@@ -18,7 +18,11 @@ namespace ScheduleIChinese
         private static readonly Dictionary<string, string> _patternSources =
             new Dictionary<string, string>(StringComparer.Ordinal);
         private static readonly List<PatternEntry> _patterns = new List<PatternEntry>();
-        private static readonly Dictionary<string, string> _patternCache =
+        private static readonly List<PatternEntry> _fallbackPatterns =
+            new List<PatternEntry>();
+        private static readonly Dictionary<char, List<PatternEntry>> _patternCandidates =
+            new Dictionary<char, List<PatternEntry>>();
+        private static readonly Dictionary<string, string> _resultCache =
             new Dictionary<string, string>(StringComparer.Ordinal);
         private static readonly Dictionary<string, string> _effects =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -29,6 +33,10 @@ namespace ScheduleIChinese
         private static readonly HashSet<string> _noHit = new HashSet<string>(StringComparer.Ordinal);
         private static readonly HashSet<string> _dumped = new HashSet<string>(StringComparer.Ordinal);
         private static readonly List<string> _dumpPending = new List<string>();
+        private static long _resultCacheHits;
+        private static long _negativeCacheHits;
+        private static long _regexEvaluations;
+        private static long _regexMatches;
 
         // source string -> components currently showing it (waiting for auto translation)
         private static readonly Dictionary<string, List<WeakReference<TMP_Text>>> _live =
@@ -82,6 +90,7 @@ namespace ScheduleIChinese
             public string Source;
             public string Replacement;
             public Regex Regex;
+            public char? RequiredFirstCharacter;
         }
 
         public static int Count => _dict.Count;
@@ -93,13 +102,20 @@ namespace ScheduleIChinese
             _dict.Clear();
             _patternSources.Clear();
             _patterns.Clear();
-            _patternCache.Clear();
+            _fallbackPatterns.Clear();
+            _patternCandidates.Clear();
+            _resultCache.Clear();
             _effects.Clear();
             _nameSources.Clear();
             _preserveNames.Clear();
             _denyKeys.Clear();
             _noHit.Clear();
             _dumped.Clear();
+            _disabledPatterns.Clear();
+            _resultCacheHits = 0;
+            _negativeCacheHits = 0;
+            _regexEvaluations = 0;
+            _regexMatches = 0;
             lock (_dumpPending) _dumpPending.Clear();
             lock (_live) _live.Clear();
 
@@ -231,15 +247,23 @@ namespace ScheduleIChinese
                     // A translation rule must consume the whole visible string. This keeps
                     // broad community rules such as "Assigned (.+)" from replacing a
                     // substring in unrelated dialogue.
+                    // These rules are loaded from data files and most visible
+                    // strings are resolved once, then served by _resultCache.
+                    // Interpreted regex avoids cold-JITing hundreds of compiled
+                    // expressions during the first UI frames.
                     var regex = new Regex(
                         @"\A(?:" + kv.Key + @")\z",
-                        RegexOptions.Compiled | RegexOptions.CultureInvariant,
+                        RegexOptions.CultureInvariant,
                         TimeSpan.FromMilliseconds(10));
                     _patterns.Add(new PatternEntry
                     {
                         Source = kv.Key,
                         Replacement = kv.Value,
-                        Regex = regex
+                        Regex = regex,
+                        RequiredFirstCharacter =
+                            TryGetRequiredFirstCharacter(kv.Key, out var first)
+                                ? NormalizePatternKey(first)
+                                : (char?)null
                     });
                 }
                 catch (Exception ex)
@@ -250,6 +274,90 @@ namespace ScheduleIChinese
 
             // More specific rules win over generic capture-all rules.
             _patterns.Sort((a, b) => b.Source.Length.CompareTo(a.Source.Length));
+            foreach (var entry in _patterns)
+                if (!entry.RequiredFirstCharacter.HasValue)
+                    _fallbackPatterns.Add(entry);
+        }
+
+        /// <summary>
+        /// Return a literal first character only when the regex syntax makes it
+        /// mandatory. Anything ambiguous stays in the fallback list, so this
+        /// optimization can add candidates but can never exclude a valid rule.
+        /// </summary>
+        private static bool TryGetRequiredFirstCharacter(
+            string pattern,
+            out char first)
+        {
+            first = '\0';
+            if (string.IsNullOrEmpty(pattern)) return false;
+
+            int index = 0;
+            for (int pass = 0; pass < 3; pass++)
+            {
+                if (index < pattern.Length && pattern[index] == '^')
+                {
+                    index++;
+                    continue;
+                }
+                if (index + 4 <= pattern.Length &&
+                    string.CompareOrdinal(pattern, index, "(?i)", 0, 4) == 0)
+                {
+                    index += 4;
+                    continue;
+                }
+                if (index + 2 <= pattern.Length &&
+                    pattern[index] == '\\' &&
+                    pattern[index + 1] == 'A')
+                {
+                    index += 2;
+                    continue;
+                }
+                break;
+            }
+
+            if (index >= pattern.Length) return false;
+            char token = pattern[index];
+            if (token == '\\')
+            {
+                if (index + 1 >= pattern.Length) return false;
+                char escaped = pattern[index + 1];
+                // Escaped punctuation represents that exact character. Escape
+                // classes such as \d, \s, \p and numeric backreferences do not.
+                if (char.IsLetterOrDigit(escaped)) return false;
+                first = escaped;
+                return true;
+            }
+
+            if (token == '.' || token == '$' || token == '(' ||
+                token == '[' || token == '{' || token == '|' ||
+                token == '*' || token == '+' || token == '?')
+                return false;
+
+            first = token;
+            return true;
+        }
+
+        private static char NormalizePatternKey(char value)
+        {
+            return char.ToUpperInvariant(value);
+        }
+
+        private static List<PatternEntry> GetPatternCandidates(string source)
+        {
+            if (string.IsNullOrEmpty(source)) return _fallbackPatterns;
+            char key = NormalizePatternKey(source[0]);
+            if (_patternCandidates.TryGetValue(key, out var candidates))
+                return candidates;
+
+            candidates = new List<PatternEntry>(_fallbackPatterns.Count + 16);
+            foreach (var entry in _patterns)
+            {
+                if (!entry.RequiredFirstCharacter.HasValue ||
+                    entry.RequiredFirstCharacter.Value == key)
+                    candidates.Add(entry);
+            }
+            _patternCandidates[key] = candidates;
+            return candidates;
         }
 
         private static void RunSelfTest()
@@ -309,7 +417,9 @@ namespace ScheduleIChinese
                 Translate("Granddaddy Purple") != null ||
                 Translate("40x Granddaddy Purple") != null ||
                 Translate("OG Kush") != null ||
-                Translate("Sour Diesel") != null)
+                Translate("Sour Diesel") != null ||
+                Translate("Face") != null ||
+                Translate("Jump") != null)
                 failed++;
             var compositeEffects = TranslateDisplayText(
                 "<color=#4CB0FF>• Focused</color>\n" +
@@ -333,6 +443,86 @@ namespace ScheduleIChinese
                 {
                     "Initial Offer $250",
                     "<size=28>初始出价: <color=#2FC443>$250</color></size>"
+                },
+                new[]
+                {
+                    "[1] Cheap Skateboard ($75)",
+                    "[1] 廉价滑板 ($75)"
+                },
+                new[]
+                {
+                    "[6] Offroad Skateboard ($1,500)",
+                    "[6] 越野滑板 ($1,500)"
+                },
+                new[]
+                {
+                    "Pick up Cuke",
+                    "拾取酷口可乐"
+                },
+                new[]
+                {
+                    "Egg Run",
+                    "鸡蛋快跑"
+                },
+                new[]
+                {
+                    "EGG RUN",
+                    "鸡蛋快跑"
+                },
+                new[]
+                {
+                    "Noodle",
+                    "贪吃蛇"
+                },
+                new[]
+                {
+                    "OFFENSE NOTICE",
+                    "处罚通知"
+                },
+                new[]
+                {
+                    "You have been convicted of the following:",
+                    "你因以下行为被定罪："
+                },
+                new[]
+                {
+                    "failure to comply with police instruction",
+                    "拒不服从警方指示"
+                },
+                new[]
+                {
+                    "possession of low-severity drug",
+                    "持有低危毒品"
+                },
+                new[]
+                {
+                    "6 low-severity drugs confiscated",
+                    "已没收 6 份低危毒品"
+                },
+                new[]
+                {
+                    "8 high-severity drugs confiscated",
+                    "已没收 8 份高危毒品"
+                },
+                new[]
+                {
+                    "$400.00 fine (paid in cash)",
+                    "罚款：$400.00（现金支付）"
+                },
+                new[]
+                {
+                    "Talk to Pearl",
+                    "与 Pearl 交谈"
+                },
+                new[]
+                {
+                    "Talk to Uncle Nelson",
+                    "与 Uncle Nelson 交谈"
+                },
+                new[]
+                {
+                    "Sewer Key required",
+                    "需要下水道钥匙"
                 }
             };
             foreach (var check in criticalDynamic)
@@ -414,27 +604,38 @@ namespace ScheduleIChinese
         {
             if (string.IsNullOrEmpty(src) || src.Length > 1000) return null;
             if (_preserveNames.Contains(src)) return null;
+            if (_resultCache.TryGetValue(src, out var cached))
+            {
+                _resultCacheHits++;
+                return cached;
+            }
+            if (_noHit.Contains(src))
+            {
+                _negativeCacheHits++;
+                return null;
+            }
 
             // Curated dynamic rules must be allowed to handle display values such
             // as "$125K". Those are intentionally excluded from dumping and
             // automatic translation, but an explicit offline rule should still win.
             if (!IsTranslatable(src))
             {
-                if (_patternCache.TryGetValue(src, out var filteredHit))
-                    return filteredHit;
+                string filteredHit;
                 if (TryTranslatePattern(src, out filteredHit))
                 {
-                    if (_patternCache.Count > 4096) _patternCache.Clear();
                     filteredHit = RestoreNames(src, filteredHit);
-                    _patternCache[src] = filteredHit;
-                    return filteredHit;
+                    return CacheResult(src, filteredHit);
                 }
+                _noHit.Add(src);
                 return null;
             }
 
-            if (TryTranslateDecoratedEffect(src, out var hit)) return hit;
-            if (_dict.TryGetValue(src, out hit)) return RestoreNames(src, hit);
-            if (TryTranslateQuantityDisplay(src, out hit)) return hit;
+            if (TryTranslateDecoratedEffect(src, out var hit))
+                return CacheResult(src, hit);
+            if (_dict.TryGetValue(src, out hit))
+                return CacheResult(src, RestoreNames(src, hit));
+            if (TryTranslateQuantityDisplay(src, out hit))
+                return CacheResult(src, hit);
 
             // try trimmed lookup, preserving the surrounding whitespace
             var trimmed = src.Trim();
@@ -442,17 +643,16 @@ namespace ScheduleIChinese
             {
                 int lead = src.Length - src.TrimStart().Length;
                 int trail = src.Length - src.TrimEnd().Length;
-                return src.Substring(0, lead) + RestoreNames(trimmed, hit) +
-                       src.Substring(src.Length - trail);
+                return CacheResult(
+                    src,
+                    src.Substring(0, lead) + RestoreNames(trimmed, hit) +
+                    src.Substring(src.Length - trail));
             }
 
-            if (_patternCache.TryGetValue(src, out hit)) return hit;
             if (TryTranslatePattern(src, out hit))
             {
-                if (_patternCache.Count > 4096) _patternCache.Clear();
                 hit = RestoreNames(src, hit);
-                _patternCache[src] = hit;
-                return hit;
+                return CacheResult(src, hit);
             }
 
             if (_noHit.Add(src))
@@ -461,6 +661,24 @@ namespace ScheduleIChinese
                 if (ModConfig.EnableAutoTranslate.Value) AutoTranslator.Enqueue(src);
             }
             return null;
+        }
+
+        private static string CacheResult(string source, string translated)
+        {
+            // UI text has a bounded vocabulary in normal play. Keep the cache
+            // bounded as a guard against rapidly changing player-authored text.
+            if (_resultCache.Count < 16384)
+                _resultCache[source] = translated;
+            return translated;
+        }
+
+        public static string GetPerformanceSnapshot()
+        {
+            return
+                $"translation cache: {_resultCacheHits} hit(s), " +
+                $"{_negativeCacheHits} cached miss(es), " +
+                $"{_resultCache.Count} result(s), {_noHit.Count} miss(es); " +
+                $"dynamic regex: {_regexEvaluations} evaluation(s), {_regexMatches} match(es).";
         }
 
         /// <summary>
@@ -598,13 +816,15 @@ namespace ScheduleIChinese
         private static bool TryTranslatePattern(string source, out string translated)
         {
             translated = null;
-            foreach (var entry in _patterns)
+            foreach (var entry in GetPatternCandidates(source))
             {
                 if (_disabledPatterns.Contains(entry.Source)) continue;
                 try
                 {
+                    _regexEvaluations++;
                     var match = entry.Regex.Match(source);
                     if (!match.Success) continue;
+                    _regexMatches++;
                     translated = ExpandReplacement(entry.Replacement, match);
                     return !string.IsNullOrEmpty(translated);
                 }
@@ -706,6 +926,8 @@ namespace ScheduleIChinese
         public static void AddRuntime(string src, string translated)
         {
             if (string.IsNullOrEmpty(src) || string.IsNullOrEmpty(translated)) return;
+            _noHit.Remove(src);
+            _resultCache.Remove(src);
             _dict[src] = translated;
         }
 

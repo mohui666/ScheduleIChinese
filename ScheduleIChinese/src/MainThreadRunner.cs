@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Il2CppInterop.Runtime.Injection;
 using TMPro;
 using UnityEngine;
@@ -21,20 +22,35 @@ namespace ScheduleIChinese
         private float _lastActiveRescan = -1000f;
         private int _sceneFingerprint = int.MinValue;
         private bool _fontWasReady;
+        private bool _performanceSnapshotLogged;
         private static MainThreadRunner _instance;
 
         // Rolling registry of every text component that has been enabled. A few
         // are re-checked each frame; this catches text the game writes natively
         // (animation-driven banners such as WANTED / UNDER ARREST), which never
         // passes through any managed setter.
-        private static readonly System.Collections.Generic.List<TMP_Text> _tmpRegistry =
-            new System.Collections.Generic.List<TMP_Text>();
-        private static readonly System.Collections.Generic.HashSet<int> _tmpIds =
-            new System.Collections.Generic.HashSet<int>();
-        private static readonly System.Collections.Generic.List<UnityEngine.UI.Text> _uguiRegistry =
-            new System.Collections.Generic.List<UnityEngine.UI.Text>();
-        private static readonly System.Collections.Generic.HashSet<int> _uguiIds =
-            new System.Collections.Generic.HashSet<int>();
+        private sealed class TrackedTmpText
+        {
+            public int InstanceId;
+            public WeakReference<TMP_Text> Component;
+            public string LastText;
+        }
+
+        private sealed class TrackedUguiText
+        {
+            public int InstanceId;
+            public WeakReference<UnityEngine.UI.Text> Component;
+            public string LastText;
+        }
+
+        private static readonly List<TrackedTmpText> _tmpRegistry =
+            new List<TrackedTmpText>();
+        private static readonly Dictionary<int, TrackedTmpText> _tmpById =
+            new Dictionary<int, TrackedTmpText>();
+        private static readonly List<TrackedUguiText> _uguiRegistry =
+            new List<TrackedUguiText>();
+        private static readonly Dictionary<int, TrackedUguiText> _uguiById =
+            new Dictionary<int, TrackedUguiText>();
         private int _tmpScanIndex;
         private int _uguiScanIndex;
 
@@ -44,7 +60,14 @@ namespace ScheduleIChinese
             int id;
             try { id = comp.GetInstanceID(); }
             catch { return; }
-            if (_tmpIds.Add(id)) _tmpRegistry.Add(comp);
+            if (_tmpById.ContainsKey(id)) return;
+            var tracked = new TrackedTmpText
+            {
+                InstanceId = id,
+                Component = new WeakReference<TMP_Text>(comp)
+            };
+            _tmpById[id] = tracked;
+            _tmpRegistry.Add(tracked);
         }
 
         public static void RegisterText(UnityEngine.UI.Text comp)
@@ -53,7 +76,36 @@ namespace ScheduleIChinese
             int id;
             try { id = comp.GetInstanceID(); }
             catch { return; }
-            if (_uguiIds.Add(id)) _uguiRegistry.Add(comp);
+            if (_uguiById.ContainsKey(id)) return;
+            var tracked = new TrackedUguiText
+            {
+                InstanceId = id,
+                Component = new WeakReference<UnityEngine.UI.Text>(comp)
+            };
+            _uguiById[id] = tracked;
+            _uguiRegistry.Add(tracked);
+        }
+
+        public static void RememberText(TMP_Text comp, string text)
+        {
+            if (comp == null) return;
+            try
+            {
+                if (_tmpById.TryGetValue(comp.GetInstanceID(), out var tracked))
+                    tracked.LastText = text;
+            }
+            catch { }
+        }
+
+        public static void RememberText(UnityEngine.UI.Text comp, string text)
+        {
+            if (comp == null) return;
+            try
+            {
+                if (_uguiById.TryGetValue(comp.GetInstanceID(), out var tracked))
+                    tracked.LastText = text;
+            }
+            catch { }
         }
 
         private void Awake()
@@ -86,9 +138,10 @@ namespace ScheduleIChinese
             if (ModConfig.DumpUntranslated.Value)
                 TranslationStore.FlushDumpIfDue();
 
-            // Setter patches cover live changes. Scan only once when the CJK font
-            // becomes ready and once after the loaded-scene set changes. The old
-            // two-second global scan caused avoidable stalls on large save loads.
+            // The TMP change event covers live changes. Scan only once when the
+            // CJK font becomes ready and once after the loaded-scene set changes.
+            // The old two-second global scan caused avoidable stalls on large
+            // save loads.
             int fingerprint = SceneManager.sceneCount;
             for (int i = 0; i < SceneManager.sceneCount; i++)
             {
@@ -106,6 +159,15 @@ namespace ScheduleIChinese
                 _sceneFollowupRescan = Time.unscaledTime + 3f;
             }
             _fontWasReady = fontReady;
+
+            if (fontReady &&
+                ModConfig.EnableRuntimeTranslationFallback.Value &&
+                !_performanceSnapshotLogged &&
+                Time.unscaledTime >= 10f)
+            {
+                _performanceSnapshotLogged = true;
+                Plugin.Log.LogInfo(TranslationStore.GetPerformanceSnapshot());
+            }
 
             if (_sceneFollowupRescan >= 0f &&
                 Time.unscaledTime >= _sceneFollowupRescan)
@@ -126,6 +188,8 @@ namespace ScheduleIChinese
             {
                 _nextCleanup = Time.time + 60f;
                 TranslationStore.CleanupLive();
+                TextPatch.CleanupCaches();
+                NameOverlay.CleanupCache();
             }
 
             RollingScan();
@@ -140,47 +204,72 @@ namespace ScheduleIChinese
             for (int n = 0; n < 24 && _tmpRegistry.Count > 0; n++)
             {
                 if (_tmpScanIndex >= _tmpRegistry.Count) _tmpScanIndex = 0;
-                var comp = _tmpRegistry[_tmpScanIndex++];
+                var tracked = _tmpRegistry[_tmpScanIndex++];
+                TMP_Text comp = null;
                 bool destroyed;
-                int compId = 0;
                 try
                 {
-                    destroyed = comp == null || comp.gameObject == null;
-                    if (!destroyed) compId = comp.GetInstanceID();
+                    destroyed =
+                        !tracked.Component.TryGetTarget(out comp) ||
+                        comp == null ||
+                        comp.gameObject == null;
                 }
                 catch { destroyed = true; }
                 if (destroyed)
                 {
                     _tmpRegistry.RemoveAt(--_tmpScanIndex);
-                    if (compId != 0) _tmpIds.Remove(compId);
+                    _tmpById.Remove(tracked.InstanceId);
                     continue;
                 }
                 // Inactive components are skipped but stay registered, so
                 // panels that close and reopen keep being covered.
                 if (!comp.gameObject.activeInHierarchy) continue;
+                string current;
+                try { current = comp.text; }
+                catch { continue; }
+                if (string.Equals(current, tracked.LastText, StringComparison.Ordinal))
+                {
+                    // Shop selection can change visual style without changing
+                    // the label text. Keep its cached overlay in sync while
+                    // skipping translation work for every other stable label.
+                    if (NameOverlay.IsShopNameLabel(comp))
+                        NameOverlay.Sync(comp, current);
+                    continue;
+                }
                 TextPatch.ApplyExisting(comp);
+                try { tracked.LastText = comp.text; }
+                catch { }
             }
 
             for (int n = 0; n < 8 && _uguiRegistry.Count > 0; n++)
             {
                 if (_uguiScanIndex >= _uguiRegistry.Count) _uguiScanIndex = 0;
-                var comp = _uguiRegistry[_uguiScanIndex++];
+                var tracked = _uguiRegistry[_uguiScanIndex++];
+                UnityEngine.UI.Text comp = null;
                 bool destroyed;
-                int compId = 0;
                 try
                 {
-                    destroyed = comp == null || comp.gameObject == null;
-                    if (!destroyed) compId = comp.GetInstanceID();
+                    destroyed =
+                        !tracked.Component.TryGetTarget(out comp) ||
+                        comp == null ||
+                        comp.gameObject == null;
                 }
                 catch { destroyed = true; }
                 if (destroyed)
                 {
                     _uguiRegistry.RemoveAt(--_uguiScanIndex);
-                    if (compId != 0) _uguiIds.Remove(compId);
+                    _uguiById.Remove(tracked.InstanceId);
                     continue;
                 }
                 if (!comp.gameObject.activeInHierarchy) continue;
+                string current;
+                try { current = comp.text; }
+                catch { continue; }
+                if (string.Equals(current, tracked.LastText, StringComparison.Ordinal))
+                    continue;
                 TextPatch.ApplyExisting(comp);
+                try { tracked.LastText = comp.text; }
+                catch { }
             }
         }
 
@@ -191,19 +280,25 @@ namespace ScheduleIChinese
                 var timer = System.Diagnostics.Stopwatch.StartNew();
                 int tmpCount = 0;
                 int legacyCount = 0;
-                foreach (var text in UnityEngine.Object.FindObjectsOfType<TMP_Text>(false))
+                foreach (var text in UnityEngine.Object.FindObjectsByType<TMP_Text>(
+                    FindObjectsInactive.Exclude,
+                    FindObjectsSortMode.None))
                 {
                     if (text == null || text.gameObject == null) continue;
                     tmpCount++;
+                    RegisterText(text);
                     FontService.EnsureCjkFont(text);
                     if (ModConfig.EnableRuntimeTranslationFallback.Value)
                         TextPatch.ApplyExisting(text);
                 }
 
-                foreach (var text in UnityEngine.Object.FindObjectsOfType<UnityEngine.UI.Text>(false))
+                foreach (var text in UnityEngine.Object.FindObjectsByType<UnityEngine.UI.Text>(
+                    FindObjectsInactive.Exclude,
+                    FindObjectsSortMode.None))
                 {
                     if (text == null || text.gameObject == null) continue;
                     legacyCount++;
+                    RegisterText(text);
                     if (ModConfig.EnableRuntimeTranslationFallback.Value)
                         TextPatch.ApplyExisting(text);
                 }

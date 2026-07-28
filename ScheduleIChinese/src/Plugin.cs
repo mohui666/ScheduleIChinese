@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using BepInEx;
 using BepInEx.Logging;
@@ -13,7 +14,7 @@ namespace ScheduleIChinese
     public class Plugin : BasePlugin
     {
         public const string Guid = "com.schedulei.chinesemod";
-        public const string Version = "1.3.52";
+        public const string Version = "1.3.53";
 
         public static Plugin Instance { get; private set; }
         public static new ManualLogSource Log => Instance?.BaseLog;
@@ -23,16 +24,23 @@ namespace ScheduleIChinese
 
         public override void Load()
         {
+            var startupTimer = Stopwatch.StartNew();
             Instance = this;
             DataDir = Path.Combine(Paths.PluginPath, "ScheduleIChinese");
             Directory.CreateDirectory(DataDir);
             Directory.CreateDirectory(Path.Combine(DataDir, "Translations"));
 
+            long phaseStart = startupTimer.ElapsedMilliseconds;
             ModConfig.Init(Config);
+            long configMs = startupTimer.ElapsedMilliseconds - phaseStart;
+
+            phaseStart = startupTimer.ElapsedMilliseconds;
             if (ModConfig.EnableRuntimeTranslationFallback.Value || ModConfig.EnableAutoTranslate.Value)
                 TranslationStore.Init();
             else
                 Log.LogInfo("Static text edition: offline display-layer translation is disabled.");
+            long translationsMs = startupTimer.ElapsedMilliseconds - phaseStart;
+
             if (ModConfig.EnableAutoTranslate.Value)
             {
                 AutoTranslator.Start();
@@ -43,9 +51,12 @@ namespace ScheduleIChinese
                 Log.LogInfo("Online auto-translation is disabled; running fully offline.");
             }
 
+            phaseStart = startupTimer.ElapsedMilliseconds;
             var harmony = new Harmony(Guid);
-            harmony.PatchAll(typeof(TextPatch).Assembly);
+            ApplyHarmonyPatches(harmony);
+            long patchesMs = startupTimer.ElapsedMilliseconds - phaseStart;
 
+            phaseStart = startupTimer.ElapsedMilliseconds;
             try
             {
                 TextPatch.InitializeChangeListener();
@@ -60,10 +71,34 @@ namespace ScheduleIChinese
             UnityEngine.Object.DontDestroyOnLoad(go);
             go.hideFlags = HideFlags.HideAndDontSave;
             go.AddComponent<MainThreadRunner>();
+            long runnerMs = startupTimer.ElapsedMilliseconds - phaseStart;
 
             Log.LogInfo(
                 $"ScheduleIChinese {Version} loaded. Font support active; " +
                 $"runtime translation fallback: {ModConfig.EnableRuntimeTranslationFallback.Value}");
+            Log.LogInfo(
+                $"Startup timings: config {configMs} ms, translations {translationsMs} ms, " +
+                $"patches {patchesMs} ms, runner {runnerMs} ms, " +
+                $"total {startupTimer.ElapsedMilliseconds} ms.");
+        }
+
+        private static void ApplyHarmonyPatches(Harmony harmony)
+        {
+            var patchTypes = new[]
+            {
+                typeof(TextPatch.SetTextProp),
+                typeof(TextPatch.SetTextString),
+                typeof(TextPatch.LegacyText),
+                typeof(TextPatch.BakedTextOnEnable)
+            };
+
+            foreach (var patchType in patchTypes)
+            {
+                var timer = Stopwatch.StartNew();
+                harmony.CreateClassProcessor(patchType).Patch();
+                Log.LogInfo(
+                    $"Harmony patch {patchType.Name}: {timer.ElapsedMilliseconds} ms.");
+            }
         }
     }
 }

@@ -38,6 +38,7 @@ namespace ScheduleIChinese
 
         private static void Init()
         {
+            var initTimer = System.Diagnostics.Stopwatch.StartNew();
             if (_gameFont == null)
                 _gameFont = FindGameFont();
             if (_gameFont != null && !_gameFontCompleted)
@@ -52,12 +53,10 @@ namespace ScheduleIChinese
                 _notoFont = _cjkFont;
                 if (_cjkFont == null) { _initAttempts = 999; return; }
             }
-            _forceAll = false;
             RegisterGlobalFallback();
-            Plugin.Log.LogInfo("CJK font asset ready.");
+            Plugin.Log.LogInfo(
+                $"CJK font asset ready in {initTimer.ElapsedMilliseconds} ms.");
         }
-
-        private static bool _forceAll;
 
         private static TMP_FontAsset _gameFont;
 
@@ -179,10 +178,13 @@ namespace ScheduleIChinese
             if (!File.Exists(path)) { Plugin.Log.LogError("no CJK font file found"); return null; }
 
             Plugin.Log.LogInfo("creating CJK font asset from " + path);
+            var timer = System.Diagnostics.Stopwatch.StartNew();
             // faceIndex 0, 72pt sampling, dynamic atlas with multi-atlas growth
             var asset = TMP_FontAsset.CreateFontAsset(path, 0, 72, 7, GlyphRenderMode.SDFAA, 2048, 2048, AtlasPopulationMode.Dynamic, true);
             if (asset == null) throw new Exception("CreateFontAsset returned null");
             asset.hideFlags = HideFlags.HideAndDontSave;
+            Plugin.Log.LogInfo(
+                $"CJK font asset creation: {timer.ElapsedMilliseconds} ms.");
             return asset;
         }
 
@@ -242,8 +244,6 @@ namespace ScheduleIChinese
             // game font and registers CJK fallbacks on every font table.
             return EnsureCjkFont(comp);
         }
-
-        private static int _fontAssignFails;
 
         /// <summary>Make sure the given component can render CJK (per-font-asset fallback).</summary>
         public static bool EnsureCjkFont(TMP_Text comp)

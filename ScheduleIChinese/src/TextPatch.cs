@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using HarmonyLib;
 using TMPro;
@@ -7,7 +8,10 @@ using UnityEngine;
 
 namespace ScheduleIChinese
 {
-    /// <summary>Intercepts text assignments on TMP components and swaps in Chinese.</summary>
+    /// <summary>
+    /// Observes TMP text changes and component activation, then applies Chinese
+    /// translations on the main thread.
+    /// </summary>
     public static class TextPatch
     {
         private static readonly object PendingLock = new object();
@@ -15,11 +19,20 @@ namespace ScheduleIChinese
             new Queue<PendingText>();
         private static readonly HashSet<int> PendingInstanceIds = new HashSet<int>();
         private static readonly HashSet<int> _nullFontRebuilt = new HashSet<int>();
+        private static readonly Dictionary<int, FaceContextEntry> FaceContextById =
+            new Dictionary<int, FaceContextEntry>();
+        private static readonly Dictionary<int, WeakReference<TMP_Text>> ArcadeControlById =
+            new Dictionary<int, WeakReference<TMP_Text>>();
         private static Il2CppSystem.Action<UnityEngine.Object> _textChangedHandler;
 
         private sealed class PendingText
         {
             public int InstanceId;
+            public WeakReference<TMP_Text> Component;
+        }
+
+        private sealed class FaceContextEntry
+        {
             public WeakReference<TMP_Text> Component;
         }
 
@@ -43,6 +56,7 @@ namespace ScheduleIChinese
             if (comp == null) return;
             try
             {
+                MainThreadRunner.RegisterText(comp);
                 int id = comp.GetInstanceID();
                 lock (PendingLock)
                 {
@@ -58,9 +72,14 @@ namespace ScheduleIChinese
             catch { }
         }
 
-        public static void ApplyPendingChanges(int budget = 256)
+        public static void ApplyPendingChanges(
+            int maxItems = 128,
+            double maxMilliseconds = 1.5)
         {
-            for (int i = 0; i < budget; i++)
+            long deadline = Stopwatch.GetTimestamp() +
+                (long)(maxMilliseconds * Stopwatch.Frequency / 1000d);
+
+            for (int i = 0; i < maxItems; i++)
             {
                 PendingText pending;
                 lock (PendingLock)
@@ -78,6 +97,10 @@ namespace ScheduleIChinese
                 catch { }
 
                 if (comp != null) ApplyExisting(comp);
+
+                // Checking the clock in batches keeps the budget itself cheap.
+                if ((i & 7) == 7 && Stopwatch.GetTimestamp() >= deadline)
+                    return;
             }
         }
 
@@ -86,44 +109,228 @@ namespace ScheduleIChinese
             try { comp.havePropertiesChanged = true; } catch { }
         }
 
-        private static void Transform(TMP_Text comp, ref string value)
+        private static string TranslateForComponent(TMP_Text comp, string source)
+        {
+            var contextual = TranslateContextual(comp, source);
+            if (contextual != null) return contextual;
+            return TranslationStore.TranslateDisplayText(source);
+        }
+
+        private static string TranslateContextual(TMP_Text comp, string source)
+        {
+            if ((string.Equals(source, "Jump", StringComparison.Ordinal) ||
+                 string.Equals(source, "Drop", StringComparison.Ordinal)) &&
+                IsArcadeControlLabel(comp))
+                return source == "Jump" ? "跳跃" : "下落";
+
+            // "Face" is an appearance enum value and therefore deliberately
+            // remains on the global denylist. It is safe to localize only the
+            // visible tattoo-shop category label.
+            if (!string.Equals(source, "Face", StringComparison.Ordinal) ||
+                comp == null)
+                return null;
+
+            try
+            {
+                int id = comp.GetInstanceID();
+                if (FaceContextById.TryGetValue(id, out var cached))
+                {
+                    if (cached.Component.TryGetTarget(out var cachedComp) &&
+                        cachedComp != null &&
+                        cachedComp.gameObject != null)
+                        return "面部";
+                    FaceContextById.Remove(id);
+                }
+
+                bool isTattooCategory = false;
+                var ancestor = comp.transform;
+                for (int depth = 0; depth < 8 && ancestor != null; depth++)
+                {
+                    if (ancestor.name.IndexOf(
+                            "Tattoo",
+                            StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        isTattooCategory = true;
+                        break;
+                    }
+
+                    int categoryMatches = 0;
+                    foreach (var label in ancestor.GetComponentsInChildren<TMP_Text>(true))
+                    {
+                        if (label == null) continue;
+                        var text = label.text;
+                        if (text == "Tattoo Shop" || text == "纹身店" ||
+                            text == "Chest" || text == "胸部" ||
+                            text == "Left Arm" || text == "左臂" ||
+                            text == "Right Arm" || text == "右臂")
+                            categoryMatches++;
+                        if (categoryMatches >= 2)
+                        {
+                            isTattooCategory = true;
+                            break;
+                        }
+                    }
+                    if (isTattooCategory) break;
+
+                    ancestor = ancestor.parent;
+                }
+
+                // Cache only a positive match. The first assignment can happen
+                // before the tattoo panel and its sibling labels are assembled;
+                // caching that early negative would make the English label stick.
+                if (isTattooCategory)
+                    FaceContextById[id] = new FaceContextEntry
+                    {
+                        Component = new WeakReference<TMP_Text>(comp)
+                    };
+                return isTattooCategory ? "面部" : null;
+            }
+            catch { }
+            return null;
+        }
+
+        private static bool IsArcadeControlLabel(TMP_Text comp)
+        {
+            if (comp == null) return false;
+            try
+            {
+                int id = comp.GetInstanceID();
+                if (ArcadeControlById.TryGetValue(id, out var cached))
+                {
+                    if (cached.TryGetTarget(out var cachedComp) &&
+                        cachedComp != null &&
+                        cachedComp.gameObject != null)
+                        return true;
+                    ArcadeControlById.Remove(id);
+                }
+
+                bool isArcadeControl = false;
+                var ancestor = comp.transform;
+                for (int depth = 0; depth < 8 && ancestor != null; depth++)
+                {
+                    var ancestorName = ancestor.name;
+                    if (ancestorName.IndexOf(
+                            "Arcade",
+                            StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        ancestorName.IndexOf(
+                            "Minigame",
+                            StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        isArcadeControl = true;
+                        break;
+                    }
+
+                    bool hasSpace = false;
+                    bool hasCtrl = false;
+                    bool hasScore = false;
+                    foreach (var label in ancestor.GetComponentsInChildren<TMP_Text>(true))
+                    {
+                        if (label == null) continue;
+                        var text = label.text;
+                        if (text == "Space") hasSpace = true;
+                        else if (text == "Ctrl") hasCtrl = true;
+                        else if (text == "High Score" || text == "HIGH SCORE" ||
+                                 text == "最高分" || text == "最高分数" ||
+                                 text == "Score" || text == "SCORE" ||
+                                 text == "分数")
+                            hasScore = true;
+
+                        if (hasSpace && hasCtrl && hasScore)
+                        {
+                            isArcadeControl = true;
+                            break;
+                        }
+                    }
+                    if (isArcadeControl) break;
+                    ancestor = ancestor.parent;
+                }
+
+                if (isArcadeControl)
+                    ArcadeControlById[id] =
+                        new WeakReference<TMP_Text>(comp);
+                return isArcadeControl;
+            }
+            catch { }
+            return false;
+        }
+
+        private static void TransformImmediate(TMP_Text comp, ref string value)
         {
             if (comp == null || string.IsNullOrEmpty(value))
                 return;
 
-            // 必须先完成翻译，再同步商店覆盖层。
-            if (TranslationStore.ContainsCjk(value))
+            if (ModConfig.EnableRuntimeTranslationFallback.Value)
             {
-                if (ModConfig.EnableRuntimeTranslationFallback.Value)
-                {
-                    var partial = TranslationStore.TranslateDisplayText(value);
-                    if (partial != null) value = partial;
-                }
-            }
-            else if (ModConfig.EnableRuntimeTranslationFallback.Value)
-            {
-                var translated = TranslationStore.TranslateDisplayText(value);
+                var translated = TranslateForComponent(comp, value);
                 if (translated != null)
                 {
                     value = translated;
                 }
-                else if (ModConfig.EnableAutoTranslate.Value &&
+                else if (!TranslationStore.ContainsCjk(value) &&
+                         ModConfig.EnableAutoTranslate.Value &&
                          TranslationStore.IsTranslatable(value))
                 {
-                    // remember who is showing this text so a late auto-translation can be applied
                     TranslationStore.RegisterLive(comp, value);
                 }
             }
 
-            if (TranslationStore.ContainsCjk(value))
-            {
-                if (FontService.ApplyCjkFont(comp))
-                    MarkDirty(comp);
-            }
+            if (TranslationStore.ContainsCjk(value) &&
+                FontService.ApplyCjkFont(comp))
+                MarkDirty(comp);
 
-            // 必须放在所有翻译处理之后，传入最终文本。
             if (NameOverlay.IsShopNameLabel(comp))
                 NameOverlay.Sync(comp, value);
+        }
+
+        public static void CleanupCaches()
+        {
+            // Instance IDs can eventually be reused after objects are destroyed.
+            // This cache is only a one-time mesh rebuild guard, so clearing it
+            // occasionally is both safe and prevents stale IDs accumulating.
+            if (_nullFontRebuilt.Count > 4096)
+                _nullFontRebuilt.Clear();
+
+            if (FaceContextById.Count > 0)
+            {
+                var dead = new List<int>();
+                foreach (var pair in FaceContextById)
+                {
+                    try
+                    {
+                        if (!pair.Value.Component.TryGetTarget(out var comp) ||
+                            comp == null ||
+                            comp.gameObject == null)
+                            dead.Add(pair.Key);
+                    }
+                    catch
+                    {
+                        dead.Add(pair.Key);
+                    }
+                }
+                foreach (int id in dead)
+                    FaceContextById.Remove(id);
+            }
+
+            if (ArcadeControlById.Count > 0)
+            {
+                var dead = new List<int>();
+                foreach (var pair in ArcadeControlById)
+                {
+                    try
+                    {
+                        if (!pair.Value.TryGetTarget(out var comp) ||
+                            comp == null ||
+                            comp.gameObject == null)
+                            dead.Add(pair.Key);
+                    }
+                    catch
+                    {
+                        dead.Add(pair.Key);
+                    }
+                }
+                foreach (int id in dead)
+                    ArcadeControlById.Remove(id);
+            }
         }
 
         public static void ApplyExisting(TMP_Text comp)
@@ -139,6 +346,7 @@ namespace ScheduleIChinese
                 {
                     if (NameOverlay.IsShopNameLabel(comp))
                         NameOverlay.Sync(comp, current);
+                    MainThreadRunner.RememberText(comp, current);
                     return;
                 }
 
@@ -156,14 +364,14 @@ namespace ScheduleIChinese
 
                     if (ModConfig.EnableRuntimeTranslationFallback.Value)
                     {
-                        var partial = TranslationStore.TranslateDisplayText(current);
+                        var partial = TranslateForComponent(comp, current);
                         if (partial != null)
                             finalText = partial;
                     }
                 }
                 else if (ModConfig.EnableRuntimeTranslationFallback.Value)
                 {
-                    var translated = TranslationStore.TranslateDisplayText(current);
+                    var translated = TranslateForComponent(comp, current);
                     if (translated != null)
                     {
                         finalText = translated;
@@ -175,16 +383,23 @@ namespace ScheduleIChinese
                     }
                 }
 
+                if (TranslationStore.ContainsCjk(finalText) &&
+                    FontService.ApplyCjkFont(comp))
+                    MarkDirty(comp);
+
                 if (finalText != current)
                 {
-                    // setter 里会再次经过 Transform，由它同步覆盖层。
                     comp.text = finalText;
+                    if (NameOverlay.IsShopNameLabel(comp))
+                        NameOverlay.Sync(comp, finalText);
+                    MainThreadRunner.RememberText(comp, finalText);
                     return;
                 }
 
                 // 已经是中文，或者商品格被复用成英文时，直接同步状态。
                 if (NameOverlay.IsShopNameLabel(comp))
                     NameOverlay.Sync(comp, finalText);
+                MainThreadRunner.RememberText(comp, finalText);
             }
             catch (Exception e)
             {
@@ -198,13 +413,26 @@ namespace ScheduleIChinese
             try
             {
                 var current = comp.text;
-                if (string.IsNullOrEmpty(current)) return;
-                if (!ModConfig.EnableRuntimeTranslationFallback.Value) return;
+                if (string.IsNullOrEmpty(current))
+                {
+                    MainThreadRunner.RememberText(comp, current);
+                    return;
+                }
+                if (!ModConfig.EnableRuntimeTranslationFallback.Value)
+                {
+                    MainThreadRunner.RememberText(comp, current);
+                    return;
+                }
                 var translated = TranslationStore.TranslateDisplayText(current);
-                if (translated == null || translated == current) return;
+                if (translated == null || translated == current)
+                {
+                    MainThreadRunner.RememberText(comp, current);
+                    return;
+                }
                 if (TranslationStore.ContainsCjk(translated) && FontService.LegacyCjkFont != null)
                     comp.font = FontService.LegacyCjkFont;
                 comp.text = translated;
+                MainThreadRunner.RememberText(comp, translated);
             }
             catch { }
         }
@@ -214,18 +442,20 @@ namespace ScheduleIChinese
         {
             public static bool Prefix(TMP_Text __instance, ref string value)
             {
-                Transform(__instance, ref value);
+                TransformImmediate(__instance, ref value);
                 return true;
             }
         }
 
         /// <summary>
-        /// Patch every TMP SetText overload whose first argument is a string. This
-        /// includes the float-formatting overloads used for money, quantities and
-        /// progress values, while avoiding brittle per-version overload lists.
+        /// Patch every TMP SetText overload whose first argument is a string.
+        /// Several document-style panels use formatting overloads even for their
+        /// static headings; handling only SetText(string, bool) leaves those
+        /// labels English until a later scan, or lets refresh loops overwrite
+        /// them every frame.
         /// </summary>
         [HarmonyPatch]
-        public static class SetTextStringOverloads
+        public static class SetTextString
         {
             public static IEnumerable<MethodBase> TargetMethods()
             {
@@ -233,57 +463,15 @@ namespace ScheduleIChinese
                 {
                     if (method.Name != nameof(TMP_Text.SetText)) continue;
                     var parameters = method.GetParameters();
-                    if (parameters.Length > 0 && parameters[0].ParameterType == typeof(string))
+                    if (parameters.Length > 0 &&
+                        parameters[0].ParameterType == typeof(string))
                         yield return method;
                 }
             }
 
-            public static void Prefix(TMP_Text __instance, object[] __args)
+            public static void Prefix(TMP_Text __instance, ref string __0)
             {
-                if (__args == null || __args.Length == 0 || !(__args[0] is string sourceText)) return;
-                Transform(__instance, ref sourceText);
-                __args[0] = sourceText;
-            }
-        }
-
-        /// <summary>
-        /// Patch SetText(StringBuilder) overloads. List-heavy UI (effect lists,
-        /// inventory rows) is commonly built through StringBuilder, which never
-        /// passes through the string overloads above; without this hook those
-        /// strings stay English and never even reach the translation dump.
-        /// </summary>
-        [HarmonyPatch]
-        public static class SetTextBuilderOverloads
-        {
-            public static IEnumerable<MethodBase> TargetMethods()
-            {
-                foreach (var method in AccessTools.GetDeclaredMethods(typeof(TMP_Text)))
-                {
-                    if (method.Name != nameof(TMP_Text.SetText)) continue;
-                    var parameters = method.GetParameters();
-                    if (parameters.Length == 1 &&
-                        parameters[0].ParameterType == typeof(Il2CppSystem.Text.StringBuilder))
-                        yield return method;
-                }
-            }
-
-            public static void Prefix(TMP_Text __instance, object[] __args)
-            {
-                if (__args == null || __args.Length == 0) return;
-                var sb = __args[0] as Il2CppSystem.Text.StringBuilder;
-                if (sb == null) return;
-                try
-                {
-                    var sourceText = sb.ToString();
-                    var before = sourceText;
-                    Transform(__instance, ref sourceText);
-                    if (sourceText != before)
-                    {
-                        sb.Clear();
-                        sb.Append(sourceText);
-                    }
-                }
-                catch { }
+                TransformImmediate(__instance, ref __0);
             }
         }
 
@@ -312,10 +500,9 @@ namespace ScheduleIChinese
 
         /// <summary>
         /// Translate labels baked into prefabs. Deserialization fills TMP fields
-        /// without touching the managed setter, so neither the setter patch nor
-        /// the change event ever fires for them; the periodic scan also misses
-        /// panels that are inactive at scan time. OnEnable is the exact moment a
-        /// baked label becomes visible (phone apps, shop panels, popups).
+        /// without dispatching the change event; the periodic scan also misses
+        /// panels that are inactive at scan time. OnEnable is the exact moment
+        /// a baked label becomes visible (phone apps, shop panels, popups).
         /// TMP_Text itself does not declare OnEnable in the interop assemblies —
         /// only the concrete subclasses do — so each is patched explicitly via
         /// TargetMethods. Every component seen here is also registered for the
