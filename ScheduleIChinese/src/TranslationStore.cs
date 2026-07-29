@@ -421,6 +421,9 @@ namespace ScheduleIChinese
                 Translate("Face") != null ||
                 Translate("Jump") != null)
                 failed++;
+            if (TranslateDisplayText("上午") != "AM" ||
+                TranslateDisplayText("下午") != "PM")
+                failed++;
             var compositeEffects = TranslateDisplayText(
                 "<color=#4CB0FF>• Focused</color>\n" +
                 "<color=#5ACB4F>• Refreshing</color>\n" +
