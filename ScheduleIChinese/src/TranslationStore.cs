@@ -456,6 +456,13 @@ namespace ScheduleIChinese
                 },
                 new[]
                 {
+                    "<color=#6ED7FF>[3]</color> Lightweight Skateboard " +
+                    "<color=#54E717>($500)</color>",
+                    "<color=#6ED7FF>[3]</color> 轻型滑板 " +
+                    "<color=#54E717>($500)</color>"
+                },
+                new[]
+                {
                     "Pick up Cuke",
                     "拾取酷口可乐"
                 },
