@@ -424,6 +424,10 @@ namespace ScheduleIChinese
             if (TranslateDisplayText("上午") != "AM" ||
                 TranslateDisplayText("下午") != "PM")
                 failed++;
+            if (TranslateDisplayText("[SPACEBAR]") != "[空格]" ||
+                TranslateDisplayText("[VIEW MORE OPTIONS]") != "查看更多选项" ||
+                TranslateDisplayText("Nevermind") != "算了")
+                failed++;
             var compositeEffects = TranslateDisplayText(
                 "<color=#4CB0FF>• Focused</color>\n" +
                 "<color=#5ACB4F>• Refreshing</color>\n" +
@@ -463,6 +467,23 @@ namespace ScheduleIChinese
                     "<color=#54E717>($500)</color>",
                     "<color=#6ED7FF>[3]</color> 轻型滑板 " +
                     "<color=#54E717>($500)</color>"
+                },
+                new[]
+                {
+                    "<color=#6ED7FF>[1]</color> The Shitbox " +
+                    "<color=#19BEF0>($5,000)</color>",
+                    "<color=#6ED7FF>[1]</color> 破烂王轿车 " +
+                    "<color=#19BEF0>($5,000)</color>"
+                },
+                new[]
+                {
+                    "[3] The Hotbox ($30,000)",
+                    "[3] 烟箱越野车 ($30,000)"
+                },
+                new[]
+                {
+                    "$75.00 fine ($0.00 paid - insufficient cash)",
+                    "罚款 $75.00（已支付 $0.00，现金不足）"
                 },
                 new[]
                 {

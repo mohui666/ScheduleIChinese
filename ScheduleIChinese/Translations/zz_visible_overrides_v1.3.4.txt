@@ -11,7 +11,7 @@ enter vehicle=进入载具
 Keyboard and Mouse=键盘和鼠标
 Toggle Load Into Vehicle=切换装入载具
 Accelerate/Decelerate=加速/减速
-Shitbox Trunk=破车后备箱
+Shitbox Trunk=破烂王轿车后备箱
 Officer <Name>=<Name> 警官
 Upper Body Tattoos=上身纹身
 Female Underwear=女式内衣
@@ -251,8 +251,8 @@ Weather=天气
 Bruiser=猛汉
 Hotbox=闷烟车
 hotbox=闷烟车
-Hounddog=猎犬
-hounddog=猎犬
+Hounddog=猎犬轿车
+hounddog=猎犬轿车
 Hotbox Trunk=闷烟车后备箱
 
 # 供应商订单中的 dead drop 统一为“秘密交货（点）”
