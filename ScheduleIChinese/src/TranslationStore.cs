@@ -785,7 +785,20 @@ namespace ScheduleIChinese
         public static string TranslateDisplayText(string source)
         {
             if (string.IsNullOrEmpty(source)) return null;
-            if (!ContainsCjk(source))
+            return TranslateDisplayText(source, ContainsCjk(source));
+        }
+
+        /// <summary>
+        /// Translate display text when the caller has already checked whether it
+        /// contains CJK. The text setter is a hot path, so this avoids scanning
+        /// every assigned string twice.
+        /// </summary>
+        public static string TranslateDisplayText(
+            string source,
+            bool containsCjk)
+        {
+            if (string.IsNullOrEmpty(source)) return null;
+            if (!containsCjk)
             {
                 var direct = Translate(source);
                 if (direct != null || source.IndexOf('\n') < 0) return direct;

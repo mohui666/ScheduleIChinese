@@ -46,7 +46,8 @@ namespace ScheduleIChinese
             Phone = 2,
             ItemQuality = 4,
             Hotbar = 8,
-            InputPrompt = 16
+            InputPrompt = 16,
+            CustomerStandard = 32
         }
 
         private sealed class SafeUiContextEntry
@@ -128,15 +129,95 @@ namespace ScheduleIChinese
             try { comp.havePropertiesChanged = true; } catch { }
         }
 
-        private static string TranslateForComponent(TMP_Text comp, string source)
+        private static string TranslateForComponent(
+            TMP_Text comp,
+            string source,
+            bool sourceContainsCjk)
         {
             var contextual = TranslateContextual(comp, source);
             if (contextual != null) return contextual;
-            return TranslationStore.TranslateDisplayText(source);
+            return TranslationStore.TranslateDisplayText(
+                source,
+                sourceContainsCjk);
+        }
+
+        private static string TranslateForComponent(
+            UnityEngine.UI.Text comp,
+            string source,
+            bool sourceContainsCjk)
+        {
+            var contextual = TranslateLegacyContextual(comp, source);
+            if (contextual != null) return contextual;
+            return TranslationStore.TranslateDisplayText(
+                source,
+                sourceContainsCjk);
+        }
+
+        private static string TranslateLegacyContextual(
+            UnityEngine.UI.Text comp,
+            string source)
+        {
+            if (comp == null || string.IsNullOrEmpty(source)) return null;
+
+            if (StorefrontTranslations.TryGet(source, out var storefront))
+                return storefront;
+
+            if (HasLegacyUiContext(comp, SafeUiContext.CustomerStandard))
+            {
+                switch (source)
+                {
+                    case "Very Low": return "非常低";
+                    case "Low": return "低";
+                    case "Moderate": return "中等";
+                    case "High": return "高";
+                    case "Very High": return "非常高";
+                }
+            }
+
+            if (source == "Benzies" &&
+                HasLegacyUiContext(comp, SafeUiContext.Phone))
+                return "本齐帮";
+
+            return null;
+        }
+
+        private static bool HasLegacyUiContext(
+            UnityEngine.UI.Text comp,
+            SafeUiContext expected)
+        {
+            try
+            {
+                var ancestor = comp.transform;
+                for (int depth = 0; depth < 12 && ancestor != null; depth++)
+                {
+                    var name = ancestor.name ?? string.Empty;
+                    if (expected == SafeUiContext.CustomerStandard &&
+                        (string.Equals(
+                             name,
+                             "StandardIItem",
+                             StringComparison.OrdinalIgnoreCase) ||
+                         ContainsIgnoreCase(name, "StandardContainer") ||
+                         ContainsIgnoreCase(name, "CustomerStandard")))
+                        return true;
+
+                    if (expected == SafeUiContext.Phone &&
+                        (ContainsIgnoreCase(name, "Phone") ||
+                         ContainsIgnoreCase(name, "AppsCanvas") ||
+                         ContainsIgnoreCase(name, "ContactsApp")))
+                        return true;
+
+                    ancestor = ancestor.parent;
+                }
+            }
+            catch { }
+            return false;
         }
 
         private static string TranslateContextual(TMP_Text comp, string source)
         {
+            if (StorefrontTranslations.TryGet(source, out var storefront))
+                return storefront;
+
             if ((string.Equals(source, "Jump", StringComparison.Ordinal) ||
                  string.Equals(source, "Drop", StringComparison.Ordinal)) &&
                 IsArcadeControlLabel(comp))
@@ -226,6 +307,9 @@ namespace ScheduleIChinese
                 case "Yes":
                     return HasSafeUiContext(comp, SafeUiContext.Phone)
                         ? "接受" : null;
+                case "Benzies":
+                    return HasSafeUiContext(comp, SafeUiContext.Phone)
+                        ? "本齐帮" : null;
                 case "[Counter-offer]":
                     return HasSafeUiContext(comp, SafeUiContext.Phone)
                         ? "还价" : null;
@@ -270,6 +354,21 @@ namespace ScheduleIChinese
                 case "Heavenly":
                     return HasSafeUiContext(comp, SafeUiContext.ItemQuality)
                         ? "极品" : null;
+                case "Very Low":
+                    return HasSafeUiContext(comp, SafeUiContext.CustomerStandard)
+                        ? "非常低" : null;
+                case "Low":
+                    return HasSafeUiContext(comp, SafeUiContext.CustomerStandard)
+                        ? "低" : null;
+                case "Moderate":
+                    return HasSafeUiContext(comp, SafeUiContext.CustomerStandard)
+                        ? "中等" : null;
+                case "High":
+                    return HasSafeUiContext(comp, SafeUiContext.CustomerStandard)
+                        ? "高" : null;
+                case "Very High":
+                    return HasSafeUiContext(comp, SafeUiContext.CustomerStandard)
+                        ? "非常高" : null;
                 default:
                     return null;
             }
@@ -338,9 +437,14 @@ namespace ScheduleIChinese
                 if (expected == SafeUiContext.ItemQuality &&
                     (ContainsIgnoreCase(name, "QualityLabel") ||
                      ContainsIgnoreCase(name, "QualityUI") ||
-                     string.Equals(name, "Standards", StringComparison.OrdinalIgnoreCase) ||
-                     ContainsIgnoreCase(name, "StandardsLabel") ||
                      ContainsIgnoreCase(name, "ProductQuality")))
+                    return true;
+
+                if (expected == SafeUiContext.CustomerStandard &&
+                    (string.Equals(name, "Standards", StringComparison.OrdinalIgnoreCase) ||
+                     ContainsIgnoreCase(name, "StandardsLabel") ||
+                     ContainsIgnoreCase(name, "CustomerStandard") ||
+                     ContainsIgnoreCase(name, "CustomerRequirement")))
                     return true;
 
                 if (expected == SafeUiContext.Hotbar &&
@@ -388,12 +492,23 @@ namespace ScheduleIChinese
                     }
                     else if (expected == SafeUiContext.ItemQuality)
                     {
-                        if (text == "Quality" || text == "品质" ||
-                            text == "Standards" || text == "标准要求")
+                        if (text == "Quality" || text == "品质")
                             first = true;
                         else if (text == "Trash" || text == "Poor" ||
                                  text == "Standard" || text == "Premium" ||
                                  text == "Heavenly")
+                            second = true;
+                    }
+                    else if (expected == SafeUiContext.CustomerStandard)
+                    {
+                        if (text == "Standards" || text == "标准要求")
+                            first = true;
+                        else if (text == "Very Low" || text == "Low" ||
+                                 text == "Moderate" || text == "High" ||
+                                 text == "Very High" ||
+                                 text == "非常低" || text == "低" ||
+                                 text == "中等" || text == "高" ||
+                                 text == "非常高")
                             second = true;
                     }
                     else if (expected == SafeUiContext.Hotbar)
@@ -496,14 +611,16 @@ namespace ScheduleIChinese
             if (comp == null || string.IsNullOrEmpty(value))
                 return;
 
+            bool hasCjk = TranslationStore.ContainsCjk(value);
             if (ModConfig.EnableRuntimeTranslationFallback.Value)
             {
-                var translated = TranslateForComponent(comp, value);
+                var translated = TranslateForComponent(comp, value, hasCjk);
                 if (translated != null)
                 {
                     value = translated;
+                    hasCjk = TranslationStore.ContainsCjk(value);
                 }
-                else if (!TranslationStore.ContainsCjk(value) &&
+                else if (!hasCjk &&
                          ModConfig.EnableAutoTranslate.Value &&
                          TranslationStore.IsTranslatable(value))
                 {
@@ -511,7 +628,7 @@ namespace ScheduleIChinese
                 }
             }
 
-            if (TranslationStore.ContainsCjk(value) &&
+            if (hasCjk &&
                 FontService.ApplyCjkFont(comp))
                 MarkDirty(comp);
 
@@ -609,9 +726,12 @@ namespace ScheduleIChinese
                 }
 
                 string finalText = current;
+                bool currentHasCjk = TranslationStore.ContainsCjk(current);
+                bool cjkFontChecked = false;
 
-                if (TranslationStore.ContainsCjk(current))
+                if (currentHasCjk)
                 {
+                    cjkFontChecked = true;
                     // If the font setup just changed, the mesh was built while no
                     // CJK fallback was available (blank glyphs) and is stale.
                     if (FontService.ApplyCjkFont(comp))
@@ -622,14 +742,20 @@ namespace ScheduleIChinese
 
                     if (ModConfig.EnableRuntimeTranslationFallback.Value)
                     {
-                        var partial = TranslateForComponent(comp, current);
+                        var partial = TranslateForComponent(
+                            comp,
+                            current,
+                            true);
                         if (partial != null)
                             finalText = partial;
                     }
                 }
                 else if (ModConfig.EnableRuntimeTranslationFallback.Value)
                 {
-                    var translated = TranslateForComponent(comp, current);
+                    var translated = TranslateForComponent(
+                        comp,
+                        current,
+                        false);
                     if (translated != null)
                     {
                         finalText = translated;
@@ -641,7 +767,8 @@ namespace ScheduleIChinese
                     }
                 }
 
-                if (TranslationStore.ContainsCjk(finalText) &&
+                if (!cjkFontChecked &&
+                    TranslationStore.ContainsCjk(finalText) &&
                     FontService.ApplyCjkFont(comp))
                     MarkDirty(comp);
 
@@ -681,7 +808,11 @@ namespace ScheduleIChinese
                     MainThreadRunner.RememberText(comp, current);
                     return;
                 }
-                var translated = TranslationStore.TranslateDisplayText(current);
+                bool currentHasCjk = TranslationStore.ContainsCjk(current);
+                var translated = TranslateForComponent(
+                    comp,
+                    current,
+                    currentHasCjk);
                 if (translated == null || translated == current)
                 {
                     MainThreadRunner.RememberText(comp, current);
@@ -745,7 +876,10 @@ namespace ScheduleIChinese
                 // detail view append lines incrementally ("• Calming" -> "...舒缓\n•
                 // Munchies"), and plain Translate() rejects any string that already
                 // contains CJK, so every line after the first would stay English.
-                var translated = TranslationStore.TranslateDisplayText(value);
+                var translated = TranslateForComponent(
+                    __instance,
+                    value,
+                    TranslationStore.ContainsCjk(value));
                 if (translated != null)
                 {
                     if (TranslationStore.ContainsCjk(translated) && FontService.LegacyCjkFont != null)

@@ -1,0 +1,70 @@
+# 保留游戏原始 12 小时制的 AM/PM 标记。
+# 本文件按名称最后加载，覆盖旧词表中“上午/下午/早/晚”的时间格式。
+
+# 动态时刻与时段
+r:^(?i)(\\d+)\\:(\\d+) AM (.+)$=$3 $1:$2 AM
+r:^(?i)(\\d+)\\:(\\d+) AM$=$1:$2 AM
+r:^(?i)(\\d+)\\:(\\d+) PM (.+)$=$3 $1:$2 PM
+r:^(?i)(\\d+)\\:(\\d+) PM$=$1:$2 PM
+r:^(?i)(\\d+)AM$=$1AM
+r:^(?i)(\\d+)PM$=$1PM
+r:^(\\d+)\\:(\\d+) AM$=$1:$2 AM
+r:^(\\d+)\\:(\\d+) PM$=$1:$2 PM
+r:^(\\d+)AM-(\\d+)AM$=$1AM-$2AM
+r:^(\\d+)AM-(\\d+)PM$=$1AM-$2PM
+r:^(\\d+)PM-(\\d+)AM$=$1PM-$2AM
+r:^(\\d+)PM-(\\d+)PM$=$1PM-$2PM
+r:CURFEW ACTIVE\n UNTIL (\\d+)AM=宵禁生效中\n 直至 $1AM
+r:CURFEW ACTIVE\n(\\d+)PM - (\\d+)AM=宵禁进行中\n$1PM - $2AM
+r:CURFEW TONIGHT\n(\\d+)PM - (\\d+)AM=今晚宵禁\n$1PM - $2AM
+r:It is (\\d+)AM =现在是 $1AM
+r:It is (\\d+)PM =现在是 $1PM
+r:Police curfew in effect until (\\d+)AM=警方宵禁生效至 $1AM
+r:Waking up at (\\d+):(\\d+) AM=将在 $1:$2 AM 醒来
+
+# 固定时段
+4PM-5AM=4PM-5AM
+6AM-6PM=6AM-6PM
+6AM-8PM=6AM-8PM
+6PM-6AM=6PM-6AM
+9PM - 5AM=9PM - 5AM
+Can't sleep before 6:00 PM=6:00 PM 前无法入睡
+CURFEW ACTIVE\n8PM - 4AM=宵禁进行中\n8PM - 4AM
+CURFEW TONIGHT\n9PM - 5AM=今晚宵禁\n9PM - 5AM
+It is 4AM - go to sleep to progress to tomorrow=现在是 4AM——睡一觉进入下一天
+Oh yeah, boss man told me about you. You can come in, but you'll have to wait until 6PM.=对，老板跟我提过你。你可以进来，但得等到 6PM。
+Only open after 6PM=仅在 6PM 后开放
+Police curfew in effect until 5AM=警方宵禁持续至 5AM
+Sorry boss, my shift ends at 4AM.=抱歉老板，我的班次到 4AM 结束。
+There is a <h2>mandatory curfew</h> between 9PM and 5AM. Police will <h2>arrest</h> you if you're seen outside.=9PM 至 5AM 实行<h2>强制宵禁</h>。若被警察发现你在外活动，他们会<h2>逮捕</h>你。
+There is a <color\=#F86266>mandatory curfew</color> between 8PM and 5AM. Police will <color\=#F86266>arrest</color> you if you're seen outside.=8PM 至 5AM 实行<color\=#F86266>强制宵禁</color>。如果在此期间被发现在外，警察会<color\=#F86266>逮捕</color>你。
+There is a <color\=#F86266>mandatory curfew</color> between 9PM and 5AM. Police will <color\=#F86266>arrest</color> you if you're seen outside.=9PM 至 5AM 实行<color\=#F86266>强制宵禁</color>。如果在此期间被发现在外，警察会<color\=#F86266>逮捕</color>你。
+
+# 带动作说明的固定时刻
+Use Vending Machine (10:30 AM)=使用自动售货机（10:30 AM）
+Use Vending Machine (10:45 AM)=使用自动售货机（10:45 AM）
+Use Vending Machine (11:00 AM)=使用自动售货机（11:00 AM）
+Use Vending Machine (11:15 AM)=使用自动售货机（11:15 AM）
+Use Vending Machine (11:50 AM)=使用自动售货机（11:50 AM）
+Use Vending Machine (12:30 PM)=使用自动售货机（12:30 PM）
+Use Vending Machine (2:30 PM)=使用自动售货机（2:30 PM）
+Use Vending Machine (7:05 AM)=使用自动售货机（7:05 AM）
+Use Vending Machine (7:10 PM)=使用自动售货机（7:10 PM）
+Use Vending Machine (7:15 PM)=使用自动售货机（7:15 PM）
+Use Vending Machine (7:30 AM)=使用自动售货机（7:30 AM）
+Use Vending Machine (8:00 AM)=使用自动售货机（8:00 AM）
+Use Vending Machine (8:20 PM)=使用自动售货机（8:20 PM）
+Use Vending Machine (8:45 AM)=使用自动售货机（8:45 AM）
+Use Vending Machine (9:00 AM)=使用自动售货机（9:00 AM）
+Use Vending Machine (9:50 AM)=使用自动售货机（9:50 AM）
+Use Vending Machine (9:50 PM)=使用自动售货机（9:50 PM）
+Wait for delivery (10:00 AM)=等待送达（10:00 AM）
+Wait for delivery (11:15 AM)=等待送达（11:15 AM）
+Wait for delivery (12:00 AM)=等待送达（12:00 AM）
+Wait for delivery (3:30 PM)=等待送达（3:30 PM）
+Wait for delivery (5:00 AM)=等待送达（5:00 AM）
+Wait for delivery (5:30 AM)=等待送达（5:30 AM）
+Wait for delivery (6:30 AM)=等待送达（6:30 AM）
+Wait for delivery (7:00 PM)=等待送达（7:00 PM）
+Wait for delivery (7:30 AM)=等待送达（7:30 AM）
+Waking up at 4:00 AM=4:00 AM 起床

@@ -1,0 +1,136 @@
+# v1.3.55 全局漏译修复。
+# 顾客标准 Low/High 由 TextPatch 的安全上下文处理，避免翻译游戏枚举键。
+
+# 抢劫短信：逐行翻译，支持任意数量的货物行。
+This is what they got:=他们抢走了这些东西：
+r:(\\d+)x Jar of (.+) \\(Trash quality\\)=$1x 罐装$2（垃圾品质）
+r:(\\d+)x Jar of (.+) \\(Poor quality\\)=$1x 罐装$2（劣质品质）
+r:(\\d+)x Jar of (.+) \\(Standard quality\\)=$1x 罐装$2（标准品质）
+r:(\\d+)x Jar of (.+) \\(Premium quality\\)=$1x 罐装$2（优质品质）
+r:(\\d+)x Jar of (.+) \\(Heavenly quality\\)=$1x 罐装$2（极品品质）
+r:\\$(\\d[\\d,]*) cash=$$$1 现金
+
+# 分段组成的区域解锁界面。
+Reduce cartel influence in Docks to=将码头区的卡特尔影响力降至
+Reduce cartel influence in Downtown to=将市中心的卡特尔影响力降至
+Reduce cartel influence in Suburbia to=将郊区的卡特尔影响力降至
+Reduce cartel influence in Westville to=将西城区的卡特尔影响力降至
+to unlock this region=以解锁该区域
+
+# 序列化剧情对话。
+Hey there=嘿。
+I guess so=应该吧。
+Man, it's rainy as hell=老兄，这雨也太大了。
+Mornin' dude=早啊，老兄。
+No thank you=不了，谢谢。
+No thanks bro=不用了，兄弟。
+Nope man=不了，老兄。
+Not interested sorry bro=没兴趣，抱歉兄弟。
+Not loving this rain, bro=我可不喜欢这场雨，兄弟。
+Not right now broskies=现在不行，兄弟。
+Not yet man=还不行，老兄。
+Oh hell yeah=哦，那当然！
+Ok then=那好吧。
+Sounds good homie=听起来不错，哥们。
+Stop it dude=住手，老兄。
+Woah dude=哇，老兄。
+Yeah ok=行吧。
+Yeah, not what I'm after homie=不了，这不是我想要的，哥们。
+I want to buy a sewer access key=我想买一把下水道通行钥匙
+
+# 房产和车辆价格选项：同时覆盖序列化占位符与运行时价格。
+Taco Ticklers (<PRICE>)=玉米饼乐园（<PRICE>）
+The Bruiser (<PRICE>)=布鲁斯（<PRICE>）
+The Bungalow (<PRICE>)=平房（<PRICE>）
+The Car Wash (<PRICE>)=洗车行（<PRICE>）
+The Cheetah (<PRICE>)=猎豹（<PRICE>）
+The Dinkler (<PRICE>)=丁克勒（<PRICE>）
+The Docks Warehouse (<PRICE>)=码头仓库（<PRICE>）
+The Laundromat (<PRICE>)=自助洗衣店（<PRICE>）
+The Post Office (<PRICE>)=邮局（<PRICE>）
+The Shitbox (<PRICE>)=破车（<PRICE>）
+The Veeper (<PRICE>)=毒蛇（<PRICE>）
+Yes (<PRICE>)=是（<PRICE>）
+r:Taco Ticklers \\((\\$[\\d,]+)\\)=玉米饼乐园（$1）
+r:The Bruiser \\((\\$[\\d,]+)\\)=布鲁斯（$1）
+r:The Bungalow \\((\\$[\\d,]+)\\)=平房（$1）
+r:The Car Wash \\((\\$[\\d,]+)\\)=洗车行（$1）
+r:The Cheetah \\((\\$[\\d,]+)\\)=猎豹（$1）
+r:The Dinkler \\((\\$[\\d,]+)\\)=丁克勒（$1）
+r:The Docks Warehouse \\((\\$[\\d,]+)\\)=码头仓库（$1）
+r:The Laundromat \\((\\$[\\d,]+)\\)=自助洗衣店（$1）
+r:The Post Office \\((\\$[\\d,]+)\\)=邮局（$1）
+r:The Shitbox \\((\\$[\\d,]+)\\)=破车（$1）
+r:The Veeper \\((\\$[\\d,]+)\\)=毒蛇（$1）
+r:Yes \\((\\$[\\d,]+)\\)=是（$1）
+
+# 任务和载入错误。
+Kill the bandit who keeps stealing Stan's supplies at the docks=杀掉那个一直在码头偷 Stan 物资的强盗
+Required file 'Game.json' is missing. Save file cannot be loaded.=缺少必需文件“Game.json”，无法载入存档。
+
+# IL2CPP 运行时高可信玩家提示和对话。
+Can't destroy vehicle while occupied.=车内有人时无法销毁车辆。
+Can't sleep while athletic!=处于运动状态时无法睡觉！
+Can't sleep while energized!=精力充沛时无法睡觉！
+r:Hey boss, I've heard there's a Benzies deal happening in Docks, (.+)\\. Might be worth checking out\\.=老板，我听说本齐帮会在码头区的$1进行交易，或许值得去看看。
+r:Hey boss, I've heard there's a Benzies deal happening in Downtown, (.+)\\. Might be worth checking out\\.=老板，我听说本齐帮会在市中心的$1进行交易，或许值得去看看。
+r:Hey boss, I've heard there's a Benzies deal happening in Suburbia, (.+)\\. Might be worth checking out\\.=老板，我听说本齐帮会在郊区的$1进行交易，或许值得去看看。
+r:Hey boss, I've heard there's a Benzies deal happening in Westville, (.+)\\. Might be worth checking out\\.=老板，我听说本齐帮会在西城区的$1进行交易，或许值得去看看。
+In the middle of the night, the door is kicked in and you are dragged into a vehicle trunk...=半夜，房门被人踹开，你被拖进了汽车后备厢……
+Mick doesn't want to do business with you right now.=Mick 现在不想和你做生意。
+Most legal shops will only accept <h1>card payments</h>, while most illegal shops only take cash. Visit an <h1>ATM</h> to deposit and withdraw cash.=大多数合法商店只接受<h1>刷卡支付</h>，而非法商店通常只收现金。前往<h1>自动取款机</h>存取现金。
+My friend <NAME> can hook you up with <PRODUCT>. I've passed your number on to them.=我的朋友 <NAME> 能给你弄到 <PRODUCT>。我已经把你的号码给对方了。
+None of your business!=不关你的事！
+Only the host can start the game.=只有房主可以开始游戏。
+Round 1\nPredict if the next card will be red or black.\nYou can also forfeit and cash out.=第1轮\n猜下一张牌是红色还是黑色。\n你也可以弃权并兑现奖金。
+Round 2\nPredict if the next card will be higher or lower.\nYou can also forfeit and cash out.=第2轮\n猜下一张牌更大还是更小。\n你也可以弃权并兑现奖金。
+Round 3\nPredict if the next card will be inside or outside the previous two cards.\nAce counts as 11.\nYou can also forfeit and cash out.=第3轮\n猜下一张牌的点数是在前两张牌之间还是之外。\nA 按 11 点计算。\n你也可以弃权并兑现奖金。
+Round 4\nPredict the suit of the next card.\nYou can also forfeit and cash out.=第4轮\n猜下一张牌的花色。\n你也可以弃权并兑现奖金。
+Thanks. I'll now check your vehicle.=谢谢。现在我要检查你的车辆。
+There is a mushroom colony ready for harvest, but it has no destination or it's destination is full.=有一处蘑菇菌落已经可以收获，但没有指定目的地，或目的地已满。
+This trash can is not usable by cleaners.=清洁工无法使用这个垃圾桶。
+Vehicle won't fit everything. Some items will be placed on the pallets.=车辆装不下全部物品，部分物品将放在托盘上。
+Waiting for a rival dealer.=正在等待敌对经销商。
+While dragging an item, press <Input_Left> or <Input_Right> to rotate it.=拖动物品时，按 <Input_Left> 或 <Input_Right> 旋转。
+You can now order <PRODUCT> from <NAME>. <PRODUCT> can be used to <PURPOSE>.=现在可以从 <NAME> 处订购 <PRODUCT>。<PRODUCT> 可用于 <PURPOSE>。
+You can use your management clipboard to assign me a locker.=你可以用管理剪贴板给我分配一个储物柜。
+
+# IL2CPP 运行时状态、奖励、违法原因和失败提示。
+Already preparing a dead drop=已经在准备秘密交货
+Already waiting for a dead drop=已经在等待秘密交货
+Dry Clay Soil=干燥黏土土壤
+r:Employee limit reached \\((.+)\\)=已达到员工上限（$1）
+Exceeded Quality Bonus=超额品质奖励
+Failure to comply with police instruction=未服从警方指令
+I haven't been assigned a locker=还没有给我分配储物柜
+Insert unpackaged product and mixing ingredient=放入未包装产品和混合原料
+Insufficient inventory space=物品栏空间不足
+No RDX in inventory=物品栏中没有 RDX
+No product equipped=未装备产品
+No quality item equipped=未装备符合品质要求的物品
+Order is too large for delivery vehicle=订单过大，配送车辆无法装载
+Order too large=订单过大
+Possession of low-severity drug=持有低危毒品
+Possession of moderate-severity drug=持有中危毒品
+Possession of high-severity drug=持有高危毒品
+Quick Delivery Bonus=快速送达奖励
+r:Reach the rank of <h1>(.+)</h>=达到<h1>$1</h>等级
+This delivery is waiting for loading dock=这批货正在等待装货码头
+Vehicle must be parked inside the shop=车辆必须停在店内
+Won't fit in inventory=物品栏放不下
+You have no vehicle to recover=没有可回收的车辆
+[Complete Deal]=[完成交易]
+Cash Deposit=现金存款
+Cash Withdrawal=现金取款
+Potential Customer=潜在顾客
+Potential Dealer=潜在经销商
+Region unlocked: Docks=已解锁区域：码头区
+Region unlocked: Downtown=已解锁区域：市中心
+Region unlocked: Suburbia=已解锁区域：郊区
+Region unlocked: Westville=已解锁区域：西城区
+Region unlocked: Northtown=已解锁区域：北城区
+Region unlocked: Northville=已解锁区域：诺斯维尔
+Region unlocked: Uptown=已解锁区域：上城区
+r:Region unlocked: (.+)=已解锁区域：$1
+Vehicle full=车辆已满
+Violating curfew=违反宵禁

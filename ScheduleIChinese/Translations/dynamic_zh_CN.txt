@@ -320,7 +320,6 @@ r:That'll be <color\=#54E717>(\\$\\d+)<\\/color> for the (.+)\\. Sound good?=这
 r:That'll be <color\=#54E717>(\\$\\d{1,3}(?:,\\d{3})*)</color> for the (.+)\\. We got a deal, partner\\?=$2 要 <color\=#54E717>$1</color>。成交吗，伙计？
 r:The drop is ready. You can find it (.+)$=交接点已准备好。你可以在 $1 找到它。
 r:This delivery is waiting for the loading dock (\\d+) to be empty.=这批货正在等待 $1 号装货码头清空。
-r:This is what they got:\n(.+)=这是他们抢的东西:\n$1
 r:Total: <color\=#5AB95A>(.+)=总计： <color\=#5AB95A>$1
 r:Total: <color\=#5AB95AFF>(.+)<\\/color>=总计： <color\=#5AB95AFF>$1</color>
 r:U got (\\d+)x (.+?)\\?\\?\\? I'll pay <color\=#46CB4F>(.+?)<\\/color> for it\\. DEAL\\?=你有 $1 份 $2 吗？？？我出 <color\=#46CB4F>$3</color>。成交？！
