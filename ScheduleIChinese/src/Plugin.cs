@@ -14,7 +14,7 @@ namespace ScheduleIChinese
     public class Plugin : BasePlugin
     {
         public const string Guid = "com.schedulei.chinesemod";
-        public const string Version = "1.3.54";
+        public const string Version = "1.3.55";
 
         public static Plugin Instance { get; private set; }
         public static new ManualLogSource Log => Instance?.BaseLog;

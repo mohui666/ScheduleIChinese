@@ -20,6 +20,7 @@ namespace ScheduleIChinese
         private float _scheduledRescan = -1f;
         private float _sceneFollowupRescan = -1f;
         private float _lastActiveRescan = -1000f;
+        private float _nextRollingScan;
         private int _sceneFingerprint = int.MinValue;
         private bool _fontWasReady;
         private bool _performanceSnapshotLogged;
@@ -192,10 +193,17 @@ namespace ScheduleIChinese
                 NameOverlay.CleanupCache();
             }
 
-            RollingScan();
+            // Keep native-write detection independent of the rendered frame rate.
+            // Running this on every frame made the same UI cost 2-4x more at
+            // 120/144 Hz than at 60 Hz without improving visible responsiveness.
+            if (Time.unscaledTime >= _nextRollingScan)
+            {
+                _nextRollingScan = Time.unscaledTime + (1f / 30f);
+                RollingScan();
+            }
         }
 
-        /// <summary>Re-check a small slice of registered components every frame.</summary>
+        /// <summary>Re-check a small slice of registered components at 30 Hz.</summary>
         private void RollingScan()
         {
             if (!FontService.Ready) return;
@@ -280,6 +288,8 @@ namespace ScheduleIChinese
                 var timer = System.Diagnostics.Stopwatch.StartNew();
                 int tmpCount = 0;
                 int legacyCount = 0;
+                bool runtimeFallback =
+                    ModConfig.EnableRuntimeTranslationFallback.Value;
                 foreach (var text in UnityEngine.Object.FindObjectsByType<TMP_Text>(
                     FindObjectsInactive.Exclude,
                     FindObjectsSortMode.None))
@@ -287,9 +297,17 @@ namespace ScheduleIChinese
                     if (text == null || text.gameObject == null) continue;
                     tmpCount++;
                     RegisterText(text);
-                    FontService.EnsureCjkFont(text);
-                    if (ModConfig.EnableRuntimeTranslationFallback.Value)
+                    if (runtimeFallback)
                         TextPatch.ApplyExisting(text);
+                    else
+                    {
+                        string current;
+                        try { current = text.text; }
+                        catch { continue; }
+                        if (!string.IsNullOrEmpty(current) &&
+                            TranslationStore.ContainsCjk(current))
+                            FontService.EnsureCjkFont(text);
+                    }
                 }
 
                 foreach (var text in UnityEngine.Object.FindObjectsByType<UnityEngine.UI.Text>(
@@ -299,7 +317,7 @@ namespace ScheduleIChinese
                     if (text == null || text.gameObject == null) continue;
                     legacyCount++;
                     RegisterText(text);
-                    if (ModConfig.EnableRuntimeTranslationFallback.Value)
+                    if (runtimeFallback)
                         TextPatch.ApplyExisting(text);
                 }
                 timer.Stop();

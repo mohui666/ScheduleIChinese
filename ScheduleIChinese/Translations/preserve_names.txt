@@ -6431,3 +6431,5 @@ White Stink=White Stink
 White Thunderfuck=White Thunderfuck
 White Urkle=White Urkle
 Meth=Meth
+Elizabeth Homley=Elizabeth Homley
+Pearl Moore=Pearl Moore
