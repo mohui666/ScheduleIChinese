@@ -37,32 +37,65 @@ Woah dude=哇，老兄。
 Yeah ok=行吧。
 Yeah, not what I'm after homie=不了，这不是我想要的，哥们。
 I want to buy a sewer access key=我想买一把下水道通行钥匙
+[SPACEBAR]=[空格]
+[VIEW MORE OPTIONS]=查看更多选项
+Nevermind=算了
 
 # 房产和车辆价格选项：同时覆盖序列化占位符与运行时价格。
+# 车型采用“中文型号 + 车身类型”，既保留车型辨识度，也避免生硬直译。
 Taco Ticklers (<PRICE>)=玉米饼乐园（<PRICE>）
-The Bruiser (<PRICE>)=布鲁斯（<PRICE>）
+The Bruiser=悍将越野车
+Bruiser=悍将越野车
+The Bruiser (<PRICE>)=悍将越野车（<PRICE>）
 The Bungalow (<PRICE>)=平房（<PRICE>）
 The Car Wash (<PRICE>)=洗车行（<PRICE>）
-The Cheetah (<PRICE>)=猎豹（<PRICE>）
-The Dinkler (<PRICE>)=丁克勒（<PRICE>）
+The Cheetah=猎豹跑车
+Cheetah=猎豹跑车
+The Cheetah (<PRICE>)=猎豹跑车（<PRICE>）
+The Dinkler=鼎客皮卡
+Dinkler=鼎客皮卡
+The Dinkler (<PRICE>)=鼎客皮卡（<PRICE>）
+The Hotbox=烟箱越野车
+Hotbox=烟箱越野车
+The Hotbox (<PRICE>)=烟箱越野车（<PRICE>）
+The Hotbox <color\=#19BEF0>($30,000)</color>=烟箱越野车 <color\=#19BEF0>($30,000)</color>
+The Hounddog=猎犬轿车
+Hounddog=猎犬轿车
+hounddog=猎犬轿车
+The Hounddog (<PRICE>)=猎犬轿车（<PRICE>）
 The Docks Warehouse (<PRICE>)=码头仓库（<PRICE>）
 The Laundromat (<PRICE>)=自助洗衣店（<PRICE>）
 The Post Office (<PRICE>)=邮局（<PRICE>）
-The Shitbox (<PRICE>)=破车（<PRICE>）
-The Veeper (<PRICE>)=毒蛇（<PRICE>）
+The Shitbox=破烂王轿车
+Shitbox=破烂王轿车
+The Shitbox (<PRICE>)=破烂王轿车（<PRICE>）
+The Veeper=威珀厢式货车
+Veeper=威珀厢式货车
+The Veeper (<PRICE>)=威珀厢式货车（<PRICE>）
 Yes (<PRICE>)=是（<PRICE>）
 r:Taco Ticklers \\((\\$[\\d,]+)\\)=玉米饼乐园（$1）
-r:The Bruiser \\((\\$[\\d,]+)\\)=布鲁斯（$1）
+r:The Bruiser \\((\\$[\\d,]+)\\)=悍将越野车（$1）
 r:The Bungalow \\((\\$[\\d,]+)\\)=平房（$1）
 r:The Car Wash \\((\\$[\\d,]+)\\)=洗车行（$1）
-r:The Cheetah \\((\\$[\\d,]+)\\)=猎豹（$1）
-r:The Dinkler \\((\\$[\\d,]+)\\)=丁克勒（$1）
+r:The Cheetah \\((\\$[\\d,]+)\\)=猎豹跑车（$1）
+r:The Dinkler \\((\\$[\\d,]+)\\)=鼎客皮卡（$1）
+r:The Hotbox \\((\\$[\\d,]+)\\)=烟箱越野车（$1）
+r:The Hounddog \\((\\$[\\d,]+)\\)=猎犬轿车（$1）
 r:The Docks Warehouse \\((\\$[\\d,]+)\\)=码头仓库（$1）
 r:The Laundromat \\((\\$[\\d,]+)\\)=自助洗衣店（$1）
 r:The Post Office \\((\\$[\\d,]+)\\)=邮局（$1）
-r:The Shitbox \\((\\$[\\d,]+)\\)=破车（$1）
-r:The Veeper \\((\\$[\\d,]+)\\)=毒蛇（$1）
+r:The Shitbox \\((\\$[\\d,]+)\\)=破烂王轿车（$1）
+r:The Veeper \\((\\$[\\d,]+)\\)=威珀厢式货车（$1）
+r:^(.*?\\[\\d+\\].*?)(The Shitbox|The Veeper|The Bruiser|The Dinkler|The Hounddog|The Hotbox|The Cheetah)(.*?\\$[\\d,]+.*)$=$1$2$3
 r:Yes \\((\\$[\\d,]+)\\)=是（$1）
+
+# 警方处罚通知（该界面由 OffenceNoticeUI 在显示时动态写入）。
+OFFENSE NOTICE=处罚通知
+You have been convicted of the following:=你因以下行为被定罪：
+Penalty:=处罚：
+Police Chief=警察局长
+r:^(\\$[\\d,.]+) fine \\((\\$[\\d,.]+) paid - insufficient cash\\)$=罚款 $1（已支付 $2，现金不足）
+r:^(\\$[\\d,.]+) fine \\((\\$[\\d,.]+) paid\\)$=罚款 $1（已支付 $2）
 
 # 任务和载入错误。
 Kill the bandit who keeps stealing Stan's supplies at the docks=杀掉那个一直在码头偷 Stan 物资的强盗

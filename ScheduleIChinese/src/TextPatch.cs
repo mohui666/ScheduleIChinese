@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using HarmonyLib;
+using ScheduleOne.UI;
 using TMPro;
 using UnityEngine;
 
@@ -767,6 +768,8 @@ namespace ScheduleIChinese
                     }
                 }
 
+                TryCompactSpacebarPrompt(comp, ref finalText);
+
                 if (!cjkFontChecked &&
                     TranslationStore.ContainsCjk(finalText) &&
                     FontService.ApplyCjkFont(comp))
@@ -789,6 +792,83 @@ namespace ScheduleIChinese
             catch (Exception e)
             {
                 Plugin.Log?.LogDebug("ApplyExisting TMP failed: " + e.Message);
+            }
+        }
+
+        private static void TryCompactSpacebarPrompt(
+            TMP_Text comp,
+            ref string finalText)
+        {
+            if (comp == null || string.IsNullOrEmpty(finalText)) return;
+
+            try
+            {
+                var parent = comp.transform.parent;
+                if (parent == null ||
+                    !string.Equals(
+                        parent.name,
+                        "Background",
+                        StringComparison.OrdinalIgnoreCase))
+                    return;
+
+                if (string.Equals(
+                        comp.gameObject.name,
+                        "Index",
+                        StringComparison.OrdinalIgnoreCase) &&
+                    (finalText == "[空格]" || finalText == "[空格键]"))
+                {
+                    var choiceTransform = parent.Find("ChoiceText");
+                    var choice = choiceTransform?.GetComponent<TMP_Text>();
+                    if (choice == null) return;
+
+                    var choiceText = choice.text;
+                    if (choiceText != "Continue" && choiceText != "继续")
+                        return;
+
+                    finalText = "[空格] 继续";
+                    choice.text = string.Empty;
+
+                    // The stock prompt reserves a fixed 100 px key column. Once
+                    // SPACEBAR is localized, that leaves an obvious visual hole.
+                    // Put this one prompt in a single left-aligned label instead.
+                    var rect = comp.rectTransform;
+                    var size = rect.sizeDelta;
+                    var position = rect.anchoredPosition;
+                    rect.sizeDelta = new Vector2(180f, size.y);
+                    rect.anchoredPosition = new Vector2(100f, position.y);
+                    comp.alignment = TextAlignmentOptions.Left;
+                    return;
+                }
+
+                if (!string.Equals(
+                        comp.gameObject.name,
+                        "ChoiceText",
+                        StringComparison.OrdinalIgnoreCase) ||
+                    (finalText != "Continue" && finalText != "继续"))
+                    return;
+
+                var indexTransform = parent.Find("Index");
+                var index = indexTransform?.GetComponent<TMP_Text>();
+                if (index == null ||
+                    (index.text != "[空格]" &&
+                     index.text != "[空格键]" &&
+                     index.text != "[空格] 继续"))
+                    return;
+
+                index.text = "[空格] 继续";
+                var indexRect = index.rectTransform;
+                var indexSize = indexRect.sizeDelta;
+                var indexPosition = indexRect.anchoredPosition;
+                indexRect.sizeDelta = new Vector2(180f, indexSize.y);
+                indexRect.anchoredPosition =
+                    new Vector2(100f, indexPosition.y);
+                index.alignment = TextAlignmentOptions.Left;
+                finalText = string.Empty;
+            }
+            catch (Exception e)
+            {
+                Plugin.Log?.LogDebug(
+                    "Compact spacebar prompt failed: " + e.Message);
             }
         }
 
@@ -935,6 +1015,38 @@ namespace ScheduleIChinese
                 catch (Exception e)
                 {
                     Plugin.Log?.LogDebug("OnEnable translation failed: " + e.Message);
+                }
+            }
+        }
+
+        /// <summary>
+        /// The offence notice is populated by native IL2CPP code after its
+        /// legacy Text components are enabled. Rescan the finished document so
+        /// both its static headings and generated fine lines are translated.
+        /// </summary>
+        [HarmonyPatch(
+            typeof(OffenceNoticeUI),
+            nameof(OffenceNoticeUI.ShowOffenceNotice))]
+        public static class OffenceNoticeRefresh
+        {
+            public static void Postfix(OffenceNoticeUI __instance)
+            {
+                try
+                {
+                    if (__instance?.container == null) return;
+                    foreach (var text in
+                        __instance.container.GetComponentsInChildren<
+                            UnityEngine.UI.Text>(true))
+                    {
+                        if (text == null) continue;
+                        MainThreadRunner.RegisterText(text);
+                        ApplyExisting(text);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Plugin.Log?.LogDebug(
+                        "Offence notice translation failed: " + e.Message);
                 }
             }
         }

@@ -89,7 +89,8 @@ namespace ScheduleIChinese
                 typeof(TextPatch.SetTextProp),
                 typeof(TextPatch.SetTextString),
                 typeof(TextPatch.LegacyText),
-                typeof(TextPatch.BakedTextOnEnable)
+                typeof(TextPatch.BakedTextOnEnable),
+                typeof(TextPatch.OffenceNoticeRefresh)
             };
 
             foreach (var patchType in patchTypes)
