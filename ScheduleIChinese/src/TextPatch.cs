@@ -48,7 +48,8 @@ namespace ScheduleIChinese
             ItemQuality = 4,
             Hotbar = 8,
             InputPrompt = 16,
-            CustomerStandard = 32
+            CustomerStandard = 32,
+            Settings = 64
         }
 
         private sealed class SafeUiContextEntry
@@ -311,6 +312,33 @@ namespace ScheduleIChinese
                 case "Benzies":
                     return HasSafeUiContext(comp, SafeUiContext.Phone)
                         ? "本齐帮" : null;
+                case "Gamepad":
+                    return HasSafeUiContext(comp, SafeUiContext.Settings)
+                        ? "手柄" : null;
+                case "Imperial":
+                    return HasSafeUiContext(comp, SafeUiContext.Settings)
+                        ? "英制" : null;
+                case "Metric":
+                    return HasSafeUiContext(comp, SafeUiContext.Settings)
+                        ? "公制" : null;
+                case "Mouse":
+                    return HasSafeUiContext(comp, SafeUiContext.Settings)
+                        ? "鼠标" : null;
+                case "Auto":
+                    return HasSafeUiContext(comp, SafeUiContext.Settings)
+                        ? "自动" : null;
+                case "None":
+                    return HasSafeUiContext(comp, SafeUiContext.Settings)
+                        ? "无" : null;
+                case "Normal":
+                    return HasSafeUiContext(comp, SafeUiContext.Settings)
+                        ? "标准" : null;
+                case "On":
+                    return HasSafeUiContext(comp, SafeUiContext.Settings)
+                        ? "开" : null;
+                case "Off":
+                    return HasSafeUiContext(comp, SafeUiContext.Settings)
+                        ? "关" : null;
                 case "[Counter-offer]":
                     return HasSafeUiContext(comp, SafeUiContext.Phone)
                         ? "还价" : null;
@@ -462,6 +490,12 @@ namespace ScheduleIChinese
                      ContainsIgnoreCase(name, "BindingDisplay")))
                     return true;
 
+                if (expected == SafeUiContext.Settings &&
+                    (ContainsIgnoreCase(name, "Settings") ||
+                     ContainsIgnoreCase(name, "OptionsMenu") ||
+                     ContainsIgnoreCase(name, "Options Menu")))
+                    return true;
+
                 ancestor = ancestor.parent;
             }
 
@@ -525,6 +559,15 @@ namespace ScheduleIChinese
                             first = true;
                         else if (text == "Close" || text == "关闭" ||
                                  text == "Continue" || text == "继续")
+                            second = true;
+                    }
+                    else if (expected == SafeUiContext.Settings)
+                    {
+                        if (text == "Settings" || text == "设置")
+                            first = true;
+                        else if (text == "Display" || text == "显示" ||
+                                 text == "Graphics" || text == "图像" ||
+                                 text == "Controls" || text == "控制")
                             second = true;
                     }
 

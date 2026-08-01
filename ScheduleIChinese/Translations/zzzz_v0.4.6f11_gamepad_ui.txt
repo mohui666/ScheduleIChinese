@@ -1,0 +1,56 @@
+# Schedule I v0.4.6f11 / Build 24484559 新增与重构 UI 文本。
+# 单字符手柄面键 A/B/X/Y 与平台名称保留原文；内部枚举仍由 deny_keys.txt 保护。
+
+# 设置与手柄绑定
+Pause on focus lost=失去焦点时暂停
+V-Sync=垂直同步
+Pointer Sensitivity=指针灵敏度
+Bindings=按键绑定
+Restore Default=恢复默认
+Select (Cannot be rebound)=选择（无法重新绑定）
+Back / Cancel (Cannot be rebound)=返回 / 取消（无法重新绑定）
+Flashlight / Headlight=手电筒 / 车灯
+Equip / Unequip=装备 / 卸下
+Messages Shortcut=短信快捷键
+Journal Shortcut=日志快捷键
+Map Shortcut=地图快捷键
+Toggle Phone=打开 / 关闭手机
+Left Stick=左摇杆
+Left Stick Press=按下左摇杆
+Right Stick Press=按下右摇杆
+D-Pad Up=方向键上
+D-Pad Down=方向键下
+D-Pad Left=方向键左
+D-Pad Right=方向键右
+D-Pad/Up=方向键/上
+D-Pad/Down=方向键/下
+D-Pad/Left=方向键/左
+D-Pad/Right=方向键/右
+
+# 新版交互与说明
+Pick Up=拾取
+Grab=抓取
+Move Single=移动单件
+(Hold) Consume=（长按）使用
+(Hold) Restart=（长按）重新开始
+(Hold) Snort=（长按）鼻吸
+Press and hold <Input_SecondaryClick> while hovering an object to pick it up.=将光标悬停在物体上并按住 <Input_SecondaryClick> 即可将其拿起。
+Relevant inputs are displayed in the bottom-left corner.=相关操作提示会显示在左下角。
+STOP ARROW=停止指针
+
+# 重构界面与弹窗
+Apply Color=应用颜色
+Confirm appearance?=确认当前外观？
+Cartel Name=卡特尔名称
+Deal Locations=交易地点
+Delivery locations=交货地点
+Edit Filter=编辑筛选
+Favourite Drug=偏好毒品
+Insert product=放入产品
+List for sale=上架出售
+Mix name already in use=混合物名称已被使用
+Enter text=输入文本
+Miscellaneous=杂项
+Call=呼叫
+Gun=枪械
+Got it. Where you do want them?=明白了。你想把他们安排到哪里？

@@ -388,7 +388,13 @@ namespace ScheduleIChinese
                 "The hell?!",
                 "Psychoactive magic mushroom. Induces strong hallucinogenic effects.\t",
                 "There is a <h1>map</h> on your phone. Press <Input_OpenMap> to quickly open it.",
-                "If enabled, the product mixing algorithm \nwill be randomized using this save file's seed. \nThis will not affect your existing mixes."
+                "If enabled, the product mixing algorithm \nwill be randomized using this save file's seed. \nThis will not affect your existing mixes.",
+                "Pause on focus lost",
+                "Pointer Sensitivity",
+                "Select (Cannot be rebound)",
+                "D-Pad Up",
+                "Confirm appearance?",
+                "STOP ARROW"
             };
 
             int failed = 0;
