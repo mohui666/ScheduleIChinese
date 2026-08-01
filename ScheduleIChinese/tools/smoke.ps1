@@ -1,4 +1,4 @@
-# Self-contained smoke test: launch game, verify plugin 1.3.12 in log, screenshot menu, kill game.
+# Self-contained smoke test: launch game, verify plugin 1.3.57 in log, screenshot menu, kill game.
 $ErrorActionPreference = 'Continue'
 $root = "C:\Program Files (x86)\Steam\steamapps\common\Schedule I"
 $log = "$root\BepInEx\LogOutput.log"

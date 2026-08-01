@@ -47,7 +47,7 @@ internal sealed class InstallerForm : Form
 
     public InstallerForm()
     {
-        Text = "Schedule I 简体中文安全汉化一键安装器 v1.3.56";
+        Text = "Schedule I 简体中文安全汉化一键安装器 v1.3.57";
         ClientSize = new Size(720, 390);
         MinimumSize = MaximumSize = Size;
         MaximizeBox = false;
@@ -65,7 +65,7 @@ internal sealed class InstallerForm : Form
         };
         var version = new Label
         {
-            Text = "v1.3.56 · 完全离线 · 人名、品种和自定义名称保留",
+            Text = "v1.3.57 · 完全离线 · 人名、品种和自定义名称保留",
             ForeColor = Color.FromArgb(75, 85, 99),
             AutoSize = true,
             Location = new Point(32, 72)
@@ -102,7 +102,7 @@ internal sealed class InstallerForm : Form
 
         var note = new Label
         {
-            Text = "适配 v0.4.5f2 / Build 22829923；不修改游戏资源、metadata 或存档。",
+            Text = "适配 v0.4.6f11 / Build 24484559；不修改游戏资源、metadata 或存档。",
             ForeColor = Color.FromArgb(75, 85, 99),
             AutoSize = true,
             Location = new Point(32, 278)
